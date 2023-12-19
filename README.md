@@ -1,23 +1,9 @@
-# SAML Java Toolkit <!-- omit in toc -->
+# SAML Java Toolkit
 
-[![Build Status](https://travis-ci.org/onelogin/java-saml.svg?branch=master)](https://travis-ci.org/onelogin/java-saml) [![Coverage Status](https://coveralls.io/repos/github/onelogin/java-saml/badge.svg?branch=master)](https://coveralls.io/github/onelogin/java-saml?branch=master)
+[![Java CI with Maven](https://github.com/codelibs/java-saml/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/java-saml/actions/workflows/maven.yml)
 
 Add SAML support to your Java applications using this library.
-
-2.8.0 uses xmlsec 2.2.3 which fixes [CVE-2021-40690](https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-1655558)
-
-Version >= 2.5.0 compatible with java8 / java9. Not compatible with java7
-
-2.5.0 sets the 'strict' setting parameter to true.
-
-2.5.0 uses xmlsec 2.1.4 which fixes [CVE-2019-12400](https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281)
-
-Version 2.0.0 - 2.4.0, compatible with java7 / java8.
-
-We [introduced some incompatibilities](https://github.com/onelogin/java-saml/issues/90), that could be fixed and make it compatible with java6.
-
-Version 1.1.2 is considered to be deprecated. If you have used it, we strongly recommend that you migrate to the new version.
-We rebuilt the toolkit on 2.0.0, so code/settings that you had been using in the previous version will no longer be compatible.
+This project is forked from [SAML-Toolkits/java-saml](https://github.com/SAML-Toolkits/java-saml).
 
 - [Why add SAML support to my software?](#why-add-saml-support-to-my-software)
 - [General description](#general-description)

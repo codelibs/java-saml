@@ -1,4 +1,4 @@
-<%@page import="com.onelogin.saml2.Auth"%>
+<%@page import="org.codelibs.saml2.core.core.toolkit.Auth"%>
 <%@page import="java.util.Collection"%>
 <%@page import="java.util.Enumeration"%>
 <%@page import="java.util.HashMap"%>

@@ -1,9 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.onelogin</groupId>
+		<groupId>org.codelibs</groupId>
 		<artifactId>java-saml-toolkit</artifactId>
-		<version>2.9.1-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<packaging>jar</packaging>
@@ -41,14 +43,19 @@
 
 		<!-- commons -->
 		<dependency>
+			<groupId>org.codelibs</groupId>
+			<artifactId>corelib</artifactId>
+			<version>${corelib.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>${apacheCommonsLangVersion}</version>
+			<artifactId>commons-text</artifactId>
+			<version>${commons.text.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.santuario</groupId>
 			<artifactId>xmlsec</artifactId>
-			<version>3.0.2</version>
+			<version>4.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -60,13 +67,13 @@
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-security-keyvault-keys</artifactId>
-			<version>4.7.0</version>
+			<version>4.7.3</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-identity</artifactId>
-			<version>1.10.1</version>
+			<version>1.11.1</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -74,25 +81,19 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.10</version>
-				<configuration>
-					<propertyName>jacoco.agent.argLine</propertyName>
-				</configuration>
-				<executions>
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-				</executions>
+				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -100,43 +101,14 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
 				<configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-					<inputEncoding>${project.build.sourceEncoding}</inputEncoding>
-					<outputEncoding>${project.build.sourceEncoding}</outputEncoding>
-					<argLine>${jacoco.agent.argLine} -Dfile.encoding=${project.build.sourceEncoding} -Dline.separator=\n</argLine>
+					<archive>
+						<manifestEntries>
+							<Automatic-Module-Name>org.codelibs.saml2.core</Automatic-Module-Name>
+						</manifestEntries>
+					</archive>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>1.4.1</version>
-				<executions>
-					<execution>
-						<id>enforce</id>
-						<configuration>
-							<rules>
-								<evaluateBeanshell>
-									<condition>javax.crypto.Cipher.getMaxAllowedKeyLength("AES") &gt; 128</condition>
-								</evaluateBeanshell>
-							</rules>
-						</configuration>
-						<goals>
-						    <goal>enforce</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
-<!--
-	<properties>
-		<jacoco.agent.argLine />
-	</properties>
--->
 </project>

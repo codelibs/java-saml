@@ -1,5 +1,5 @@
-<%@page import="com.onelogin.saml2.Auth"%>
-<%@page import="com.onelogin.saml2.servlet.ServletUtils"%>
+<%@page import="org.codelibs.saml2.core.core.toolkit.Auth"%>
+<%@page import="org.codelibs.saml2.core.core.toolkit.servlet.ServletUtils"%>
 <%@page import="java.util.Collection"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>

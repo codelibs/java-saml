@@ -1,4 +1,4 @@
-<%@page import="java.util.*,com.onelogin.saml2.Auth,com.onelogin.saml2.settings.Saml2Settings" language="java" contentType="application/xhtml+xml"%><%
+<%@page import="java.util.*,org.codelibs.saml2.core.core.toolkit.Auth,org.codelibs.saml2.core.core.toolkit.settings.Saml2Settings" language="java" contentType="application/xhtml+xml"%><%
 Auth auth = new Auth();
 Saml2Settings settings = auth.getSettings();
 settings.setSPValidationOnly(true);
