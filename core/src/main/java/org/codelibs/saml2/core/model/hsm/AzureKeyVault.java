@@ -29,7 +29,6 @@ public class AzureKeyVault extends HSM {
 	 * @param clientCredentials The Azure Key Vault client credentials.
 	 * @param tenantId          The Azure Key Vault tenant ID.
 	 * @param keyVaultId        The Azure Key Vault ID.
-	 * @return AzureKeyVault
 	 */
 	public AzureKeyVault(String clientId, String clientCredentials, String tenantId, String keyVaultId) {
 		this.clientId = clientId;

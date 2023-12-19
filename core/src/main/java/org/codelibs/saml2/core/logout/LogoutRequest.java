@@ -592,7 +592,7 @@ public class LogoutRequest {
       /**
        * Returns the issue instant of the Logout Request Document.
        *
-       * @param samlLogoutRequestDocument
+       * @param samlLogoutRequestString
        * 				A DOMDocument object loaded from the SAML Logout Request.
        *
        * @return the issue instant of the Logout Request.

@@ -1142,7 +1142,6 @@ public final class Util {
 	 *
 	 * @return True if the sign is valid, false otherwise.
 	 *
-	 * @throws Exception
 	 */
 	public static Boolean validateSignNode(Node signNode, X509Certificate cert, String fingerprint, String alg) {
 		return validateSignNode(signNode, cert, fingerprint, alg, false);
@@ -1164,7 +1163,6 @@ public final class Util {
 	 *
 	 * @return True if the sign is valid, false otherwise.
 	 *
-	 * @throws Exception
 	 */
 	public static Boolean validateSignNode(Node signNode, X509Certificate cert, String fingerprint, String alg, Boolean rejectDeprecatedAlg) {
 		Map<String,Object> signatureData = getSignatureData(signNode, alg, rejectDeprecatedAlg);
@@ -1272,7 +1270,6 @@ public final class Util {
 	 * @param encryptedDataElement The encrypted element.
 	 * @param hsm The HSM object.
 	 *
-	 * @throws Exception
 	 */
 	public static void decryptUsingHsm(Element encryptedDataElement, HSM hsm) {
 		try {

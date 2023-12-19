@@ -798,7 +798,7 @@ public class Saml2Settings {
 	/**
 	 * Controls if unsolicited Responses are rejected if they contain an InResponseTo value.
 	 *
-	 * If false using a validate method {@link org.codelibs.saml2.core.core.authn.SamlResponse#isValid(String)} with a null argument will
+	 * If false using a validate method {@link org.codelibs.saml2.core.authn.SamlResponse#isValid(String)} with a null argument will
 	 * accept messages with any (or none) InResponseTo value.
 	 *
 	 * If true using these methods with a null argument will only accept messages with no InRespoonseTo value,
