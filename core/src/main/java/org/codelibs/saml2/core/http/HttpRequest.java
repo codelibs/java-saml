@@ -23,7 +23,7 @@ import org.codelibs.saml2.core.util.Util;
  */
 public final class HttpRequest {
 
-    public static final Map<String, List<String>> EMPTY_PARAMETERS = Collections.<String, List<String>>emptyMap();
+    public static final Map<String, List<String>> EMPTY_PARAMETERS = Collections.<String, List<String>> emptyMap();
 
     private final String requestURL;
     private final Map<String, List<String>> parameters;
@@ -110,7 +110,7 @@ public final class HttpRequest {
 
         return new HttpRequest(requestURL, params, queryString);
     }
-    
+
     /**
      * The URL the client used to make the request. Includes a protocol, server name, port number, and server path, but
      * not the query string parameters.
@@ -136,7 +136,7 @@ public final class HttpRequest {
      */
     public List<String> getParameters(String name) {
         List<String> values = parameters.get(name);
-        return values != null ? values : Collections.<String>emptyList();
+        return values != null ? values : Collections.<String> emptyList();
     }
 
     /**
@@ -173,24 +173,23 @@ public final class HttpRequest {
      * @return the first value for the parameter, or url encoded default value
      */
     public String getEncodedParameter(String name, String defaultValue) {
-            String value = getEncodedParameter(name);
-            return (value != null ? value : Util.urlEncoder(defaultValue));
+        String value = getEncodedParameter(name);
+        return (value != null ? value : Util.urlEncoder(defaultValue));
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) {
-        	return true;
+            return true;
         }
 
         if (o == null || getClass() != o.getClass()) {
-        	return false;
+            return false;
         }
 
         HttpRequest that = (HttpRequest) o;
-        return Objects.equals(requestURL, that.requestURL) &&
-                Objects.equals(parameters, that.parameters) &&
-                Objects.equals(queryString, that.queryString);
+        return Objects.equals(requestURL, that.requestURL) && Objects.equals(parameters, that.parameters)
+                && Objects.equals(queryString, that.queryString);
     }
 
     @Override
@@ -200,11 +199,7 @@ public final class HttpRequest {
 
     @Override
     public String toString() {
-        return "HttpRequest{" +
-                "requestURL='" + requestURL + '\'' +
-                ", parameters=" + parameters +
-                ", queryString=" + queryString +
-                '}';
+        return "HttpRequest{" + "requestURL='" + requestURL + '\'' + ", parameters=" + parameters + ", queryString=" + queryString + '}';
     }
 
     private static Map<String, List<String>> unmodifiableCopyOf(Map<String, List<String>> orig) {
@@ -215,6 +210,5 @@ public final class HttpRequest {
 
         return unmodifiableMap(copy);
     }
-
 
 }

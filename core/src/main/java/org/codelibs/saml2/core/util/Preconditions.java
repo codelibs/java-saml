@@ -11,7 +11,7 @@ public final class Preconditions {
      *
      * @throws NullPointerException if {@code t} is null
      */
-    public static <T>T checkNotNull(T t, String message) {
+    public static <T> T checkNotNull(T t, String message) {
         if (t == null) {
             throw new NullPointerException(message);
         } else {

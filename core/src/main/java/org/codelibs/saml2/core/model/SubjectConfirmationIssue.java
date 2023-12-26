@@ -19,9 +19,7 @@ public class SubjectConfirmationIssue {
         for (int i = 0; i < subjectConfirmationDataIssues.size(); i++) {
             final SubjectConfirmationIssue issue = subjectConfirmationDataIssues.get(i);
             if (subjectConfirmationDataIssues.size() > 1) {
-                subjectConfirmationDataIssuesMsg.append("\n[")
-                        .append(issue.subjectConfirmationIndex)
-                        .append("] ");
+                subjectConfirmationDataIssuesMsg.append("\n[").append(issue.subjectConfirmationIndex).append("] ");
             }
             subjectConfirmationDataIssuesMsg.append(issue.message);
             if (i != subjectConfirmationDataIssues.size() - 1) {

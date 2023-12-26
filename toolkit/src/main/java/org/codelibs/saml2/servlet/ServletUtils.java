@@ -20,18 +20,18 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class ServletUtils {
 
-	private ServletUtils() {
-	      //not called
-	}
+    private ServletUtils() {
+        //not called
+    }
 
-	/**
+    /**
      * Creates an HttpRequest from an HttpServletRequest.
      *
      * @param req the incoming HttpServletRequest
      * @return a HttpRequest
      */
     public static HttpRequest makeHttpRequest(HttpServletRequest req) {
-    	@SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         final Map<String, String[]> paramsAsArray = (Map<String, String[]>) req.getParameterMap();
         final Map<String, List<String>> paramsAsList = new HashMap<>();
         for (Map.Entry<String, String[]> param : paramsAsArray.entrySet()) {
@@ -145,21 +145,21 @@ public class ServletUtils {
      * 				target location url
      * @param parameters
      * 				GET parameters to be added
-	 * @param stay
-	 *            True if we want to stay (returns the url string) False to execute redirection
+     * @param stay
+     *            True if we want to stay (returns the url string) False to execute redirection
      *
      * @return string the target URL
      * @throws IOException
      *
      * @see jakarta.servlet.http.HttpServletResponse#sendRedirect(String)
      */
-    public static String sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters, Boolean stay) throws IOException {
+    public static String sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters, Boolean stay)
+            throws IOException {
         String target = location;
 
         if (!parameters.isEmpty()) {
-        	boolean first = !location.contains("?");
-            for (Map.Entry<String, String> parameter : parameters.entrySet())
-            {
+            boolean first = !location.contains("?");
+            for (Map.Entry<String, String> parameter : parameters.entrySet()) {
                 if (first) {
                     target += "?";
                     first = false;
@@ -173,7 +173,7 @@ public class ServletUtils {
             }
         }
         if (!stay) {
-        	response.sendRedirect(target);
+            response.sendRedirect(target);
         }
 
         return target;
@@ -188,13 +188,13 @@ public class ServletUtils {
      * 				target location url
      * @param parameters
      * 				GET parameters to be added
-	 *
+     *
      * @throws IOException
      *
      * @see jakarta.servlet.http.HttpServletResponse#sendRedirect(String)
      */
     public static void sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters) throws IOException {
-    	sendRedirect(response, location, parameters, false);
+        sendRedirect(response, location, parameters, false);
     }
 
     /**
@@ -210,7 +210,7 @@ public class ServletUtils {
      * @see HttpServletResponse#sendRedirect(String)
      */
     public static void sendRedirect(HttpServletResponse response, String location) throws IOException {
-        Map<String, String> parameters  =new HashMap<String, String>();
+        Map<String, String> parameters = new HashMap<String, String>();
         sendRedirect(response, location, parameters);
     }
 }
