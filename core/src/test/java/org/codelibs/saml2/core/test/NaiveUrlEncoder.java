@@ -2,9 +2,9 @@ package org.codelibs.saml2.core.test;
 
 import java.io.UnsupportedEncodingException;
 
-public final  class NaiveUrlEncoder {
+public final class NaiveUrlEncoder {
 
-    private NaiveUrlEncoder () {
+    private NaiveUrlEncoder() {
         //static class only
     }
 
@@ -17,9 +17,9 @@ public final  class NaiveUrlEncoder {
      *
      * @throws UnsupportedEncodingException
      */
-    public static String encode (String s) throws UnsupportedEncodingException {
+    public static String encode(String s) throws UnsupportedEncodingException {
         StringBuilder buf = new StringBuilder();
-        for  (byte b : s.getBytes("UTF-8")) {
+        for (byte b : s.getBytes("UTF-8")) {
             buf.append("%");
             buf.append(String.format("%02x", b));
         }

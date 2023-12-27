@@ -9,7 +9,7 @@ public final class Constants {
     /**
      * Value added to the current time in time condition validations.
      */
-    public static final Integer ALOWED_CLOCK_DRIFT = 180; // 3 min in seconds
+    public static final long ALOWED_CLOCK_DRIFT = 180L; // 3 min in seconds
 
     // NameID Formats
     public static final String NAMEID_EMAIL_ADDRESS = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";

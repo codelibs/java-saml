@@ -129,14 +129,15 @@ public class ServletUtilsTest {
     public void testSendRedirectStay() throws IOException {
         HttpServletResponse response = mock(HttpServletResponse.class);
         Map<String, String> parameters = new HashMap<String, String>();
-        
+
         String url = ServletUtils.sendRedirect(response, "http://example.com/expectedurl.jsp", parameters, true);
         assertEquals("http://example.com/expectedurl.jsp", url);
-        
-        url = ServletUtils.sendRedirect(response, "http://example.com/expectedurl.jsp?idpid=ffee-aabbb", singletonMap("SAMLRequest", "data"), true);
+
+        url = ServletUtils.sendRedirect(response, "http://example.com/expectedurl.jsp?idpid=ffee-aabbb",
+                singletonMap("SAMLRequest", "data"), true);
         assertEquals("http://example.com/expectedurl.jsp?idpid=ffee-aabbb&SAMLRequest=data", url);
     }
-    
+
     /**
      * Tests the getSelfURLhost method
      *
@@ -260,14 +261,14 @@ public class ServletUtilsTest {
     @Test
     public void testMakeHttpRequest() throws Exception {
         final String url = "http://localhost:1234/a/b";
-        final Map<String, String[]> paramAsArray = singletonMap("name", new String[]{"a"});
+        final Map<String, String[]> paramAsArray = singletonMap("name", new String[] { "a" });
 
         final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
         when(servletRequest.getRequestURL()).thenReturn(new StringBuffer(url));
         when(servletRequest.getParameterMap()).thenReturn(paramAsArray);
 
         final String barNaiveEncoded = NaiveUrlEncoder.encode("bar"); //must differ from normal url encode
-		when(servletRequest.getQueryString()).thenReturn("foo=" + barNaiveEncoded);
+        when(servletRequest.getQueryString()).thenReturn("foo=" + barNaiveEncoded);
 
         final HttpRequest httpRequest = ServletUtils.makeHttpRequest(servletRequest);
         assertThat(httpRequest.getRequestURL(), equalTo(url));
@@ -275,15 +276,16 @@ public class ServletUtilsTest {
         assertThat(httpRequest.getEncodedParameter("foo"), equalTo(barNaiveEncoded));
     }
 
-	@Test
-	public void sendRedirectToShouldHandleUrlsWithQueryParams() throws Exception {
-		// having
-		final HttpServletResponse response = mock(HttpServletResponse.class);
+    @Test
+    public void sendRedirectToShouldHandleUrlsWithQueryParams() throws Exception {
+        // having
+        final HttpServletResponse response = mock(HttpServletResponse.class);
 
-		// when
-		ServletUtils.sendRedirect(response, "https://sso.connect.pingidentity.com/sso/idp/SSO.saml2?idpid=ffee-aabbb", singletonMap("SAMLRequest", "data"));
+        // when
+        ServletUtils.sendRedirect(response, "https://sso.connect.pingidentity.com/sso/idp/SSO.saml2?idpid=ffee-aabbb",
+                singletonMap("SAMLRequest", "data"));
 
-		// then
-		verify(response).sendRedirect("https://sso.connect.pingidentity.com/sso/idp/SSO.saml2?idpid=ffee-aabbb&SAMLRequest=data");
-	}
+        // then
+        verify(response).sendRedirect("https://sso.connect.pingidentity.com/sso/idp/SSO.saml2?idpid=ffee-aabbb&SAMLRequest=data");
+    }
 }

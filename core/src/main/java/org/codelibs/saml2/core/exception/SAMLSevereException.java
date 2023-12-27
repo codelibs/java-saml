@@ -12,10 +12,15 @@ public class SAMLSevereException extends SAMLException {
     public static final int SAML_LOGOUTRESPONSE_INVALID = 6;
     public static final int SAML_SINGLE_LOGOUT_NOT_SUPPORTED = 7;
 
-    private int errorCode;
+    private final int errorCode;
 
-    public SAMLSevereException(String message, int errorCode) {
+    public SAMLSevereException(final String message, final int errorCode) {
         super(message);
+        this.errorCode = errorCode;
+    }
+
+    public SAMLSevereException(final String message, final int errorCode, final Throwable cause) {
+        super(message, cause);
         this.errorCode = errorCode;
     }
 

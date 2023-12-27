@@ -46,11 +46,11 @@ public interface SamlMessageFactory {
      *              the HTTP request from which the response is to be extracted and
      *              parsed
      * @return the created {@link SamlResponse} instance
-     * @throws Exception
+     *
      *               in case some error occurred while trying to create the
      *               {@link SamlResponse} instance
      */
-    default SamlResponse createSamlResponse(final Saml2Settings settings, final HttpRequest request) throws Exception {
+    default SamlResponse createSamlResponse(final Saml2Settings settings, final HttpRequest request) {
         return new SamlResponse(settings, request);
     }
 
@@ -76,11 +76,11 @@ public interface SamlMessageFactory {
      *              the HTTP request from which the logout request is to be
      *              extracted and parsed
      * @return the created {@link LogoutRequest} instance
-     * @throws Exception
+     *
      *               in case some error occurred while trying to create the
      *               {@link LogoutRequest} instance
      */
-    default LogoutRequest createIncomingLogoutRequest(final Saml2Settings settings, final HttpRequest request) throws Exception {
+    default LogoutRequest createIncomingLogoutRequest(final Saml2Settings settings, final HttpRequest request) {
         return new LogoutRequest(settings, request);
     }
 
@@ -106,11 +106,11 @@ public interface SamlMessageFactory {
      *              the HTTP request from which the logout response is to be
      *              extracted and parsed
      * @return the created {@link LogoutResponse} instance
-     * @throws Exception
+     *
      *               in case some error occurred while trying to create the
      *               {@link LogoutResponse} instance
      */
-    default LogoutResponse createIncomingLogoutResponse(final Saml2Settings settings, final HttpRequest request) throws Exception {
+    default LogoutResponse createIncomingLogoutResponse(final Saml2Settings settings, final HttpRequest request) {
         return new LogoutResponse(settings, request);
     }
 }

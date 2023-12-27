@@ -35,7 +35,7 @@ public class KeyStoreSettings {
      * @param spKeyPass
      *            password to access Private KeyEntry in KeyStore
      */
-    public KeyStoreSettings(KeyStore keyStore, String spAlias, String spKeyPass) {
+    public KeyStoreSettings(final KeyStore keyStore, final String spAlias, final String spKeyPass) {
         this.keyStore = keyStore;
         this.spAlias = spAlias;
         this.spKeyPass = spKeyPass;

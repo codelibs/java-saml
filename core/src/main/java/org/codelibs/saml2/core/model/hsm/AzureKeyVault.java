@@ -15,12 +15,12 @@ import com.azure.security.keyvault.keys.cryptography.models.KeyWrapAlgorithm;
 
 public class AzureKeyVault extends HSM {
 
-    private String clientId;
-    private String clientCredentials;
-    private String tenantId;
-    private String keyVaultId;
+    private final String clientId;
+    private final String clientCredentials;
+    private final String tenantId;
+    private final String keyVaultId;
     private CryptographyClient akvClient;
-    private HashMap<String, KeyWrapAlgorithm> algorithmMapping;
+    private final HashMap<String, KeyWrapAlgorithm> algorithmMapping;
 
     /**
      * Constructor to initialise an HSM object.
@@ -30,7 +30,7 @@ public class AzureKeyVault extends HSM {
      * @param tenantId          The Azure Key Vault tenant ID.
      * @param keyVaultId        The Azure Key Vault ID.
      */
-    public AzureKeyVault(String clientId, String clientCredentials, String tenantId, String keyVaultId) {
+    public AzureKeyVault(final String clientId, final String clientCredentials, final String tenantId, final String keyVaultId) {
         this.clientId = clientId;
         this.clientCredentials = clientCredentials;
         this.tenantId = tenantId;
@@ -47,7 +47,7 @@ public class AzureKeyVault extends HSM {
      * @return The algorithm mapping.
      */
     private HashMap<String, KeyWrapAlgorithm> createAlgorithmMapping() {
-        HashMap<String, KeyWrapAlgorithm> mapping = new HashMap<>();
+        final HashMap<String, KeyWrapAlgorithm> mapping = new HashMap<>();
 
         mapping.put(Constants.RSA_1_5, KeyWrapAlgorithm.RSA1_5);
         mapping.put(Constants.RSA_OAEP_MGF1P, KeyWrapAlgorithm.RSA_OAEP);
@@ -65,7 +65,7 @@ public class AzureKeyVault extends HSM {
      * @param algorithmUrl The algorithm URL.
      * @return The KeyWrapAlgorithm.
      */
-    private KeyWrapAlgorithm getAlgorithm(String algorithmUrl) {
+    private KeyWrapAlgorithm getAlgorithm(final String algorithmUrl) {
         return algorithmMapping.get(algorithmUrl);
     }
 
@@ -74,10 +74,10 @@ public class AzureKeyVault extends HSM {
      */
     @Override
     public void setClient() {
-        ClientSecretCredential clientSecretCredential =
+        final ClientSecretCredential clientSecretCredential =
                 new ClientSecretCredentialBuilder().clientId(clientId).clientSecret(clientCredentials).tenantId(tenantId).build();
 
-        HttpClient httpClient = new NettyAsyncHttpClientBuilder().build();
+        final HttpClient httpClient = new NettyAsyncHttpClientBuilder().build();
 
         this.akvClient = new CryptographyClientBuilder().httpClient(httpClient).credential(clientSecretCredential).keyIdentifier(keyVaultId)
                 .buildClient();
@@ -91,7 +91,7 @@ public class AzureKeyVault extends HSM {
      * @return A wrapped key.
      */
     @Override
-    public byte[] wrapKey(String algorithm, byte[] key) {
+    public byte[] wrapKey(final String algorithm, final byte[] key) {
         return this.akvClient.wrapKey(KeyWrapAlgorithm.fromString(algorithm), key).getEncryptedKey();
     }
 
@@ -103,7 +103,7 @@ public class AzureKeyVault extends HSM {
      * @return An unwrapped key.
      */
     @Override
-    public byte[] unwrapKey(String algorithmUrl, byte[] wrappedKey) {
+    public byte[] unwrapKey(final String algorithmUrl, final byte[] wrappedKey) {
         return this.akvClient.unwrapKey(getAlgorithm(algorithmUrl), wrappedKey).getKey();
     }
 
@@ -115,7 +115,7 @@ public class AzureKeyVault extends HSM {
      * @return An encrypted array of bytes.
      */
     @Override
-    public byte[] encrypt(String algorithm, byte[] plainText) {
+    public byte[] encrypt(final String algorithm, final byte[] plainText) {
         return this.akvClient.encrypt(EncryptionAlgorithm.fromString(algorithm), plainText).getCipherText();
     }
 
@@ -127,7 +127,7 @@ public class AzureKeyVault extends HSM {
      * @return A decrypted array of bytes.
      */
     @Override
-    public byte[] decrypt(String algorithm, byte[] cipherText) {
+    public byte[] decrypt(final String algorithm, final byte[] cipherText) {
         return this.akvClient.decrypt(EncryptionAlgorithm.fromString(algorithm), cipherText).getPlainText();
     }
 }

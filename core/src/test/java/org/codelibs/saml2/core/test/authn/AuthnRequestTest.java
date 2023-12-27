@@ -22,581 +22,588 @@ import org.junit.Test;
 
 public class AuthnRequestTest {
 
-	/**
-	 * Tests the getEncodedAuthnRequest method of AuthnRequest
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getEncodedAuthnRequest
-	 */
-	@Test
-	public void testGetEncodedAuthnRequestSimulated() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+    /**
+     * Tests the getEncodedAuthnRequest method of AuthnRequest
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getEncodedAuthnRequest
+     */
+    @Test
+    public void testGetEncodedAuthnRequestSimulated() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-		final String authnRequestString = Util.getFileAsString("data/requests/authn_request.xml");
-		AuthnRequest authnRequest = new AuthnRequest(settings) {
-			@Override
-			public String getAuthnRequestXml() {
-				return authnRequestString;
-			}
-		};
+        final String authnRequestString = Util.getFileAsString("data/requests/authn_request.xml");
+        AuthnRequest authnRequest = new AuthnRequest(settings) {
+            @Override
+            public String getAuthnRequestXml() {
+                return authnRequestString;
+            }
+        };
 
-		String expectedAuthnRequestStringBase64Deflated = Util.getFileAsString("data/requests/authn_request.xml.deflated.base64");
-		String expectedAuthnRequestStringBase64 = Util.getFileAsString("data/requests/authn_request.xml.base64");
+        String expectedAuthnRequestStringBase64Deflated = Util.getFileAsString("data/requests/authn_request.xml.deflated.base64");
+        String expectedAuthnRequestStringBase64 = Util.getFileAsString("data/requests/authn_request.xml.base64");
 
-		String authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest();
-		assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
+        String authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest();
+        assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
 
-		authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(null);
-		assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
+        authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(null);
+        assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
 
-		authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(true);
-		assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
+        authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(true);
+        assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
 
-		authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(false);
-		assertNotEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
-		assertEquals(authnRequestStringBase64Deflated,expectedAuthnRequestStringBase64);
-		
-		settings.setCompressRequest(true);		
-		authnRequest = new AuthnRequest(settings) {
-			@Override
-			public String getAuthnRequestXml() {
-				return authnRequestString;
-			}
-		};
-		authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(null);
-		assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
+        authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(false);
+        assertNotEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
+        assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64);
 
-		settings.setCompressRequest(false);
-		authnRequest = new AuthnRequest(settings) {
-			@Override
-			public String getAuthnRequestXml() {
-				return authnRequestString;
-			}
-		};
-		authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(null);
-		assertNotEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
-		assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64);
-	}
+        settings.setCompressRequest(true);
+        authnRequest = new AuthnRequest(settings) {
+            @Override
+            public String getAuthnRequestXml() {
+                return authnRequestString;
+            }
+        };
+        authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(null);
+        assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
 
-	/**
-	 * Tests the getEncodedAuthnRequest method of AuthnRequest
-	 * Case: Only settings provided.
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getEncodedAuthnRequest
-	 */
-	@Test
-	public void testGetEncodedAuthnRequestOnlySettings() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("ProviderName=\"SP Java Example\"")));
-		
-		settings = new SettingsBuilder().fromFile("config/config.all.properties").build();
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("ProviderName=\"SP Java Example\""));
-	}
+        settings.setCompressRequest(false);
+        authnRequest = new AuthnRequest(settings) {
+            @Override
+            public String getAuthnRequestXml() {
+                return authnRequestString;
+            }
+        };
+        authnRequestStringBase64Deflated = authnRequest.getEncodedAuthnRequest(null);
+        assertNotEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64Deflated);
+        assertEquals(authnRequestStringBase64Deflated, expectedAuthnRequestStringBase64);
+    }
 
-	/**
-	 * Tests the getEncodedAuthnRequest method of AuthnRequest
-	 * <p>
-	 * Case: Only settings provided and containing special chars.
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getEncodedAuthnRequest
-	 */
-	@Test
-	public void testGetEncodedAuthnRequestOnlySettingsSpecialChars() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("ProviderName=\"S&amp;P Java Example\"")));
-		
-		settings = new SettingsBuilder().fromFile("config/config.all_specialchars.properties").build();
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("ProviderName=\"S&amp;P Java &quot;Example&quot;\""));
-	}
+    /**
+     * Tests the getEncodedAuthnRequest method of AuthnRequest
+     * Case: Only settings provided.
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getEncodedAuthnRequest
+     */
+    @Test
+    public void testGetEncodedAuthnRequestOnlySettings() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("ProviderName=\"SP Java Example\"")));
 
-	/**
-	 * Tests the getAuthnRequestXml method of AuthnRequest
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getAuthnRequestXml
-	 */
-	@Test
-	public void testGetAuthnRequestXml() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestXML = authnRequest.getAuthnRequestXml();
-		assertThat(authnRequestXML, containsString("<samlp:AuthnRequest"));
-	}
+        settings = new SettingsBuilder().fromFile("config/config.all.properties").build();
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("ProviderName=\"SP Java Example\""));
+    }
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with the different values of ForceAuthn
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testForceAuthN() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+    /**
+     * Tests the getEncodedAuthnRequest method of AuthnRequest
+     * <p>
+     * Case: Only settings provided and containing special chars.
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getEncodedAuthnRequest
+     */
+    @Test
+    public void testGetEncodedAuthnRequestOnlySettingsSpecialChars() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("ProviderName=\"S&amp;P Java Example\"")));
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("ForceAuthn=\"true\"")));
+        settings = new SettingsBuilder().fromFile("config/config.all_specialchars.properties").build();
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("ProviderName=\"S&amp;P Java &quot;Example&quot;\""));
+    }
 
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("ForceAuthn=\"true\"")));		
+    /**
+     * Tests the getAuthnRequestXml method of AuthnRequest
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest#getAuthnRequestXml
+     */
+    @Test
+    public void testGetAuthnRequestXml() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestXML = authnRequest.getAuthnRequestXml();
+        assertThat(authnRequestXML, containsString("<samlp:AuthnRequest"));
+    }
 
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(true, false, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("ForceAuthn=\"true\""));
-	}
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with the different values of ForceAuthn
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testForceAuthN() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with the different values of IsPassive
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testIsPassive() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("ForceAuthn=\"true\"")));
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("IsPassive=\"true\"")));
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("ForceAuthn=\"true\"")));
 
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("IsPassive=\"true\"")));		
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(true, false, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("ForceAuthn=\"true\""));
+    }
 
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, true, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("IsPassive=\"true\""));
-	}
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with the different values of IsPassive
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testIsPassive() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with and without NameIDPolicy
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testNameIDPolicy() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("IsPassive=\"true\"")));
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
-		assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\""));
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("IsPassive=\"true\"")));
 
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));		
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, true, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("IsPassive=\"true\""));
+    }
 
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
-		assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\""));
-	}
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with and without NameIDPolicy
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testNameIDPolicy() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with NameIDPolicy with and without AllowCreate
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testAllowCreate() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
+        assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\""));
 
-		// by default setNameIdPolicy=true, allowCreate=true
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
-		assertThat(authnRequestStr, containsString("AllowCreate=\"true\""));
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));
 
-		// explicit setNameIdPolicy=true, by default allowCreate=true
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
-		assertThat(authnRequestStr, containsString("AllowCreate=\"true\""));
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
+        assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\""));
+    }
 
-		// explicit setNameIdPolicy=true, explicit allowCreate=true
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true, true));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);	
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
-		assertThat(authnRequestStr, containsString("AllowCreate=\"true\""));
-		
-		// explicit setNameIdPolicy=true, explicit allowCreate=false
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
-		assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
-		
-		// if setNameIdPolicy=false, by default AllowCreate missing
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));
-		assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
-		
-		// if setNameIdPolicy=false explicitly, AllowCreate missing even if explicit allowCreate=true
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, true));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));
-		assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with NameIDPolicy with and without AllowCreate
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testAllowCreate() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-		// if both setNameIdPolicy=false and allowCreate=false explicitly, of course AllowCreate missing
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, false));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));
-		assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
-	}
+        // by default setNameIdPolicy=true, allowCreate=true
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
+        assertThat(authnRequestStr, containsString("AllowCreate=\"true\""));
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with NameIDPolicy Encrypted
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testCreateEncPolicySAMLRequest() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.all.properties").build();
+        // explicit setNameIdPolicy=true, by default allowCreate=true
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
+        assertThat(authnRequestStr, containsString("AllowCreate=\"true\""));
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
-		assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted\""));
-	}
+        // explicit setNameIdPolicy=true, explicit allowCreate=true
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true, true));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
+        assertThat(authnRequestStr, containsString("AllowCreate=\"true\""));
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with and without AuthNContext
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testAuthNContext() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        // explicit setNameIdPolicy=true, explicit allowCreate=false
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, true, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
+        assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
 
-		List<String> requestedAuthnContext = new ArrayList<String>();
-		settings.setRequestedAuthnContext(requestedAuthnContext);
+        // if setNameIdPolicy=false, by default AllowCreate missing
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));
+        assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<samlp:RequestedAuthnContext")));
+        // if setNameIdPolicy=false explicitly, AllowCreate missing even if explicit allowCreate=true
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, true));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));
+        assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
 
-		requestedAuthnContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
-		settings.setRequestedAuthnContext(requestedAuthnContext);
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
-		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
+        // if both setNameIdPolicy=false and allowCreate=false explicitly, of course AllowCreate missing
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, false));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<samlp:NameIDPolicy")));
+        assertThat(authnRequestStr, not(containsString("AllowCreate=\"true\"")));
+    }
 
-		requestedAuthnContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:X509");
-		settings.setRequestedAuthnContext(requestedAuthnContext);
-		settings.setRequestedAuthnContext(requestedAuthnContext);
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
-		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
-		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:X509</saml:AuthnContextClassRef>"));
-	}
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with NameIDPolicy Encrypted
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testCreateEncPolicySAMLRequest() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.all.properties").build();
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with and without AuthNContext
-	 * <p>
-	 * Case: AuthnContextClassRef contains custom URN with special chars.
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testAuthNContextSpecialChars() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:NameIDPolicy"));
+        assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:encrypted\""));
+    }
 
-		List<String> requestedAuthnContext = new ArrayList<String>();
-		settings.setRequestedAuthnContext(requestedAuthnContext);
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with and without AuthNContext
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testAuthNContext() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<samlp:RequestedAuthnContext")));
+        List<String> requestedAuthnContext = new ArrayList<String>();
+        settings.setRequestedAuthnContext(requestedAuthnContext);
 
-		requestedAuthnContext.add("urn:custom:a&b");
-		settings.setRequestedAuthnContext(requestedAuthnContext);
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
-		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:custom:a&amp;b</saml:AuthnContextClassRef>"));
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<samlp:RequestedAuthnContext")));
 
-		requestedAuthnContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:X509");
-		settings.setRequestedAuthnContext(requestedAuthnContext);
-		settings.setRequestedAuthnContext(requestedAuthnContext);
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
-		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:custom:a&amp;b</saml:AuthnContextClassRef>"));
-		assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:X509</saml:AuthnContextClassRef>"));
-	}
+        requestedAuthnContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:Password");
+        settings.setRequestedAuthnContext(requestedAuthnContext);
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
+        assertThat(authnRequestStr,
+                containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with and without Subject
-	 *
-	 * @throws Exception
-	 *
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testSubject() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        requestedAuthnContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:X509");
+        settings.setRequestedAuthnContext(requestedAuthnContext);
+        settings.setRequestedAuthnContext(requestedAuthnContext);
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
+        assertThat(authnRequestStr,
+                containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>"));
+        assertThat(authnRequestStr,
+                containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:X509</saml:AuthnContextClassRef>"));
+    }
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<saml:Subject")));
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with and without AuthNContext
+     * <p>
+     * Case: AuthnContextClassRef contains custom URN with special chars.
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testAuthNContextSpecialChars() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
 
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, "testuser@example.com"));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<saml:Subject"));
-		assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\">testuser@example.com</saml:NameID>"));
-		assertThat(authnRequestStr, containsString("<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\">"));
+        List<String> requestedAuthnContext = new ArrayList<String>();
+        settings.setRequestedAuthnContext(requestedAuthnContext);
 
-		settings = new SettingsBuilder().fromFile("config/config.emailaddressformat.properties").build();
-		authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, "testuser@example.com"));
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<saml:Subject"));
-		assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">testuser@example.com</saml:NameID>"));
-		assertThat(authnRequestStr, containsString("<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\">"));
-	}
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<samlp:RequestedAuthnContext")));
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with and without Subject
-	 * <p>
-	 * Case: subject contains special chars.
-	 *
-	 * @throws Exception
-	 *
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testSubjectSpecialChars() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
+        requestedAuthnContext.add("urn:custom:a&b");
+        settings.setRequestedAuthnContext(requestedAuthnContext);
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
+        assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:custom:a&amp;b</saml:AuthnContextClassRef>"));
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("<saml:Subject")));
+        requestedAuthnContext.add("urn:oasis:names:tc:SAML:2.0:ac:classes:X509");
+        settings.setRequestedAuthnContext(requestedAuthnContext);
+        settings.setRequestedAuthnContext(requestedAuthnContext);
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<samlp:RequestedAuthnContext Comparison=\"exact\">"));
+        assertThat(authnRequestStr, containsString("<saml:AuthnContextClassRef>urn:custom:a&amp;b</saml:AuthnContextClassRef>"));
+        assertThat(authnRequestStr,
+                containsString("<saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:X509</saml:AuthnContextClassRef>"));
+    }
 
-		authnRequest = new AuthnRequest(settings, false, false, false, "t&stuser@example.com");
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("<saml:Subject"));
-		assertThat(authnRequestStr, containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\">t&amp;stuser@example.com</saml:NameID>"));
-		assertThat(authnRequestStr, containsString("<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\">"));
-	}
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with and without Subject
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testSubject() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-	/**
-	 * Tests the getId method of AuthnRequest
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest.getId
-	 */
-	@Test
-	public void testGetId() throws Exception
-	{
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<saml:Subject")));
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		final String authnRequestStr = Util.base64decodedInflated(authnRequest.getEncodedAuthnRequest());
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, "testuser@example.com"));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<saml:Subject"));
+        assertThat(authnRequestStr,
+                containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\">testuser@example.com</saml:NameID>"));
+        assertThat(authnRequestStr, containsString("<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\">"));
 
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("ID=\"" + authnRequest.getId() + "\""));
-	}
+        settings = new SettingsBuilder().fromFile("config/config.emailaddressformat.properties").build();
+        authnRequest = new AuthnRequest(settings, new AuthnRequestParams(false, false, false, "testuser@example.com"));
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<saml:Subject"));
+        assertThat(authnRequestStr,
+                containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">testuser@example.com</saml:NameID>"));
+        assertThat(authnRequestStr, containsString("<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\">"));
+    }
 
-	/**
-	 * Tests the getId method of AuthnRequest
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest.getId
-	 */
-	@Test
-	public void testGetIssueInstant() throws Exception
-	{
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with and without Subject
+     * <p>
+     * Case: subject contains special chars.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testSubjectSpecialChars() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
 
-		final long start = System.currentTimeMillis();
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		final long end = System.currentTimeMillis();
-		final String authnRequestStr = Util.base64decodedInflated(authnRequest.getEncodedAuthnRequest());
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("<saml:Subject")));
 
-		final Calendar issueInstant = authnRequest.getIssueInstant();
-		assertNotNull(issueInstant);
-		final long millis = issueInstant.getTimeInMillis();
-		assertTrue(millis >= start && millis <= end);
-		
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("IssueInstant=\"" + Util.formatDateTime(millis) + "\""));
-	}
+        authnRequest = new AuthnRequest(settings, false, false, false, "t&stuser@example.com");
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("<saml:Subject"));
+        assertThat(authnRequestStr,
+                containsString("Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified\">t&amp;stuser@example.com</saml:NameID>"));
+        assertThat(authnRequestStr, containsString("<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\">"));
+    }
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with and without Destination
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testAuthNDestination() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+    /**
+     * Tests the getId method of AuthnRequest
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest.getId
+     */
+    @Test
+    public void testGetId() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        final String authnRequestStr = Util.base64decodedInflated(authnRequest.getEncodedAuthnRequest());
 
-		settings = new Saml2Settings();
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\"")));
-	}
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("ID=\"" + authnRequest.getId() + "\""));
+    }
 
-	/**
-	 * Tests the AuthnRequest Constructor
-	 * The creation of a deflated SAML Request with and without Destination
-	 * <p>
-	 * Case: destinations contain special chars.
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest
-	 */
-	@Test
-	public void testAuthNDestinationSpecialChars() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
+    /**
+     * Tests the getId method of AuthnRequest
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest.getId
+     */
+    @Test
+    public void testGetIssueInstant() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
 
-		AuthnRequest authnRequest = new AuthnRequest(settings);
-		String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php?a=1&amp;b=2\""));
+        final long start = System.currentTimeMillis();
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        final long end = System.currentTimeMillis();
+        final String authnRequestStr = Util.base64decodedInflated(authnRequest.getEncodedAuthnRequest());
 
-		settings = new Saml2Settings();
-		authnRequest = new AuthnRequest(settings);
-		authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
-		authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
-		assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
-		assertThat(authnRequestStr, not(containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php?a=1&amp;b=2\"")));
-  }
-	
-	/**
-	 * Tests the postProcessXml method of AuthnRequest
-	 *
-	 * @throws Exception
-	 * 
-	 * @see org.codelibs.saml2.core.core.authn.AuthnRequest#postProcessXml
-	 */
-	@Test
-	public void testPostProcessXml() throws Exception {
-		Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
-		AuthnRequest authnRequest = new AuthnRequest(settings) {
-			@Override
-			protected String postProcessXml(String authnRequestXml, AuthnRequestParams params, Saml2Settings sett) {
-				assertEquals(authnRequestXml, super.postProcessXml(authnRequestXml, params, sett));
-				assertSame(settings, sett);
-				return "changed";
-			}
-		};
-		assertEquals("changed", authnRequest.getAuthnRequestXml());
-	}
+        final Calendar issueInstant = authnRequest.getIssueInstant();
+        assertNotNull(issueInstant);
+        final long millis = issueInstant.getTimeInMillis();
+        assertTrue(millis >= start && millis <= end);
+
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("IssueInstant=\"" + Util.formatDateTime(millis) + "\""));
+    }
+
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with and without Destination
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testAuthNDestination() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\""));
+
+        settings = new Saml2Settings();
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr, not(containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php\"")));
+    }
+
+    /**
+     * Tests the AuthnRequest Constructor
+     * The creation of a deflated SAML Request with and without Destination
+     * <p>
+     * Case: destinations contain special chars.
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest
+     */
+    @Test
+    public void testAuthNDestinationSpecialChars() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min_specialchars.properties").build();
+
+        AuthnRequest authnRequest = new AuthnRequest(settings);
+        String authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        String authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr,
+                containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php?a=1&amp;b=2\""));
+
+        settings = new Saml2Settings();
+        authnRequest = new AuthnRequest(settings);
+        authnRequestStringBase64 = authnRequest.getEncodedAuthnRequest();
+        authnRequestStr = Util.base64decodedInflated(authnRequestStringBase64);
+        assertThat(authnRequestStr, containsString("<samlp:AuthnRequest"));
+        assertThat(authnRequestStr,
+                not(containsString("Destination=\"http://idp.example.com/simplesaml/saml2/idp/SSOService.php?a=1&amp;b=2\"")));
+    }
+
+    /**
+     * Tests the postProcessXml method of AuthnRequest
+     *
+     * @throws Exception
+     * 
+     * @see org.codelibs.saml2.core.core.authn.AuthnRequest#postProcessXml
+     */
+    @Test
+    public void testPostProcessXml() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        AuthnRequest authnRequest = new AuthnRequest(settings) {
+            @Override
+            protected String postProcessXml(String authnRequestXml, AuthnRequestParams params, Saml2Settings sett) {
+                assertEquals(authnRequestXml, super.postProcessXml(authnRequestXml, params, sett));
+                assertSame(settings, sett);
+                return "changed";
+            }
+        };
+        assertEquals("changed", authnRequest.getAuthnRequestXml());
+    }
 }

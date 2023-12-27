@@ -27,7 +27,7 @@ public class SamlResponseStatus {
      * @param statusCode
      *              String. Status code
      */
-    public SamlResponseStatus(String statusCode) {
+    public SamlResponseStatus(final String statusCode) {
         this.statusCode = statusCode;
     }
 
@@ -39,7 +39,7 @@ public class SamlResponseStatus {
      * @param statusMessage
      *				String. Status message
      */
-    public SamlResponseStatus(String statusCode, String statusMessage) {
+    public SamlResponseStatus(final String statusCode, final String statusMessage) {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
     }
@@ -57,7 +57,7 @@ public class SamlResponseStatus {
      * @param statusCode
      *              String. Status code
      */
-    public void setStatusCode(String statusCode) {
+    public void setStatusCode(final String statusCode) {
         this.statusCode = statusCode;
     }
 
@@ -74,7 +74,7 @@ public class SamlResponseStatus {
      * @param subStatusCode
      *              String. second-level status code
      */
-    public void setSubStatusCode(String subStatusCode) {
+    public void setSubStatusCode(final String subStatusCode) {
         this.subStatusCode = subStatusCode;
     }
 
@@ -91,7 +91,7 @@ public class SamlResponseStatus {
      * @param statusMessage
      *              String. Status message
      */
-    public void setStatusMessage(String statusMessage) {
+    public void setStatusMessage(final String statusMessage) {
         this.statusMessage = statusMessage;
     }
 
@@ -103,7 +103,7 @@ public class SamlResponseStatus {
      *
      * @return boolean checks the status code
      */
-    public boolean is(String status) {
+    public boolean is(final String status) {
         return statusCode != null && !statusCode.isEmpty() && statusCode.equals(status);
     }
 

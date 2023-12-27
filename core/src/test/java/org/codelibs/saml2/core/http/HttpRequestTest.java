@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.test.NaiveUrlEncoder;
 import org.codelibs.saml2.core.util.Util;
 import org.junit.Test;
@@ -24,10 +23,10 @@ public class HttpRequestTest {
     public void testConstructorWithNoQueryParams() throws Exception {
         final String url = "url";
 
-        final HttpRequest request = new HttpRequest(url, (String)null);
+        final HttpRequest request = new HttpRequest(url, (String) null);
         assertThat(request.getRequestURL(), equalTo(url));
-        assertThat(request.getParameters(), equalTo(Collections.<String, List<String>>emptyMap()));
-        assertThat(request.getParameters("x"), equalTo(Collections.<String>emptyList()));
+        assertThat(request.getParameters(), equalTo(Collections.<String, List<String>> emptyMap()));
+        assertThat(request.getParameters("x"), equalTo(Collections.<String> emptyList()));
         assertThat(request.getParameter("x"), nullValue());
     }
 
@@ -54,7 +53,7 @@ public class HttpRequestTest {
         final String name = "name";
         final String value = "value";
 
-        final HttpRequest request = new HttpRequest(url, (String)null).addParameter(name, value);
+        final HttpRequest request = new HttpRequest(url, (String) null).addParameter(name, value);
         assertThat(request.getRequestURL(), equalTo(url));
         assertThat(request.getParameters(), equalTo(singletonMap(name, singletonList(value))));
         assertThat(request.getParameters(name), equalTo(singletonList(value)));
@@ -70,7 +69,7 @@ public class HttpRequestTest {
         final String name = "name";
         final String value = "value";
 
-        HttpRequest request = new HttpRequest(url, (String)null).addParameter(name, value);
+        HttpRequest request = new HttpRequest(url, (String) null).addParameter(name, value);
         assertThat(request.getRequestURL(), equalTo(url));
         assertThat(request.getParameters(), equalTo(singletonMap(name, singletonList(value))));
         assertThat(request.getParameters(name), equalTo(singletonList(value)));
@@ -157,10 +156,9 @@ public class HttpRequestTest {
         final String url = "url";
         final String foobar = "foo/bar!";
 
-        final HttpRequest request = new HttpRequest(url, (String)null);
+        final HttpRequest request = new HttpRequest(url, (String) null);
         assertThat(request.getEncodedParameter("missing", foobar), equalTo(Util.urlEncoder(foobar)));
     }
-
 
     @Test
     public void testAddParameter_preservesQueryString() throws Exception {

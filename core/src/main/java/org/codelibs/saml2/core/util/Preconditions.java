@@ -2,21 +2,20 @@ package org.codelibs.saml2.core.util;
 
 public final class Preconditions {
     /**
-     * Throws a NullPointerException if {@code t} is null.
+     * Throws a IllegalArgumentException if {@code t} is null.
      *
      * @param t       the value to check for null
      * @param message the message to include in the thrown exception
      *
-     * @return T 
+     * @return T
      *
-     * @throws NullPointerException if {@code t} is null
+     * @throws IllegalArgumentException if {@code t} is null
      */
-    public static <T> T checkNotNull(T t, String message) {
+    public static <T> T checkNotNull(final T t, final String message) {
         if (t == null) {
-            throw new NullPointerException(message);
-        } else {
-            return t;
+            throw new IllegalArgumentException(message);
         }
+        return t;
     }
 
     private Preconditions() {

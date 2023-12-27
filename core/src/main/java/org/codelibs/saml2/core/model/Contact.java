@@ -55,7 +55,7 @@ public class Contact {
      * @deprecated use {@link #Contact(String, String, String, String, List, List)}
      */
     @Deprecated
-    public Contact(String contactType, String givenName, String emailAddress) {
+    public Contact(final String contactType, final String givenName, final String emailAddress) {
         this(contactType, null, givenName != null ? givenName : "", null, Arrays.asList(emailAddress != null ? emailAddress : ""), null);
     }
 
@@ -75,8 +75,8 @@ public class Contact {
      * @param telephoneNumbers
      *              Contact phone numbers
      */
-    public Contact(String contactType, String company, String givenName, String surName, List<String> emailAddresses,
-            List<String> telephoneNumbers) {
+    public Contact(final String contactType, final String company, final String givenName, final String surName,
+            final List<String> emailAddresses, final List<String> telephoneNumbers) {
         this.contactType = contactType != null ? contactType : "";
         this.company = company;
         this.givenName = givenName;

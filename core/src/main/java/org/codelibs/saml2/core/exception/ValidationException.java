@@ -55,9 +55,9 @@ public class ValidationException extends SAMLException {
     public static final int MISSING_ENCRYPTED_ELEMENT = 48;
     public static final int INVALID_ISSUE_INSTANT_FORMAT = 49;
 
-    private int errorCode;
+    private final int errorCode;
 
-    public ValidationException(String message, int errorCode) {
+    public ValidationException(final String message, final int errorCode) {
         super(message);
         this.errorCode = errorCode;
     }

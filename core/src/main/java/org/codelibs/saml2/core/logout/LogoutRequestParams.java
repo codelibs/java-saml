@@ -44,7 +44,7 @@ public class LogoutRequestParams {
      * @param nameId
      *              the name id of the user to log out
      */
-    public LogoutRequestParams(String sessionIndex, String nameId) {
+    public LogoutRequestParams(final String sessionIndex, final String nameId) {
         this(sessionIndex, nameId, null, null, null);
     }
 
@@ -58,7 +58,7 @@ public class LogoutRequestParams {
      * @param nameIdFormat
      *              the name id format
      */
-    public LogoutRequestParams(String sessionIndex, String nameId, String nameIdFormat) {
+    public LogoutRequestParams(final String sessionIndex, final String nameId, final String nameIdFormat) {
         this(sessionIndex, nameId, nameIdFormat, null, null);
     }
 
@@ -74,7 +74,8 @@ public class LogoutRequestParams {
      * @param nameIdNameQualifier
      *              the name id qualifier
      */
-    public LogoutRequestParams(String sessionIndex, String nameId, String nameIdFormat, String nameIdNameQualifier) {
+    public LogoutRequestParams(final String sessionIndex, final String nameId, final String nameIdFormat,
+            final String nameIdNameQualifier) {
         this(sessionIndex, nameId, nameIdFormat, nameIdNameQualifier, null);
     }
 
@@ -92,8 +93,8 @@ public class LogoutRequestParams {
      * @param nameIdSPNameQualifier
      *              the name id SP qualifier
      */
-    public LogoutRequestParams(String sessionIndex, String nameId, String nameIdFormat, String nameIdNameQualifier,
-            String nameIdSPNameQualifier) {
+    public LogoutRequestParams(final String sessionIndex, final String nameId, final String nameIdFormat, final String nameIdNameQualifier,
+            final String nameIdSPNameQualifier) {
         this.sessionIndex = sessionIndex;
         this.nameId = nameId;
         this.nameIdFormat = nameIdFormat;
@@ -108,7 +109,7 @@ public class LogoutRequestParams {
      * @param source
      *              the source set of logout request input parameters
      */
-    protected LogoutRequestParams(LogoutRequestParams source) {
+    protected LogoutRequestParams(final LogoutRequestParams source) {
         this.sessionIndex = source.getSessionIndex();
         this.nameId = source.getNameId();
         this.nameIdFormat = source.getNameIdFormat();

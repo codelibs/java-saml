@@ -11,33 +11,38 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class XMLErrorAccumulatorHandler extends DefaultHandler {
-    // TODO Not only SAXException, errorXML --> error
-    private final Logger LOG = LoggerFactory.getLogger(XMLErrorAccumulatorHandler.class);
-    private final List<Exception> errorXML = new ArrayList<Exception>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(XMLErrorAccumulatorHandler.class);
+    private final List<SAXParseException> errors = new ArrayList<>();
 
     @Override
-    public void error(SAXParseException e) throws SAXException {
-        errorXML.add(e);
-        LOG.debug("ERROR parsing xml: " + (e.getMessage()));
+    public void error(final SAXParseException e) throws SAXException {
+        errors.add(e);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("ErrorHandler#error: parsing xml: {}", e.getMessage());
+        }
     }
 
     @Override
-    public void fatalError(SAXParseException e) throws SAXException {
-        errorXML.add(e);
-        LOG.debug("FATALERROR parsing xml: " + (e.getMessage()));
+    public void fatalError(final SAXParseException e) throws SAXException {
+        errors.add(e);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("ErrorHandler#fatalError: parsing xml: {}", e.getMessage());
+        }
     }
 
     @Override
-    public void warning(SAXParseException e) throws SAXException {
-        errorXML.add(e);
-        LOG.debug("WARNING parsing xml: " + (e.getMessage()));
+    public void warning(final SAXParseException e) throws SAXException {
+        errors.add(e);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("ErrorHandler#warning: parsing xml: {}", e.getMessage());
+        }
     }
 
-    public List<Exception> getErrorXML() {
-        return Collections.unmodifiableList(errorXML);
+    public List<SAXParseException> getErrorXML() {
+        return Collections.unmodifiableList(errors);
     }
 
     public boolean hasError() {
-        return !errorXML.isEmpty();
+        return !errors.isEmpty();
     }
 }

@@ -2,7 +2,6 @@ package org.codelibs.saml2.core.settings;
 
 import java.net.URL;
 import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -400,7 +399,7 @@ public class Saml2Settings {
      * @param strict
      *            the strict to be set
      */
-    public void setStrict(boolean strict) {
+    public void setStrict(final boolean strict) {
         this.strict = strict;
     }
 
@@ -410,7 +409,7 @@ public class Saml2Settings {
      * @param debug
      *            the debug mode to be set
      */
-    public void setDebug(boolean debug) {
+    public void setDebug(final boolean debug) {
         this.debug = debug;
     }
 
@@ -419,7 +418,7 @@ public class Saml2Settings {
      *
      * @param hsm The HSM object to be set.
      */
-    public void setHsm(HSM hsm) {
+    public void setHsm(final HSM hsm) {
         this.hsm = hsm;
     }
 
@@ -429,7 +428,7 @@ public class Saml2Settings {
      * @param spEntityId
      *            the spEntityId value to be set
      */
-    protected final void setSpEntityId(String spEntityId) {
+    protected final void setSpEntityId(final String spEntityId) {
         this.spEntityId = spEntityId;
     }
 
@@ -439,7 +438,7 @@ public class Saml2Settings {
      * @param spAssertionConsumerServiceUrl
      *            the spAssertionConsumerServiceUrl value to be set
      */
-    protected final void setSpAssertionConsumerServiceUrl(URL spAssertionConsumerServiceUrl) {
+    protected final void setSpAssertionConsumerServiceUrl(final URL spAssertionConsumerServiceUrl) {
         this.spAssertionConsumerServiceUrl = spAssertionConsumerServiceUrl;
     }
 
@@ -449,7 +448,7 @@ public class Saml2Settings {
      * @param spAssertionConsumerServiceBinding
      *            the spAssertionConsumerServiceBinding value to be set
      */
-    protected final void setSpAssertionConsumerServiceBinding(String spAssertionConsumerServiceBinding) {
+    protected final void setSpAssertionConsumerServiceBinding(final String spAssertionConsumerServiceBinding) {
         this.spAssertionConsumerServiceBinding = spAssertionConsumerServiceBinding;
     }
 
@@ -459,7 +458,7 @@ public class Saml2Settings {
      * @param spSingleLogoutServiceUrl
      *            the spSingleLogoutServiceUrl value to be set
      */
-    protected final void setSpSingleLogoutServiceUrl(URL spSingleLogoutServiceUrl) {
+    protected final void setSpSingleLogoutServiceUrl(final URL spSingleLogoutServiceUrl) {
         this.spSingleLogoutServiceUrl = spSingleLogoutServiceUrl;
     }
 
@@ -469,7 +468,7 @@ public class Saml2Settings {
      * @param spSingleLogoutServiceBinding
      *            the spSingleLogoutServiceBinding value to be set
      */
-    protected final void setSpSingleLogoutServiceBinding(String spSingleLogoutServiceBinding) {
+    protected final void setSpSingleLogoutServiceBinding(final String spSingleLogoutServiceBinding) {
         this.spSingleLogoutServiceBinding = spSingleLogoutServiceBinding;
     }
 
@@ -479,7 +478,7 @@ public class Saml2Settings {
      * @param spNameIDFormat
      *            the spNameIDFormat value to be set
      */
-    protected final void setSpNameIDFormat(String spNameIDFormat) {
+    protected final void setSpNameIDFormat(final String spNameIDFormat) {
         this.spNameIDFormat = spNameIDFormat;
     }
 
@@ -489,7 +488,7 @@ public class Saml2Settings {
      * @param allowRepeatAttributeName
      *        the allowRepeatAttributeName value to be set
      */
-    public void setAllowRepeatAttributeName(boolean allowRepeatAttributeName) {
+    public void setAllowRepeatAttributeName(final boolean allowRepeatAttributeName) {
         this.allowRepeatAttributeName = allowRepeatAttributeName;
     }
 
@@ -499,7 +498,7 @@ public class Saml2Settings {
      * @param rejectDeprecatedAlg
      *        the rejectDeprecatedAlg value to be set
      */
-    public void setRejectDeprecatedAlg(boolean rejectDeprecatedAlg) {
+    public void setRejectDeprecatedAlg(final boolean rejectDeprecatedAlg) {
         this.rejectDeprecatedAlg = rejectDeprecatedAlg;
     }
 
@@ -509,7 +508,7 @@ public class Saml2Settings {
      * @param spX509cert
      *            the spX509cert value to be set in X509Certificate format
      */
-    protected final void setSpX509cert(X509Certificate spX509cert) {
+    protected final void setSpX509cert(final X509Certificate spX509cert) {
         this.spX509cert = spX509cert;
     }
 
@@ -519,7 +518,7 @@ public class Saml2Settings {
      * @param spX509certNew
      *            the spX509certNew value to be set in X509Certificate format
      */
-    protected final void setSpX509certNew(X509Certificate spX509certNew) {
+    protected final void setSpX509certNew(final X509Certificate spX509certNew) {
         this.spX509certNew = spX509certNew;
     }
 
@@ -529,7 +528,7 @@ public class Saml2Settings {
      * @param spPrivateKey
      *            the spprivateKey value to be set in PrivateKey format
      */
-    protected final void setSpPrivateKey(PrivateKey spPrivateKey) {
+    protected final void setSpPrivateKey(final PrivateKey spPrivateKey) {
         this.spPrivateKey = spPrivateKey;
     }
 
@@ -539,7 +538,7 @@ public class Saml2Settings {
      * @param uniqueIDPrefix
      *            the Unique ID prefix used when generating Unique ID
      */
-    protected final void setUniqueIDPrefix(String uniqueIDPrefix) {
+    protected final void setUniqueIDPrefix(final String uniqueIDPrefix) {
         this.uniqueIDPrefix = uniqueIDPrefix;
     }
 
@@ -549,7 +548,7 @@ public class Saml2Settings {
      * @param idpEntityId
      *            the idpEntityId value to be set
      */
-    protected final void setIdpEntityId(String idpEntityId) {
+    protected final void setIdpEntityId(final String idpEntityId) {
         this.idpEntityId = idpEntityId;
     }
 
@@ -559,7 +558,7 @@ public class Saml2Settings {
      * @param idpSingleSignOnServiceUrl
      *            the idpSingleSignOnServiceUrl value to be set
      */
-    protected final void setIdpSingleSignOnServiceUrl(URL idpSingleSignOnServiceUrl) {
+    protected final void setIdpSingleSignOnServiceUrl(final URL idpSingleSignOnServiceUrl) {
         this.idpSingleSignOnServiceUrl = idpSingleSignOnServiceUrl;
     }
 
@@ -569,7 +568,7 @@ public class Saml2Settings {
      * @param idpSingleSignOnServiceBinding
      *            the idpSingleSignOnServiceBinding value to be set
      */
-    protected final void setIdpSingleSignOnServiceBinding(String idpSingleSignOnServiceBinding) {
+    protected final void setIdpSingleSignOnServiceBinding(final String idpSingleSignOnServiceBinding) {
         this.idpSingleSignOnServiceBinding = idpSingleSignOnServiceBinding;
     }
 
@@ -579,7 +578,7 @@ public class Saml2Settings {
      * @param idpSingleLogoutServiceUrl
      *            the idpSingleLogoutServiceUrl value to be set
      */
-    protected final void setIdpSingleLogoutServiceUrl(URL idpSingleLogoutServiceUrl) {
+    protected final void setIdpSingleLogoutServiceUrl(final URL idpSingleLogoutServiceUrl) {
         this.idpSingleLogoutServiceUrl = idpSingleLogoutServiceUrl;
     }
 
@@ -589,7 +588,7 @@ public class Saml2Settings {
      * @param idpSingleLogoutServiceResponseUrl
      *            the idpSingleLogoutServiceUrl value to be set
      */
-    protected final void setIdpSingleLogoutServiceResponseUrl(URL idpSingleLogoutServiceResponseUrl) {
+    protected final void setIdpSingleLogoutServiceResponseUrl(final URL idpSingleLogoutServiceResponseUrl) {
         this.idpSingleLogoutServiceResponseUrl = idpSingleLogoutServiceResponseUrl;
     }
 
@@ -599,7 +598,7 @@ public class Saml2Settings {
      * @param idpSingleLogoutServiceBinding
      *            the idpSingleLogoutServiceBinding value to be set
      */
-    protected final void setIdpSingleLogoutServiceBinding(String idpSingleLogoutServiceBinding) {
+    protected final void setIdpSingleLogoutServiceBinding(final String idpSingleLogoutServiceBinding) {
         this.idpSingleLogoutServiceBinding = idpSingleLogoutServiceBinding;
     }
 
@@ -609,7 +608,7 @@ public class Saml2Settings {
      * @param idpX509cert
      *            the idpX509cert value to be set in X509Certificate format
      */
-    protected final void setIdpx509cert(X509Certificate idpX509cert) {
+    protected final void setIdpx509cert(final X509Certificate idpX509cert) {
         this.idpx509cert = idpX509cert;
     }
 
@@ -619,7 +618,7 @@ public class Saml2Settings {
      * @param idpCertFingerprint
      *            the idpCertFingerprint value to be set
      */
-    protected final void setIdpCertFingerprint(String idpCertFingerprint) {
+    protected final void setIdpCertFingerprint(final String idpCertFingerprint) {
         this.idpCertFingerprint = idpCertFingerprint;
     }
 
@@ -629,7 +628,7 @@ public class Saml2Settings {
      * @param idpCertFingerprintAlgorithm
      *            the idpCertFingerprintAlgorithm value to be set.
      */
-    protected final void setIdpCertFingerprintAlgorithm(String idpCertFingerprintAlgorithm) {
+    protected final void setIdpCertFingerprintAlgorithm(final String idpCertFingerprintAlgorithm) {
         this.idpCertFingerprintAlgorithm = idpCertFingerprintAlgorithm;
     }
 
@@ -638,7 +637,7 @@ public class Saml2Settings {
      *
      * @param idpx509certMulti the idpx509certMulti to set
      */
-    public void setIdpx509certMulti(List<X509Certificate> idpx509certMulti) {
+    public void setIdpx509certMulti(final List<X509Certificate> idpx509certMulti) {
         this.idpx509certMulti = idpx509certMulti;
     }
 
@@ -648,7 +647,7 @@ public class Saml2Settings {
      * @param nameIdEncrypted
      *            the nameIdEncrypted value to be set. Based on it the SP will encrypt the NameID or not
      */
-    public void setNameIdEncrypted(boolean nameIdEncrypted) {
+    public void setNameIdEncrypted(final boolean nameIdEncrypted) {
         this.nameIdEncrypted = nameIdEncrypted;
     }
 
@@ -658,7 +657,7 @@ public class Saml2Settings {
      * @param authnRequestsSigned
      *            the authnRequestsSigned value to be set. Based on it the SP will sign Logout Request or not
      */
-    public void setAuthnRequestsSigned(boolean authnRequestsSigned) {
+    public void setAuthnRequestsSigned(final boolean authnRequestsSigned) {
         this.authnRequestsSigned = authnRequestsSigned;
     }
 
@@ -668,7 +667,7 @@ public class Saml2Settings {
      * @param logoutRequestSigned
      *            the logoutRequestSigned value to be set. Based on it the SP will sign Logout Request or not
      */
-    public void setLogoutRequestSigned(boolean logoutRequestSigned) {
+    public void setLogoutRequestSigned(final boolean logoutRequestSigned) {
         this.logoutRequestSigned = logoutRequestSigned;
     }
 
@@ -678,7 +677,7 @@ public class Saml2Settings {
      * @param logoutResponseSigned
      *            the logoutResponseSigned value to be set. Based on it the SP will sign Logout Response or not
      */
-    public void setLogoutResponseSigned(boolean logoutResponseSigned) {
+    public void setLogoutResponseSigned(final boolean logoutResponseSigned) {
         this.logoutResponseSigned = logoutResponseSigned;
     }
 
@@ -688,7 +687,7 @@ public class Saml2Settings {
      * @param wantMessagesSigned
      *            the wantMessagesSigned value to be set. Based on it the SP expects the SAML Messages to be signed or not
      */
-    public void setWantMessagesSigned(boolean wantMessagesSigned) {
+    public void setWantMessagesSigned(final boolean wantMessagesSigned) {
         this.wantMessagesSigned = wantMessagesSigned;
     }
 
@@ -698,7 +697,7 @@ public class Saml2Settings {
      * @param wantAssertionsSigned
      *            the wantAssertionsSigned value to be set. Based on it the SP expects the SAML Assertions to be signed or not
      */
-    public void setWantAssertionsSigned(boolean wantAssertionsSigned) {
+    public void setWantAssertionsSigned(final boolean wantAssertionsSigned) {
         this.wantAssertionsSigned = wantAssertionsSigned;
     }
 
@@ -708,7 +707,7 @@ public class Saml2Settings {
      * @param wantAssertionsEncrypted
      *            the wantAssertionsEncrypted value to be set. Based on it the SP expects the SAML Assertions to be encrypted or not
      */
-    public void setWantAssertionsEncrypted(boolean wantAssertionsEncrypted) {
+    public void setWantAssertionsEncrypted(final boolean wantAssertionsEncrypted) {
         this.wantAssertionsEncrypted = wantAssertionsEncrypted;
     }
 
@@ -718,7 +717,7 @@ public class Saml2Settings {
      * @param wantNameId
      *            the wantNameId value to be set. Based on it the SP expects a NameID
      */
-    public void setWantNameId(boolean wantNameId) {
+    public void setWantNameId(final boolean wantNameId) {
         this.wantNameId = wantNameId;
     }
 
@@ -728,7 +727,7 @@ public class Saml2Settings {
      * @param wantNameIdEncrypted
      *            the wantNameIdEncrypted value to be set. Based on it the SP expects the NameID to be encrypted or not
      */
-    public void setWantNameIdEncrypted(boolean wantNameIdEncrypted) {
+    public void setWantNameIdEncrypted(final boolean wantNameIdEncrypted) {
         this.wantNameIdEncrypted = wantNameIdEncrypted;
     }
 
@@ -738,7 +737,7 @@ public class Saml2Settings {
      * @param signMetadata
      *            the signMetadata value to be set. Based on it the SP will sign or not the metadata with the SP PrivateKey/Certificate
      */
-    public void setSignMetadata(boolean signMetadata) {
+    public void setSignMetadata(final boolean signMetadata) {
         this.signMetadata = signMetadata;
     }
 
@@ -748,7 +747,7 @@ public class Saml2Settings {
      * @param requestedAuthnContext
      *            the requestedAuthnContext value to be set on the AuthNRequest.
      */
-    public void setRequestedAuthnContext(List<String> requestedAuthnContext) {
+    public void setRequestedAuthnContext(final List<String> requestedAuthnContext) {
         if (requestedAuthnContext != null) {
             this.requestedAuthnContext = requestedAuthnContext;
         }
@@ -760,7 +759,7 @@ public class Saml2Settings {
      * @param requestedAuthnContextComparison
      *            the requestedAuthnContextComparison value to be set.
      */
-    public void setRequestedAuthnContextComparison(String requestedAuthnContextComparison) {
+    public void setRequestedAuthnContextComparison(final String requestedAuthnContextComparison) {
         this.requestedAuthnContextComparison = requestedAuthnContextComparison;
     }
 
@@ -770,7 +769,7 @@ public class Saml2Settings {
      * @param wantXMLValidation
      *            the wantXMLValidation value to be set. Based on it the SP will validate SAML messages against the XML scheme
      */
-    public void setWantXMLValidation(boolean wantXMLValidation) {
+    public void setWantXMLValidation(final boolean wantXMLValidation) {
         this.wantXMLValidation = wantXMLValidation;
     }
 
@@ -780,7 +779,7 @@ public class Saml2Settings {
      * @param signatureAlgorithm
      *            the signatureAlgorithm value to be set.
      */
-    public void setSignatureAlgorithm(String signatureAlgorithm) {
+    public void setSignatureAlgorithm(final String signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
@@ -790,7 +789,7 @@ public class Saml2Settings {
      * @param digestAlgorithm
      *            the digestAlgorithm value to be set.
      */
-    public void setDigestAlgorithm(String digestAlgorithm) {
+    public void setDigestAlgorithm(final String digestAlgorithm) {
         this.digestAlgorithm = digestAlgorithm;
     }
 
@@ -808,7 +807,7 @@ public class Saml2Settings {
      *
      * @param rejectUnsolicitedResponsesWithInResponseTo whether to strictly check the InResponseTo attribute
      */
-    public void setRejectUnsolicitedResponsesWithInResponseTo(boolean rejectUnsolicitedResponsesWithInResponseTo) {
+    public void setRejectUnsolicitedResponsesWithInResponseTo(final boolean rejectUnsolicitedResponsesWithInResponseTo) {
         this.rejectUnsolicitedResponsesWithInResponseTo = rejectUnsolicitedResponsesWithInResponseTo;
     }
 
@@ -822,7 +821,7 @@ public class Saml2Settings {
      * @param compressRequest
      *            the compressRequest value to be set.
      */
-    public void setCompressRequest(boolean compressRequest) {
+    public void setCompressRequest(final boolean compressRequest) {
         this.compressRequest = compressRequest;
     }
 
@@ -839,7 +838,7 @@ public class Saml2Settings {
      * @param compressResponse
      *            the compressResponse value to be set.
      */
-    public void setCompressResponse(boolean compressResponse) {
+    public void setCompressResponse(final boolean compressResponse) {
         this.compressResponse = compressResponse;
     }
 
@@ -860,7 +859,7 @@ public class Saml2Settings {
      *              set to <code>true</code> to trim parsed Name IDs, set to
      *              <code>false</code> to keep them intact
      */
-    public void setTrimNameIds(boolean trimNameIds) {
+    public void setTrimNameIds(final boolean trimNameIds) {
         this.trimNameIds = trimNameIds;
     }
 
@@ -887,7 +886,7 @@ public class Saml2Settings {
      *              set to <code>true</code> to trim parsed attribute values, set to
      *              <code>false</code> to keep them intact
      */
-    public void setTrimAttributeValues(boolean trimAttributeValues) {
+    public void setTrimAttributeValues(final boolean trimAttributeValues) {
         this.trimAttributeValues = trimAttributeValues;
     }
 
@@ -910,7 +909,7 @@ public class Saml2Settings {
      * @param contacts
      *            the contacts to set
      */
-    protected final void setContacts(List<Contact> contacts) {
+    protected final void setContacts(final List<Contact> contacts) {
         this.contacts = contacts;
     }
 
@@ -920,7 +919,7 @@ public class Saml2Settings {
      * @param organization
      *            the organization to set
      */
-    protected final void setOrganization(Organization organization) {
+    protected final void setOrganization(final Organization organization) {
         this.organization = organization;
     }
 
@@ -930,7 +929,7 @@ public class Saml2Settings {
      * @return errors found on the settings data
      */
     public List<String> checkSettings() {
-        List<String> errors = new ArrayList<>(this.checkSPSettings());
+        final List<String> errors = new ArrayList<>(this.checkSPSettings());
         if (!spValidationOnly) {
             errors.addAll(this.checkIdPSettings());
         }
@@ -944,31 +943,31 @@ public class Saml2Settings {
      * @return errors found on the IdP settings data
      */
     public List<String> checkIdPSettings() {
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         String errorMsg;
 
         if (!checkRequired(getIdpEntityId())) {
             errorMsg = "idp_entityId_not_found";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         if (!checkRequired(this.getIdpSingleSignOnServiceUrl())) {
             errorMsg = "idp_sso_url_invalid";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         if (!checkIdpx509certRequired() && !checkRequired(this.getIdpCertFingerprint())) {
             errorMsg = "idp_cert_or_fingerprint_not_found_and_required";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         if (!checkIdpx509certRequired() && this.getNameIdEncrypted()) {
             errorMsg = "idp_cert_not_found_and_required";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         return errors;
@@ -993,41 +992,41 @@ public class Saml2Settings {
      * @return errors found on the SP settings data
      */
     public List<String> checkSPSettings() {
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
         String errorMsg;
 
         if (!checkRequired(getSpEntityId())) {
             errorMsg = "sp_entityId_not_found";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         if (!checkRequired(getSpAssertionConsumerServiceUrl())) {
             errorMsg = "sp_acs_not_found";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         if (this.getHsm() == null && (this.getAuthnRequestsSigned() || this.getLogoutRequestSigned() || this.getLogoutResponseSigned()
                 || this.getWantAssertionsEncrypted() || this.getWantNameIdEncrypted()) && !this.checkSPCerts()) {
             errorMsg = "sp_cert_not_found_and_required";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
-        List<Contact> contacts = this.getContacts();
+        final List<Contact> contacts = this.getContacts();
         if (!contacts.isEmpty()) {
-            Set<String> validTypes = new HashSet<>();
+            final Set<String> validTypes = new HashSet<>();
             validTypes.add(Constants.CONTACT_TYPE_TECHNICAL);
             validTypes.add(Constants.CONTACT_TYPE_SUPPORT);
             validTypes.add(Constants.CONTACT_TYPE_ADMINISTRATIVE);
             validTypes.add(Constants.CONTACT_TYPE_BILLING);
             validTypes.add(Constants.CONTACT_TYPE_OTHER);
-            for (Contact contact : contacts) {
+            for (final Contact contact : contacts) {
                 if (!validTypes.contains(contact.getContactType())) {
                     errorMsg = "contact_type_invalid";
                     errors.add(errorMsg);
-                    LOGGER.error(errorMsg);
+                    LOGGER.warn(errorMsg);
                 }
                 if ((contact.getEmailAddresses().isEmpty() || contact.getEmailAddresses().stream().allMatch(StringUtils::isEmpty))
                         && (contact.getTelephoneNumbers().isEmpty()
@@ -1036,22 +1035,22 @@ public class Saml2Settings {
                         && StringUtils.isEmpty(contact.getSurName())) {
                     errorMsg = "contact_not_enough_data";
                     errors.add(errorMsg);
-                    LOGGER.error(errorMsg);
+                    LOGGER.warn(errorMsg);
                 }
             }
         }
 
-        Organization org = this.getOrganization();
+        final Organization org = this.getOrganization();
         if (org != null && (org.getOrgDisplayName().isEmpty() || org.getOrgName().isEmpty() || org.getOrgUrl().isEmpty())) {
             errorMsg = "organization_not_enough_data";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         if (this.getHsm() != null && this.getSPkey() != null) {
             errorMsg = "use_either_hsm_or_private_key";
             errors.add(errorMsg);
-            LOGGER.error(errorMsg);
+            LOGGER.warn(errorMsg);
         }
 
         return errors;
@@ -1063,8 +1062,8 @@ public class Saml2Settings {
      * @return true if the SP settings are valid
      */
     public boolean checkSPCerts() {
-        X509Certificate cert = getSPcert();
-        PrivateKey key = getSPkey();
+        final X509Certificate cert = getSPcert();
+        final PrivateKey key = getSPkey();
 
         return (cert != null && key != null);
     }
@@ -1078,12 +1077,8 @@ public class Saml2Settings {
      *
      * @return true if the SP settings are valid
      */
-    private boolean checkRequired(Object value) {
-        if (value == null) {
-            return false;
-        }
-
-        if (value instanceof String && ((String) value).isEmpty()) {
+    private boolean checkRequired(final Object value) {
+        if ((value == null) || (value instanceof String && ((String) value).isEmpty())) {
             return false;
         }
 
@@ -1099,7 +1094,7 @@ public class Saml2Settings {
      * @param spValidationOnly
      *            the spValidationOnly value to be set
      */
-    public void setSPValidationOnly(boolean spValidationOnly) {
+    public void setSPValidationOnly(final boolean spValidationOnly) {
         this.spValidationOnly = spValidationOnly;
     }
 
@@ -1115,21 +1110,20 @@ public class Saml2Settings {
      *
      * @return the SP metadata (xml)
      *
-     * @throws CertificateEncodingException
      */
-    public String getSPMetadata() throws CertificateEncodingException {
-        Metadata metadataObj = new Metadata(this);
+    public String getSPMetadata() {
+        final Metadata metadataObj = new Metadata(this);
         String metadataString = metadataObj.getMetadataString();
 
         // Check if must be signed
-        boolean signMetadata = this.getSignMetadata();
+        final boolean signMetadata = this.getSignMetadata();
         if (signMetadata) {
             // TODO Extend this in order to be able to read not only SP privateKey/certificate
             try {
                 metadataString = Metadata.signMetadata(metadataString, this.getSPkey(), this.getSPcert(), this.getSignatureAlgorithm(),
                         this.getDigestAlgorithm());
-            } catch (Exception e) {
-                LOGGER.debug("SAMLSevereException executing signMetadata: " + e.getMessage(), e);
+            } catch (final Exception e) {
+                LOGGER.debug("Failed to get SP metadata.", e);
             }
         }
 
@@ -1143,42 +1137,39 @@ public class Saml2Settings {
      *
      * @return Array The list of found errors
      *
-     * @throws Exception
      */
-    public static List<String> validateMetadata(String metadataString) throws Exception {
+    public static List<String> validateMetadata(String metadataString) {
 
         metadataString = metadataString.replace("<?xml version=\"1.0\"?>", "");
 
-        Document metadataDocument = Util.loadXML(metadataString);
+        final Document metadataDocument = Util.loadXML(metadataString);
 
-        List<String> errors = new ArrayList<>();
+        final List<String> errors = new ArrayList<>();
 
         if (!Util.validateXML(metadataDocument, SchemaFactory.SAML_SCHEMA_METADATA_2_0)) {
             errors.add("Invalid SAML Metadata. Not match the saml-schema-metadata-2.0.xsd");
         } else {
-            Element rootElement = metadataDocument.getDocumentElement();
-            if (!rootElement.getLocalName().equals("EntityDescriptor")) {
+            final Element rootElement = metadataDocument.getDocumentElement();
+            if (!"EntityDescriptor".equals(rootElement.getLocalName())) {
                 errors.add("noEntityDescriptor_xml");
+            } else if (rootElement.getElementsByTagNameNS(Constants.NS_MD, "SPSSODescriptor").getLength() != 1) {
+                errors.add("onlySPSSODescriptor_allowed_xml");
             } else {
-                if (rootElement.getElementsByTagNameNS(Constants.NS_MD, "SPSSODescriptor").getLength() != 1) {
-                    errors.add("onlySPSSODescriptor_allowed_xml");
-                } else {
-                    String validUntil = null;
-                    String cacheDuration = null;
+                String validUntil = null;
+                String cacheDuration = null;
 
-                    if (rootElement.hasAttribute("cacheDuration")) {
-                        cacheDuration = rootElement.getAttribute("cacheDuration");
-                    }
+                if (rootElement.hasAttribute("cacheDuration")) {
+                    cacheDuration = rootElement.getAttribute("cacheDuration");
+                }
 
-                    if (rootElement.hasAttribute("validUntil")) {
-                        validUntil = rootElement.getAttribute("validUntil");
-                    }
+                if (rootElement.hasAttribute("validUntil")) {
+                    validUntil = rootElement.getAttribute("validUntil");
+                }
 
-                    long expireTime = Util.getExpireTime(cacheDuration, validUntil);
+                final long expireTime = Util.getExpireTime(cacheDuration, validUntil);
 
-                    if (expireTime != 0 && Util.getCurrentTimeStamp() > expireTime) {
-                        errors.add("expired_xml");
-                    }
+                if (expireTime != 0 && Util.getCurrentTimeStamp() > expireTime) {
+                    errors.add("expired_xml");
                 }
             }
         }

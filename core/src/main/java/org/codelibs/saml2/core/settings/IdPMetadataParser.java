@@ -1,14 +1,13 @@
 package org.codelibs.saml2.core.settings;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.xml.xpath.XPathException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.codelibs.saml2.core.exception.SAMLSevereException;
+import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.util.Constants;
 import org.codelibs.saml2.core.util.Util;
 import org.slf4j.Logger;
@@ -48,109 +47,101 @@ public class IdPMetadataParser {
      *            Parse specific binding SLO endpoint.
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws XPathExpressionException
      */
-    public static Map<String, Object> parseXML(Document xmlDocument, String entityId, String desiredNameIdFormat, String desiredSSOBinding,
-            String desiredSLOBinding) throws XPathException {
-        Map<String, Object> metadataInfo = new LinkedHashMap<>();
+    public static Map<String, Object> parseXML(final Document xmlDocument, String entityId, final String desiredNameIdFormat,
+            final String desiredSSOBinding, final String desiredSLOBinding) {
+        final Map<String, Object> metadataInfo = new LinkedHashMap<>();
 
-        try {
-            String customIdPStr = "";
-            if (entityId != null && !entityId.isEmpty()) {
-                customIdPStr = "[@entityID=\"" + entityId + "\"]";
+        String customIdPStr = "";
+        if (entityId != null && !entityId.isEmpty()) {
+            customIdPStr = "[@entityID=\"" + entityId + "\"]";
+        }
+
+        final String idpDescryptorXPath = "//md:EntityDescriptor" + customIdPStr + "/md:IDPSSODescriptor";
+
+        final NodeList idpDescriptorNodes = Util.query(xmlDocument, idpDescryptorXPath);
+
+        if (idpDescriptorNodes.getLength() > 0) {
+
+            final Node idpDescriptorNode = idpDescriptorNodes.item(0);
+            if (entityId == null || entityId.isEmpty()) {
+                final Node entityIDNode = idpDescriptorNode.getParentNode().getAttributes().getNamedItem("entityID");
+                if (entityIDNode != null) {
+                    entityId = entityIDNode.getNodeValue();
+                }
             }
 
-            String idpDescryptorXPath = "//md:EntityDescriptor" + customIdPStr + "/md:IDPSSODescriptor";
+            if (entityId != null && !entityId.isEmpty()) {
+                metadataInfo.put(SettingsBuilder.IDP_ENTITYID_PROPERTY_KEY, entityId);
+            }
 
-            NodeList idpDescriptorNodes = Util.query(xmlDocument, idpDescryptorXPath);
+            NodeList ssoNodes =
+                    Util.query(xmlDocument, "./md:SingleSignOnService[@Binding=\"" + desiredSSOBinding + "\"]", idpDescriptorNode);
+            if (ssoNodes.getLength() < 1) {
+                ssoNodes = Util.query(xmlDocument, "./md:SingleSignOnService", idpDescriptorNode);
+            }
+            if (ssoNodes.getLength() > 0) {
+                metadataInfo.put(SettingsBuilder.IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY,
+                        ssoNodes.item(0).getAttributes().getNamedItem("Location").getNodeValue());
+                metadataInfo.put(SettingsBuilder.IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY,
+                        ssoNodes.item(0).getAttributes().getNamedItem("Binding").getNodeValue());
+            }
 
-            if (idpDescriptorNodes.getLength() > 0) {
+            NodeList sloNodes =
+                    Util.query(xmlDocument, "./md:SingleLogoutService[@Binding=\"" + desiredSLOBinding + "\"]", idpDescriptorNode);
+            if (sloNodes.getLength() < 1) {
+                sloNodes = Util.query(xmlDocument, "./md:SingleLogoutService", idpDescriptorNode);
+            }
+            if (sloNodes.getLength() > 0) {
+                metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY,
+                        sloNodes.item(0).getAttributes().getNamedItem("Location").getNodeValue());
+                metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY,
+                        sloNodes.item(0).getAttributes().getNamedItem("Binding").getNodeValue());
+                final Node responseLocationNode = sloNodes.item(0).getAttributes().getNamedItem("ResponseLocation");
+                if (responseLocationNode != null) {
+                    metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY,
+                            responseLocationNode.getNodeValue());
+                }
+            }
 
-                Node idpDescriptorNode = idpDescriptorNodes.item(0);
-                if (entityId == null || entityId.isEmpty()) {
-                    Node entityIDNode = idpDescriptorNode.getParentNode().getAttributes().getNamedItem("entityID");
-                    if (entityIDNode != null) {
-                        entityId = entityIDNode.getNodeValue();
-                    }
+            final NodeList keyDescriptorCertSigningNodes = Util.query(xmlDocument,
+                    "./md:KeyDescriptor[not(contains(@use, \"encryption\"))]/ds:KeyInfo/ds:X509Data/ds:X509Certificate", idpDescriptorNode);
+
+            final NodeList keyDescriptorCertEncryptionNodes = Util.query(xmlDocument,
+                    "./md:KeyDescriptor[not(contains(@use, \"signing\"))]/ds:KeyInfo/ds:X509Data/ds:X509Certificate", idpDescriptorNode);
+
+            if (keyDescriptorCertSigningNodes.getLength() > 0 || keyDescriptorCertEncryptionNodes.getLength() > 0) {
+
+                final boolean hasEncryptionCert = keyDescriptorCertEncryptionNodes.getLength() > 0;
+                String encryptionCert = null;
+
+                if (hasEncryptionCert) {
+                    encryptionCert = keyDescriptorCertEncryptionNodes.item(0).getTextContent();
+                    metadataInfo.put(SettingsBuilder.IDP_X509CERT_PROPERTY_KEY, encryptionCert);
                 }
 
-                if (entityId != null && !entityId.isEmpty()) {
-                    metadataInfo.put(SettingsBuilder.IDP_ENTITYID_PROPERTY_KEY, entityId);
-                }
-
-                NodeList ssoNodes =
-                        Util.query(xmlDocument, "./md:SingleSignOnService[@Binding=\"" + desiredSSOBinding + "\"]", idpDescriptorNode);
-                if (ssoNodes.getLength() < 1) {
-                    ssoNodes = Util.query(xmlDocument, "./md:SingleSignOnService", idpDescriptorNode);
-                }
-                if (ssoNodes.getLength() > 0) {
-                    metadataInfo.put(SettingsBuilder.IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY,
-                            ssoNodes.item(0).getAttributes().getNamedItem("Location").getNodeValue());
-                    metadataInfo.put(SettingsBuilder.IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY,
-                            ssoNodes.item(0).getAttributes().getNamedItem("Binding").getNodeValue());
-                }
-
-                NodeList sloNodes =
-                        Util.query(xmlDocument, "./md:SingleLogoutService[@Binding=\"" + desiredSLOBinding + "\"]", idpDescriptorNode);
-                if (sloNodes.getLength() < 1) {
-                    sloNodes = Util.query(xmlDocument, "./md:SingleLogoutService", idpDescriptorNode);
-                }
-                if (sloNodes.getLength() > 0) {
-                    metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY,
-                            sloNodes.item(0).getAttributes().getNamedItem("Location").getNodeValue());
-                    metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY,
-                            sloNodes.item(0).getAttributes().getNamedItem("Binding").getNodeValue());
-                    Node responseLocationNode = sloNodes.item(0).getAttributes().getNamedItem("ResponseLocation");
-                    if (responseLocationNode != null) {
-                        metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY,
-                                responseLocationNode.getNodeValue());
-                    }
-                }
-
-                NodeList keyDescriptorCertSigningNodes = Util.query(xmlDocument,
-                        "./md:KeyDescriptor[not(contains(@use, \"encryption\"))]/ds:KeyInfo/ds:X509Data/ds:X509Certificate",
-                        idpDescriptorNode);
-
-                NodeList keyDescriptorCertEncryptionNodes = Util.query(xmlDocument,
-                        "./md:KeyDescriptor[not(contains(@use, \"signing\"))]/ds:KeyInfo/ds:X509Data/ds:X509Certificate",
-                        idpDescriptorNode);
-
-                if (keyDescriptorCertSigningNodes.getLength() > 0 || keyDescriptorCertEncryptionNodes.getLength() > 0) {
-
-                    boolean hasEncryptionCert = keyDescriptorCertEncryptionNodes.getLength() > 0;
-                    String encryptionCert = null;
-
-                    if (hasEncryptionCert) {
-                        encryptionCert = keyDescriptorCertEncryptionNodes.item(0).getTextContent();
-                        metadataInfo.put(SettingsBuilder.IDP_X509CERT_PROPERTY_KEY, encryptionCert);
-                    }
-
-                    if (keyDescriptorCertSigningNodes.getLength() > 0) {
-                        int index = 0;
-                        for (int i = 0; i < keyDescriptorCertSigningNodes.getLength(); i++) {
-                            String signingCert = keyDescriptorCertSigningNodes.item(i).getTextContent();
-                            if (i == 0 && !hasEncryptionCert) {
-                                metadataInfo.put(SettingsBuilder.IDP_X509CERT_PROPERTY_KEY, signingCert);
-                            } else if (!hasEncryptionCert || !encryptionCert.equals(signingCert)) {
-                                metadataInfo.put(SettingsBuilder.IDP_X509CERTMULTI_PROPERTY_KEY + "." + (index++), signingCert);
-                            }
+                if (keyDescriptorCertSigningNodes.getLength() > 0) {
+                    int index = 0;
+                    for (int i = 0; i < keyDescriptorCertSigningNodes.getLength(); i++) {
+                        final String signingCert = keyDescriptorCertSigningNodes.item(i).getTextContent();
+                        if (i == 0 && !hasEncryptionCert) {
+                            metadataInfo.put(SettingsBuilder.IDP_X509CERT_PROPERTY_KEY, signingCert);
+                        } else if (!hasEncryptionCert || !encryptionCert.equals(signingCert)) {
+                            metadataInfo.put(SettingsBuilder.IDP_X509CERTMULTI_PROPERTY_KEY + "." + index, signingCert);
+                            index++;
                         }
                     }
                 }
+            }
 
-                NodeList nameIdFormatNodes = Util.query(xmlDocument, "./md:NameIDFormat", idpDescriptorNode);
-                for (int i = 0; i < nameIdFormatNodes.getLength(); i++) {
-                    String nameIdFormat = nameIdFormatNodes.item(i).getTextContent();
-                    if (nameIdFormat != null && (desiredNameIdFormat == null || desiredNameIdFormat.equals(nameIdFormat))) {
-                        metadataInfo.put(SettingsBuilder.SP_NAMEIDFORMAT_PROPERTY_KEY, nameIdFormat);
-                        break;
-                    }
+            final NodeList nameIdFormatNodes = Util.query(xmlDocument, "./md:NameIDFormat", idpDescriptorNode);
+            for (int i = 0; i < nameIdFormatNodes.getLength(); i++) {
+                final String nameIdFormat = nameIdFormatNodes.item(i).getTextContent();
+                if (nameIdFormat != null && (desiredNameIdFormat == null || desiredNameIdFormat.equals(nameIdFormat))) {
+                    metadataInfo.put(SettingsBuilder.SP_NAMEIDFORMAT_PROPERTY_KEY, nameIdFormat);
+                    break;
                 }
             }
-        } catch (XPathException e) {
-            String errorMsg = "SAMLSevereException parsing metadata. " + e.getMessage();
-            LOGGER.error(errorMsg, e);
-            throw e;
         }
 
         return metadataInfo;
@@ -165,9 +156,9 @@ public class IdPMetadataParser {
      *            Entity Id of the desired IdP, if no entity Id is provided and the XML metadata contains more than one IDPSSODescriptor, the first is returned
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws XPathException
+     *
      */
-    public static Map<String, Object> parseXML(Document xmlDocument, String entityId) throws XPathException {
+    public static Map<String, Object> parseXML(final Document xmlDocument, final String entityId) {
         return parseXML(xmlDocument, entityId, null, Constants.BINDING_HTTP_REDIRECT, Constants.BINDING_HTTP_REDIRECT);
     }
 
@@ -178,9 +169,9 @@ public class IdPMetadataParser {
      *            XML document that contains IdP metadata
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws XPathException
+     *
      */
-    public static Map<String, Object> parseXML(Document xmlDocument) throws XPathException {
+    public static Map<String, Object> parseXML(final Document xmlDocument) {
         return parseXML(xmlDocument, null);
     }
 
@@ -199,23 +190,22 @@ public class IdPMetadataParser {
      *            Parse specific binding SLO endpoint.
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws Exception
+     *
      */
-    public static Map<String, Object> parseFileXML(String xmlFileName, String entityId, String desiredNameIdFormat,
-            String desiredSSOBinding, String desiredSLOBinding) throws Exception {
-        ClassLoader classLoader = IdPMetadataParser.class.getClassLoader();
+    public static Map<String, Object> parseFileXML(final String xmlFileName, final String entityId, final String desiredNameIdFormat,
+            final String desiredSSOBinding, final String desiredSLOBinding) {
+        final ClassLoader classLoader = IdPMetadataParser.class.getClassLoader();
         try (InputStream inputStream = classLoader.getResourceAsStream(xmlFileName)) {
             if (inputStream != null) {
-                Document xmlDocument = Util.parseXML(new InputSource(inputStream));
+                final Document xmlDocument = Util.parseXML(new InputSource(inputStream));
                 return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding);
-            } else {
-                throw new Exception("XML file '" + xmlFileName + "' not found in the classpath");
             }
-        } catch (Exception e) {
-            String errorMsg = "XML file'" + xmlFileName + "' cannot be loaded." + e.getMessage();
-            LOGGER.error(errorMsg, e);
-            throw new SAMLSevereException(errorMsg, SAMLSevereException.SETTINGS_FILE_NOT_FOUND);
+        } catch (final Exception e) {
+            final String errorMsg = "XML file'" + xmlFileName + "' cannot be loaded." + e.getMessage();
+            throw new SAMLSevereException(errorMsg, SAMLSevereException.SETTINGS_FILE_NOT_FOUND, e);
         }
+        throw new SAMLSevereException("XML file '" + xmlFileName + "' not found in the classpath",
+                SAMLSevereException.SETTINGS_FILE_NOT_FOUND);
     }
 
     /**
@@ -227,9 +217,9 @@ public class IdPMetadataParser {
      *            Entity Id of the desired IdP, if no entity Id is provided and the XML metadata contains more than one IDPSSODescriptor, the first is returned
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws Exception
+     *
      */
-    public static Map<String, Object> parseFileXML(String xmlFileName, String entityId) throws Exception {
+    public static Map<String, Object> parseFileXML(final String xmlFileName, final String entityId) {
         return parseFileXML(xmlFileName, entityId, null, Constants.BINDING_HTTP_REDIRECT, Constants.BINDING_HTTP_REDIRECT);
     }
 
@@ -240,9 +230,9 @@ public class IdPMetadataParser {
      *            Filename of the XML filename that contains IdP metadata
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws Exception
+     *
      */
-    public static Map<String, Object> parseFileXML(String xmlFileName) throws Exception {
+    public static Map<String, Object> parseFileXML(final String xmlFileName) {
         return parseFileXML(xmlFileName, null);
     }
 
@@ -261,12 +251,16 @@ public class IdPMetadataParser {
      *            Parse specific binding SLO endpoint.
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws Exception
+     *
      */
-    public static Map<String, Object> parseRemoteXML(URL xmlURL, String entityId, String desiredNameIdFormat, String desiredSSOBinding,
-            String desiredSLOBinding) throws Exception {
-        Document xmlDocument = Util.parseXML(new InputSource(xmlURL.openStream()));
-        return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding);
+    public static Map<String, Object> parseRemoteXML(final URL xmlURL, final String entityId, final String desiredNameIdFormat,
+            final String desiredSSOBinding, final String desiredSLOBinding) {
+        try (InputStream is = xmlURL.openStream()) {
+            final Document xmlDocument = Util.parseXML(new InputSource(is));
+            return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding);
+        } catch (IOException e) {
+            throw new XMLParsingException("Failed to parse a remote XML: " + xmlURL, e);
+        }
     }
 
     /**
@@ -278,9 +272,9 @@ public class IdPMetadataParser {
      *            Entity Id of the desired IdP, if no entity Id is provided and the XML metadata contains more than one IDPSSODescriptor, the first is returned
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws Exception
+     *
      */
-    public static Map<String, Object> parseRemoteXML(URL xmlURL, String entityId) throws Exception {
+    public static Map<String, Object> parseRemoteXML(final URL xmlURL, final String entityId) {
         return parseRemoteXML(xmlURL, entityId, null, Constants.BINDING_HTTP_REDIRECT, Constants.BINDING_HTTP_REDIRECT);
     }
 
@@ -291,9 +285,9 @@ public class IdPMetadataParser {
      *            URL to the XML document that contains IdP metadata
      *
      * @return Mapped values with metadata info in Saml2Settings format
-     * @throws Exception
+     *
      */
-    public static Map<String, Object> parseRemoteXML(URL xmlURL) throws Exception {
+    public static Map<String, Object> parseRemoteXML(final URL xmlURL) {
         return parseRemoteXML(xmlURL, null);
     }
 
@@ -307,9 +301,9 @@ public class IdPMetadataParser {
      *
      * @return the Saml2Settings object with metadata info settings loaded
      */
-    public static Saml2Settings injectIntoSettings(Saml2Settings settings, Map<String, Object> metadataInfo) {
+    public static Saml2Settings injectIntoSettings(final Saml2Settings settings, final Map<String, Object> metadataInfo) {
 
-        SettingsBuilder settingsBuilder = new SettingsBuilder().fromValues(metadataInfo);
+        final SettingsBuilder settingsBuilder = new SettingsBuilder().fromValues(metadataInfo);
         settingsBuilder.build(settings);
         return settings;
     }

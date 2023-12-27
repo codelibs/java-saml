@@ -11,9 +11,9 @@ public class SettingsException extends SAMLException {
     public static final int PUBLIC_CERT_FILE_NOT_FOUND = 5;
     public static final int PRIVATE_KEY_FILE_NOT_FOUND = 6;
 
-    private int errorCode;
+    private final int errorCode;
 
-    public SettingsException(String message, int errorCode) {
+    public SettingsException(final String message, final int errorCode) {
         super(message);
         this.errorCode = errorCode;
     }

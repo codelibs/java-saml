@@ -32,17 +32,17 @@ public class AttributeConsumingService {
      * @param serviceDescription
      *              String. Service Description
      */
-    public AttributeConsumingService(String serviceName, String serviceDescription) {
+    public AttributeConsumingService(final String serviceName, final String serviceDescription) {
         this.serviceName = serviceName != null ? serviceName : "";
         this.serviceDescription = serviceDescription != null ? serviceDescription : "";
-        this.requestedAttributes = new ArrayList<RequestedAttribute>();
+        this.requestedAttributes = new ArrayList<>();
     }
 
     /**
      * @param attr
      *              RequestedAttribute. The requested attribute to be included
      */
-    public final void addRequestedAttribute(RequestedAttribute attr) {
+    public final void addRequestedAttribute(final RequestedAttribute attr) {
         this.requestedAttributes.add(attr);
     }
 

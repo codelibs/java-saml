@@ -11,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.saml2.core.exception.SAMLSevereException;
+import org.codelibs.saml2.core.exception.X509CertificateException;
 import org.codelibs.saml2.core.model.Contact;
 import org.codelibs.saml2.core.model.KeyStoreSettings;
 import org.codelibs.saml2.core.model.Organization;
@@ -52,7 +52,7 @@ public class SettingsBuilder {
     /**
      * Private property that contains the SAML settings
      */
-    private Map<String, Object> samlData = new LinkedHashMap<>();
+    private final Map<String, Object> samlData = new LinkedHashMap<>();
 
     /**
      * Saml2Settings object
@@ -154,10 +154,8 @@ public class SettingsBuilder {
      *
      * @return the SettingsBuilder object with the settings loaded from the file
      *
-     * @throws IOException
-     * @throws SAMLSevereException
      */
-    public SettingsBuilder fromFile(String propFileName) throws SAMLSevereException, IOException {
+    public SettingsBuilder fromFile(final String propFileName) {
         return fromFile(propFileName, null);
     }
 
@@ -169,27 +167,24 @@ public class SettingsBuilder {
      *
      * @return the SettingsBuilder object with the settings loaded from the file
      *
-     * @throws IOException
-     * @throws SAMLSevereException
      */
-    public SettingsBuilder fromFile(String propFileName, KeyStoreSettings keyStoreSetting) throws SAMLSevereException, IOException {
+    public SettingsBuilder fromFile(final String propFileName, final KeyStoreSettings keyStoreSetting) {
 
-        ClassLoader classLoader = getClass().getClassLoader();
+        final ClassLoader classLoader = getClass().getClassLoader();
         try (InputStream inputStream = classLoader.getResourceAsStream(propFileName)) {
-            if (inputStream != null) {
-                Properties prop = new Properties();
-                prop.load(inputStream);
-                parseProperties(prop);
-                LOGGER.debug("properties file '{}' loaded succesfully", propFileName);
-            } else {
-                String errorMsg = "properties file '" + propFileName + "' not found in the classpath";
-                LOGGER.error(errorMsg);
+            if (inputStream == null) {
+                final String errorMsg = "properties file '" + propFileName + "' not found in the classpath";
                 throw new SAMLSevereException(errorMsg, SAMLSevereException.SETTINGS_FILE_NOT_FOUND);
             }
-        } catch (IOException e) {
-            String errorMsg = "properties file'" + propFileName + "' cannot be loaded.";
-            LOGGER.error(errorMsg, e);
-            throw new SAMLSevereException(errorMsg, SAMLSevereException.SETTINGS_FILE_NOT_FOUND);
+            final Properties prop = new Properties();
+            prop.load(inputStream);
+            parseProperties(prop);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("properties file '{}' loaded succesfully", propFileName);
+            }
+        } catch (final IOException e) {
+            final String errorMsg = "properties file'" + propFileName + "' cannot be loaded.";
+            throw new SAMLSevereException(errorMsg, SAMLSevereException.SETTINGS_FILE_NOT_FOUND, e);
         }
         // Parse KeyStore and set the properties for SP Cert and Key
         if (keyStoreSetting != null) {
@@ -207,7 +202,7 @@ public class SettingsBuilder {
      * @return the SettingsBuilder object with the settings loaded from the prop
      *         object
      */
-    public SettingsBuilder fromProperties(Properties prop) {
+    public SettingsBuilder fromProperties(final Properties prop) {
         parseProperties(prop);
         return this;
     }
@@ -220,7 +215,7 @@ public class SettingsBuilder {
      * @return the SettingsBuilder object with the settings loaded from the prop
      *         object
      */
-    public SettingsBuilder fromValues(Map<String, Object> samlData) {
+    public SettingsBuilder fromValues(final Map<String, Object> samlData) {
         return this.fromValues(samlData, null);
     }
 
@@ -233,7 +228,7 @@ public class SettingsBuilder {
      * @return the SettingsBuilder object with the settings loaded from the prop
      *         object
      */
-    public SettingsBuilder fromValues(Map<String, Object> samlData, KeyStoreSettings keyStoreSetting) {
+    public SettingsBuilder fromValues(final Map<String, Object> samlData, final KeyStoreSettings keyStoreSetting) {
         if (samlData != null) {
             this.samlData.putAll(samlData);
         }
@@ -263,16 +258,16 @@ public class SettingsBuilder {
      * @return the Saml2Settings object with all the SAML settings loaded
      *
      */
-    public Saml2Settings build(Saml2Settings saml2Setting) {
+    public Saml2Settings build(final Saml2Settings saml2Setting) {
 
         this.saml2Setting = saml2Setting;
 
-        Boolean strict = loadBooleanProperty(STRICT_PROPERTY_KEY);
+        final Boolean strict = loadBooleanProperty(STRICT_PROPERTY_KEY);
         if (strict != null) {
             saml2Setting.setStrict(strict);
         }
 
-        Boolean debug = loadBooleanProperty(DEBUG_PROPERTY_KEY);
+        final Boolean debug = loadBooleanProperty(DEBUG_PROPERTY_KEY);
         if (debug != null) {
             saml2Setting.setDebug(debug);
         }
@@ -283,17 +278,17 @@ public class SettingsBuilder {
         this.loadCompressSetting();
         this.loadParsingSetting();
 
-        List<Contact> contacts = this.loadContacts();
+        final List<Contact> contacts = this.loadContacts();
         if (!contacts.isEmpty()) {
             saml2Setting.setContacts(contacts);
         }
 
-        Organization org = this.loadOrganization();
+        final Organization org = this.loadOrganization();
         if (org != null) {
             saml2Setting.setOrganization(org);
         }
 
-        String uniqueIdPrefix = loadUniqueIDPrefix();
+        final String uniqueIdPrefix = loadUniqueIDPrefix();
         if (StringUtils.isNotEmpty(uniqueIdPrefix)) {
             saml2Setting.setUniqueIDPrefix(uniqueIdPrefix);
         } else if (saml2Setting.getUniqueIDPrefix() == null) {
@@ -307,52 +302,52 @@ public class SettingsBuilder {
      * Loads the IdP settings from the properties file
      */
     private void loadIdpSetting() {
-        String idpEntityID = loadStringProperty(IDP_ENTITYID_PROPERTY_KEY);
+        final String idpEntityID = loadStringProperty(IDP_ENTITYID_PROPERTY_KEY);
         if (idpEntityID != null) {
             saml2Setting.setIdpEntityId(idpEntityID);
         }
 
-        URL idpSingleSignOnServiceUrl = loadURLProperty(IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY);
+        final URL idpSingleSignOnServiceUrl = loadURLProperty(IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY);
         if (idpSingleSignOnServiceUrl != null) {
             saml2Setting.setIdpSingleSignOnServiceUrl(idpSingleSignOnServiceUrl);
         }
 
-        String idpSingleSignOnServiceBinding = loadStringProperty(IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY);
+        final String idpSingleSignOnServiceBinding = loadStringProperty(IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY);
         if (idpSingleSignOnServiceBinding != null) {
             saml2Setting.setIdpSingleSignOnServiceBinding(idpSingleSignOnServiceBinding);
         }
 
-        URL idpSingleLogoutServiceUrl = loadURLProperty(IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY);
+        final URL idpSingleLogoutServiceUrl = loadURLProperty(IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY);
         if (idpSingleLogoutServiceUrl != null) {
             saml2Setting.setIdpSingleLogoutServiceUrl(idpSingleLogoutServiceUrl);
         }
 
-        URL idpSingleLogoutServiceResponseUrl = loadURLProperty(IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY);
+        final URL idpSingleLogoutServiceResponseUrl = loadURLProperty(IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY);
         if (idpSingleLogoutServiceResponseUrl != null) {
             saml2Setting.setIdpSingleLogoutServiceResponseUrl(idpSingleLogoutServiceResponseUrl);
         }
 
-        String idpSingleLogoutServiceBinding = loadStringProperty(IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY);
+        final String idpSingleLogoutServiceBinding = loadStringProperty(IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY);
         if (idpSingleLogoutServiceBinding != null) {
             saml2Setting.setIdpSingleLogoutServiceBinding(idpSingleLogoutServiceBinding);
         }
 
-        List<X509Certificate> idpX509certMulti = loadCertificateListFromProp(IDP_X509CERTMULTI_PROPERTY_KEY);
+        final List<X509Certificate> idpX509certMulti = loadCertificateListFromProp(IDP_X509CERTMULTI_PROPERTY_KEY);
         if (idpX509certMulti != null) {
             saml2Setting.setIdpx509certMulti(idpX509certMulti);
         }
 
-        X509Certificate idpX509cert = loadCertificateFromProp(IDP_X509CERT_PROPERTY_KEY);
+        final X509Certificate idpX509cert = loadCertificateFromProp(IDP_X509CERT_PROPERTY_KEY);
         if (idpX509cert != null) {
             saml2Setting.setIdpx509cert(idpX509cert);
         }
 
-        String idpCertFingerprint = loadStringProperty(CERTFINGERPRINT_PROPERTY_KEY);
+        final String idpCertFingerprint = loadStringProperty(CERTFINGERPRINT_PROPERTY_KEY);
         if (idpCertFingerprint != null) {
             saml2Setting.setIdpCertFingerprint(idpCertFingerprint);
         }
 
-        String idpCertFingerprintAlgorithm = loadStringProperty(CERTFINGERPRINT_ALGORITHM_PROPERTY_KEY);
+        final String idpCertFingerprintAlgorithm = loadStringProperty(CERTFINGERPRINT_ALGORITHM_PROPERTY_KEY);
         if (idpCertFingerprintAlgorithm != null && !idpCertFingerprintAlgorithm.isEmpty()) {
             saml2Setting.setIdpCertFingerprintAlgorithm(idpCertFingerprintAlgorithm);
         }
@@ -362,77 +357,93 @@ public class SettingsBuilder {
      * Loads the security settings from the properties file
      */
     private void loadSecuritySetting() {
-        Boolean nameIdEncrypted = loadBooleanProperty(SECURITY_NAMEID_ENCRYPTED);
-        if (nameIdEncrypted != null)
+        final Boolean nameIdEncrypted = loadBooleanProperty(SECURITY_NAMEID_ENCRYPTED);
+        if (nameIdEncrypted != null) {
             saml2Setting.setNameIdEncrypted(nameIdEncrypted);
+        }
 
-        Boolean authnRequestsSigned = loadBooleanProperty(SECURITY_AUTHREQUEST_SIGNED);
-        if (authnRequestsSigned != null)
+        final Boolean authnRequestsSigned = loadBooleanProperty(SECURITY_AUTHREQUEST_SIGNED);
+        if (authnRequestsSigned != null) {
             saml2Setting.setAuthnRequestsSigned(authnRequestsSigned);
+        }
 
-        Boolean logoutRequestSigned = loadBooleanProperty(SECURITY_LOGOUTREQUEST_SIGNED);
-        if (logoutRequestSigned != null)
+        final Boolean logoutRequestSigned = loadBooleanProperty(SECURITY_LOGOUTREQUEST_SIGNED);
+        if (logoutRequestSigned != null) {
             saml2Setting.setLogoutRequestSigned(logoutRequestSigned);
+        }
 
-        Boolean logoutResponseSigned = loadBooleanProperty(SECURITY_LOGOUTRESPONSE_SIGNED);
-        if (logoutResponseSigned != null)
+        final Boolean logoutResponseSigned = loadBooleanProperty(SECURITY_LOGOUTRESPONSE_SIGNED);
+        if (logoutResponseSigned != null) {
             saml2Setting.setLogoutResponseSigned(logoutResponseSigned);
+        }
 
-        Boolean wantMessagesSigned = loadBooleanProperty(SECURITY_WANT_MESSAGES_SIGNED);
-        if (wantMessagesSigned != null)
+        final Boolean wantMessagesSigned = loadBooleanProperty(SECURITY_WANT_MESSAGES_SIGNED);
+        if (wantMessagesSigned != null) {
             saml2Setting.setWantMessagesSigned(wantMessagesSigned);
+        }
 
-        Boolean wantAssertionsSigned = loadBooleanProperty(SECURITY_WANT_ASSERTIONS_SIGNED);
-        if (wantAssertionsSigned != null)
+        final Boolean wantAssertionsSigned = loadBooleanProperty(SECURITY_WANT_ASSERTIONS_SIGNED);
+        if (wantAssertionsSigned != null) {
             saml2Setting.setWantAssertionsSigned(wantAssertionsSigned);
+        }
 
-        Boolean wantAssertionsEncrypted = loadBooleanProperty(SECURITY_WANT_ASSERTIONS_ENCRYPTED);
-        if (wantAssertionsEncrypted != null)
+        final Boolean wantAssertionsEncrypted = loadBooleanProperty(SECURITY_WANT_ASSERTIONS_ENCRYPTED);
+        if (wantAssertionsEncrypted != null) {
             saml2Setting.setWantAssertionsEncrypted(wantAssertionsEncrypted);
+        }
 
-        Boolean wantNameId = loadBooleanProperty(SECURITY_WANT_NAMEID);
-        if (wantNameId != null)
+        final Boolean wantNameId = loadBooleanProperty(SECURITY_WANT_NAMEID);
+        if (wantNameId != null) {
             saml2Setting.setWantNameId(wantNameId);
+        }
 
-        Boolean wantNameIdEncrypted = loadBooleanProperty(SECURITY_WANT_NAMEID_ENCRYPTED);
-        if (wantNameIdEncrypted != null)
+        final Boolean wantNameIdEncrypted = loadBooleanProperty(SECURITY_WANT_NAMEID_ENCRYPTED);
+        if (wantNameIdEncrypted != null) {
             saml2Setting.setWantNameIdEncrypted(wantNameIdEncrypted);
+        }
 
-        Boolean wantXMLValidation = loadBooleanProperty(SECURITY_WANT_XML_VALIDATION);
-        if (wantXMLValidation != null)
+        final Boolean wantXMLValidation = loadBooleanProperty(SECURITY_WANT_XML_VALIDATION);
+        if (wantXMLValidation != null) {
             saml2Setting.setWantXMLValidation(wantXMLValidation);
+        }
 
-        Boolean signMetadata = loadBooleanProperty(SECURITY_SIGN_METADATA);
-        if (signMetadata != null)
+        final Boolean signMetadata = loadBooleanProperty(SECURITY_SIGN_METADATA);
+        if (signMetadata != null) {
             saml2Setting.setSignMetadata(signMetadata);
+        }
 
-        List<String> requestedAuthnContext = loadListProperty(SECURITY_REQUESTED_AUTHNCONTEXT);
-        if (requestedAuthnContext != null)
+        final List<String> requestedAuthnContext = loadListProperty(SECURITY_REQUESTED_AUTHNCONTEXT);
+        if (requestedAuthnContext != null) {
             saml2Setting.setRequestedAuthnContext(requestedAuthnContext);
+        }
 
-        String requestedAuthnContextComparison = loadStringProperty(SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON);
-        if (requestedAuthnContextComparison != null && !requestedAuthnContextComparison.isEmpty())
+        final String requestedAuthnContextComparison = loadStringProperty(SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON);
+        if (requestedAuthnContextComparison != null && !requestedAuthnContextComparison.isEmpty()) {
             saml2Setting.setRequestedAuthnContextComparison(requestedAuthnContextComparison);
+        }
 
-        String signatureAlgorithm = loadStringProperty(SECURITY_SIGNATURE_ALGORITHM);
-        if (signatureAlgorithm != null && !signatureAlgorithm.isEmpty())
+        final String signatureAlgorithm = loadStringProperty(SECURITY_SIGNATURE_ALGORITHM);
+        if (signatureAlgorithm != null && !signatureAlgorithm.isEmpty()) {
             saml2Setting.setSignatureAlgorithm(signatureAlgorithm);
+        }
 
-        String digestAlgorithm = loadStringProperty(SECURITY_DIGEST_ALGORITHM);
-        if (digestAlgorithm != null && !digestAlgorithm.isEmpty())
+        final String digestAlgorithm = loadStringProperty(SECURITY_DIGEST_ALGORITHM);
+        if (digestAlgorithm != null && !digestAlgorithm.isEmpty()) {
             saml2Setting.setDigestAlgorithm(digestAlgorithm);
+        }
 
-        Boolean rejectUnsolicitedResponsesWithInResponseTo = loadBooleanProperty(SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO);
+        final Boolean rejectUnsolicitedResponsesWithInResponseTo =
+                loadBooleanProperty(SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO);
         if (rejectUnsolicitedResponsesWithInResponseTo != null) {
             saml2Setting.setRejectUnsolicitedResponsesWithInResponseTo(rejectUnsolicitedResponsesWithInResponseTo);
         }
 
-        Boolean allowRepeatAttributeName = loadBooleanProperty(SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY);
+        final Boolean allowRepeatAttributeName = loadBooleanProperty(SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY);
         if (allowRepeatAttributeName != null) {
             saml2Setting.setAllowRepeatAttributeName(allowRepeatAttributeName);
         }
 
-        Boolean rejectDeprecatedAlg = loadBooleanProperty(SECURITY_REJECT_DEPRECATED_ALGORITHM);
+        final Boolean rejectDeprecatedAlg = loadBooleanProperty(SECURITY_REJECT_DEPRECATED_ALGORITHM);
         if (rejectDeprecatedAlg != null) {
             saml2Setting.setRejectDeprecatedAlg(rejectDeprecatedAlg);
         }
@@ -442,12 +453,12 @@ public class SettingsBuilder {
      * Loads the compress settings from the properties file
      */
     private void loadCompressSetting() {
-        Boolean compressRequest = loadBooleanProperty(COMPRESS_REQUEST);
+        final Boolean compressRequest = loadBooleanProperty(COMPRESS_REQUEST);
         if (compressRequest != null) {
             saml2Setting.setCompressRequest(compressRequest);
         }
 
-        Boolean compressResponse = loadBooleanProperty(COMPRESS_RESPONSE);
+        final Boolean compressResponse = loadBooleanProperty(COMPRESS_RESPONSE);
         if (compressResponse != null) {
             saml2Setting.setCompressResponse(compressResponse);
         }
@@ -457,12 +468,12 @@ public class SettingsBuilder {
      * Loads the parsing settings from the properties file
      */
     private void loadParsingSetting() {
-        Boolean trimNameIds = loadBooleanProperty(PARSING_TRIM_NAME_IDS);
+        final Boolean trimNameIds = loadBooleanProperty(PARSING_TRIM_NAME_IDS);
         if (trimNameIds != null) {
             saml2Setting.setTrimNameIds(trimNameIds);
         }
 
-        Boolean trimAttributeValues = loadBooleanProperty(PARSING_TRIM_ATTRIBUTE_VALUES);
+        final Boolean trimAttributeValues = loadBooleanProperty(PARSING_TRIM_ATTRIBUTE_VALUES);
         if (trimAttributeValues != null) {
             saml2Setting.setTrimAttributeValues(trimAttributeValues);
         }
@@ -474,10 +485,10 @@ public class SettingsBuilder {
     private Organization loadOrganization() {
         Organization orgResult = null;
 
-        String orgName = loadStringProperty(ORGANIZATION_NAME);
-        String orgDisplayName = loadStringProperty(ORGANIZATION_DISPLAYNAME);
-        URL orgUrl = loadURLProperty(ORGANIZATION_URL);
-        String orgLangAttribute = loadStringProperty(ORGANIZATION_LANG);
+        final String orgName = loadStringProperty(ORGANIZATION_NAME);
+        final String orgDisplayName = loadStringProperty(ORGANIZATION_DISPLAYNAME);
+        final URL orgUrl = loadURLProperty(ORGANIZATION_URL);
+        final String orgLangAttribute = loadStringProperty(ORGANIZATION_LANG);
 
         if (StringUtils.isNotBlank(orgName) || StringUtils.isNotBlank(orgDisplayName) || orgUrl != null) {
             orgResult = new Organization(orgName, orgDisplayName, orgUrl, orgLangAttribute);
@@ -501,19 +512,19 @@ public class SettingsBuilder {
         final List<Contact> contacts =
                 contactProps.entrySet().stream().map(entry -> loadContact(entry.getValue(), entry.getKey())).collect(Collectors.toList());
         // append legacy contacts if present
-        String technicalGn = loadStringProperty(CONTACT_TECHNICAL_GIVEN_NAME);
-        String technicalEmailAddress = loadStringProperty(CONTACT_TECHNICAL_EMAIL_ADDRESS);
+        final String technicalGn = loadStringProperty(CONTACT_TECHNICAL_GIVEN_NAME);
+        final String technicalEmailAddress = loadStringProperty(CONTACT_TECHNICAL_EMAIL_ADDRESS);
 
         if ((technicalGn != null && !technicalGn.isEmpty()) || (technicalEmailAddress != null && !technicalEmailAddress.isEmpty())) {
-            Contact technical = new Contact(Constants.CONTACT_TYPE_TECHNICAL, technicalGn, technicalEmailAddress);
+            final Contact technical = new Contact(Constants.CONTACT_TYPE_TECHNICAL, technicalGn, technicalEmailAddress);
             contacts.add(technical);
         }
 
-        String supportGn = loadStringProperty(CONTACT_SUPPORT_GIVEN_NAME);
-        String supportEmailAddress = loadStringProperty(CONTACT_SUPPORT_EMAIL_ADDRESS);
+        final String supportGn = loadStringProperty(CONTACT_SUPPORT_GIVEN_NAME);
+        final String supportEmailAddress = loadStringProperty(CONTACT_SUPPORT_EMAIL_ADDRESS);
 
         if ((supportGn != null && !supportGn.isEmpty()) || (supportEmailAddress != null && !supportEmailAddress.isEmpty())) {
-            Contact support = new Contact(Constants.CONTACT_TYPE_SUPPORT, supportGn, supportEmailAddress);
+            final Contact support = new Contact(Constants.CONTACT_TYPE_SUPPORT, supportGn, supportEmailAddress);
             contacts.add(support);
         }
 
@@ -529,7 +540,7 @@ public class SettingsBuilder {
      *              the contact index
      * @return the loaded contact
      */
-    private Contact loadContact(Map<String, Object> contactProps, int index) {
+    private Contact loadContact(final Map<String, Object> contactProps, final int index) {
         final String contactType = loadStringProperty(SP_CONTACT_CONTACT_TYPE_PROPERTY_KEY_SUFFIX, contactProps);
         final String company = loadStringProperty(SP_CONTACT_COMPANY_PROPERTY_KEY_SUFFIX, contactProps);
         final String givenName = loadStringProperty(SP_CONTACT_GIVEN_NAME_PROPERTY_KEY_SUFFIX, contactProps);
@@ -592,7 +603,7 @@ public class SettingsBuilder {
      *              the input data
      * @return a map with extracted data for each identified index
      */
-    private SortedMap<Integer, Map<String, Object>> extractIndexedProperties(String prefix, Map<String, Object> data) {
+    private SortedMap<Integer, Map<String, Object>> extractIndexedProperties(final String prefix, final Map<String, Object> data) {
         final Pattern p = Pattern.compile(Pattern.quote(prefix) + "(?:\\[(\\d{1,9})\\])?\\.(.+)");
         final SortedMap<Integer, Map<String, Object>> indexedProps = new TreeMap<>();
         for (final Entry<String, Object> prop : data.entrySet()) {
@@ -657,7 +668,7 @@ public class SettingsBuilder {
      *              the input data
      * @return a map with extracted values for each identified index
      */
-    private SortedMap<Integer, Object> extractIndexedValues(String prefix, Map<String, Object> data) {
+    private SortedMap<Integer, Object> extractIndexedValues(final String prefix, final Map<String, Object> data) {
         final Pattern p = Pattern.compile(Pattern.quote(prefix) + "(?:\\[(\\d{1,9})\\])?");
         final SortedMap<Integer, Object> indexedValues = new TreeMap<>();
         for (final Entry<String, Object> prop : data.entrySet()) {
@@ -693,54 +704,53 @@ public class SettingsBuilder {
      * Loads the unique ID prefix. Uses default if property not set.
      */
     private String loadUniqueIDPrefix() {
-        String uniqueIDPrefix = loadStringProperty(UNIQUE_ID_PREFIX_PROPERTY_KEY);
-        return uniqueIDPrefix;
+        return loadStringProperty(UNIQUE_ID_PREFIX_PROPERTY_KEY);
     }
 
     /**
      * Loads the SP settings from the properties file
      */
     private void loadSpSetting() {
-        String spEntityID = loadStringProperty(SP_ENTITYID_PROPERTY_KEY);
+        final String spEntityID = loadStringProperty(SP_ENTITYID_PROPERTY_KEY);
         if (spEntityID != null) {
             saml2Setting.setSpEntityId(spEntityID);
         }
 
-        URL assertionConsumerServiceUrl = loadURLProperty(SP_ASSERTION_CONSUMER_SERVICE_URL_PROPERTY_KEY);
+        final URL assertionConsumerServiceUrl = loadURLProperty(SP_ASSERTION_CONSUMER_SERVICE_URL_PROPERTY_KEY);
         if (assertionConsumerServiceUrl != null) {
             saml2Setting.setSpAssertionConsumerServiceUrl(assertionConsumerServiceUrl);
         }
 
-        String spAssertionConsumerServiceBinding = loadStringProperty(SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY);
+        final String spAssertionConsumerServiceBinding = loadStringProperty(SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY);
         if (spAssertionConsumerServiceBinding != null) {
             saml2Setting.setSpAssertionConsumerServiceBinding(spAssertionConsumerServiceBinding);
         }
 
-        URL spSingleLogoutServiceUrl = loadURLProperty(SP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY);
+        final URL spSingleLogoutServiceUrl = loadURLProperty(SP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY);
         if (spSingleLogoutServiceUrl != null) {
             saml2Setting.setSpSingleLogoutServiceUrl(spSingleLogoutServiceUrl);
         }
 
-        String spSingleLogoutServiceBinding = loadStringProperty(SP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY);
+        final String spSingleLogoutServiceBinding = loadStringProperty(SP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY);
         if (spSingleLogoutServiceBinding != null) {
             saml2Setting.setSpSingleLogoutServiceBinding(spSingleLogoutServiceBinding);
         }
 
-        String spNameIDFormat = loadStringProperty(SP_NAMEIDFORMAT_PROPERTY_KEY);
+        final String spNameIDFormat = loadStringProperty(SP_NAMEIDFORMAT_PROPERTY_KEY);
         if (spNameIDFormat != null && !spNameIDFormat.isEmpty()) {
             saml2Setting.setSpNameIDFormat(spNameIDFormat);
         }
 
-        boolean keyStoreEnabled = this.samlData.get(KEYSTORE_KEY) != null && this.samlData.get(KEYSTORE_ALIAS) != null
+        final boolean keyStoreEnabled = this.samlData.get(KEYSTORE_KEY) != null && this.samlData.get(KEYSTORE_ALIAS) != null
                 && this.samlData.get(KEYSTORE_KEY_PASSWORD) != null;
 
         X509Certificate spX509cert;
         PrivateKey spPrivateKey;
 
         if (keyStoreEnabled) {
-            KeyStore ks = (KeyStore) this.samlData.get(KEYSTORE_KEY);
-            String alias = (String) this.samlData.get(KEYSTORE_ALIAS);
-            String password = (String) this.samlData.get(KEYSTORE_KEY_PASSWORD);
+            final KeyStore ks = (KeyStore) this.samlData.get(KEYSTORE_KEY);
+            final String alias = (String) this.samlData.get(KEYSTORE_ALIAS);
+            final String password = (String) this.samlData.get(KEYSTORE_KEY_PASSWORD);
 
             spX509cert = getCertificateFromKeyStore(ks, alias, password);
             spPrivateKey = getPrivateKeyFromKeyStore(ks, alias, password);
@@ -756,7 +766,7 @@ public class SettingsBuilder {
             saml2Setting.setSpPrivateKey(spPrivateKey);
         }
 
-        X509Certificate spX509certNew = loadCertificateFromProp(SP_X509CERTNEW_PROPERTY_KEY);
+        final X509Certificate spX509certNew = loadCertificateFromProp(SP_X509CERTNEW_PROPERTY_KEY);
         if (spX509certNew != null) {
             saml2Setting.setSpX509certNew(spX509certNew);
         }
@@ -769,7 +779,7 @@ public class SettingsBuilder {
      *
      * @return the value
      */
-    private String loadStringProperty(String propertyKey) {
+    private String loadStringProperty(final String propertyKey) {
         return loadStringProperty(propertyKey, samlData);
     }
 
@@ -781,8 +791,8 @@ public class SettingsBuilder {
      *
      * @return the value
      */
-    private String loadStringProperty(String propertyKey, Map<String, Object> data) {
-        Object propValue = data.get(propertyKey);
+    private String loadStringProperty(final String propertyKey, final Map<String, Object> data) {
+        final Object propValue = data.get(propertyKey);
         if (isString(propValue)) {
             return StringUtils.trimToNull((String) propValue);
         }
@@ -796,8 +806,8 @@ public class SettingsBuilder {
      *
      * @return the value
      */
-    private Boolean loadBooleanProperty(String propertyKey) {
-        Object propValue = samlData.get(propertyKey);
+    private Boolean loadBooleanProperty(final String propertyKey) {
+        final Object propValue = samlData.get(propertyKey);
         if (isString(propValue)) {
             return Boolean.parseBoolean(((String) propValue).trim());
         }
@@ -815,10 +825,10 @@ public class SettingsBuilder {
      *
      * @return the value
      */
-    private List<String> loadListProperty(String propertyKey) {
-        Object propValue = samlData.get(propertyKey);
+    private List<String> loadListProperty(final String propertyKey) {
+        final Object propValue = samlData.get(propertyKey);
         if (isString(propValue)) {
-            String[] values = ((String) propValue).trim().split(",");
+            final String[] values = ((String) propValue).trim().split(",");
             for (int i = 0; i < values.length; i++) {
                 values[i] = values[i].trim();
             }
@@ -838,15 +848,15 @@ public class SettingsBuilder {
      *
      * @return the value
      */
-    private URL loadURLProperty(String propertyKey) {
+    private URL loadURLProperty(final String propertyKey) {
 
-        Object propValue = samlData.get(propertyKey);
+        final Object propValue = samlData.get(propertyKey);
 
         if (isString(propValue)) {
             try {
                 return new URL(((String) propValue).trim());
-            } catch (MalformedURLException e) {
-                LOGGER.error("'{}' contains malformed url.", propertyKey, e);
+            } catch (final MalformedURLException e) {
+                LOGGER.warn("'{}' contains malformed url.", propertyKey, e);
                 return null;
             }
         }
@@ -858,7 +868,7 @@ public class SettingsBuilder {
         return null;
     }
 
-    protected PrivateKey getPrivateKeyFromKeyStore(KeyStore keyStore, String alias, String password) {
+    protected PrivateKey getPrivateKeyFromKeyStore(final KeyStore keyStore, final String alias, final String password) {
         Key key;
         try {
             if (keyStore.containsAlias(alias)) {
@@ -867,29 +877,29 @@ public class SettingsBuilder {
                     return (PrivateKey) key;
                 }
             } else {
-                LOGGER.error("Entry for alias {} not found in keystore", alias);
+                LOGGER.warn("Entry for alias {} not found in keystore", alias);
             }
         } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
-            LOGGER.error("SAMLSevereException loading private key from keystore. {}", e);
+            LOGGER.warn("SAMLSevereException loading private key from keystore. {}", e);
         }
         return null;
     }
 
-    protected X509Certificate getCertificateFromKeyStore(KeyStore keyStore, String alias, String password) {
+    protected X509Certificate getCertificateFromKeyStore(final KeyStore keyStore, final String alias, final String password) {
         try {
             if (keyStore.containsAlias(alias)) {
-                Key key = keyStore.getKey(alias, password.toCharArray());
+                final Key key = keyStore.getKey(alias, password.toCharArray());
                 if (key instanceof PrivateKey) {
-                    Certificate cert = keyStore.getCertificate(alias);
+                    final Certificate cert = keyStore.getCertificate(alias);
                     if (cert instanceof X509Certificate) {
                         return (X509Certificate) cert;
                     }
                 }
             } else {
-                LOGGER.error("Entry for alias {} not found in keystore", alias);
+                LOGGER.warn("Entry for alias {} not found in keystore", alias);
             }
         } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException e) {
-            LOGGER.error("SAMLSevereException loading certificate from keystore. {}", e);
+            LOGGER.warn("SAMLSevereException loading certificate from keystore. {}", e);
         }
         return null;
     }
@@ -901,13 +911,13 @@ public class SettingsBuilder {
      *
      * @return the X509Certificate object
      */
-    protected X509Certificate loadCertificateFromProp(Object propValue) {
+    protected X509Certificate loadCertificateFromProp(final Object propValue) {
 
         if (isString(propValue)) {
             try {
                 return Util.loadCert(((String) propValue).trim());
-            } catch (CertificateException e) {
-                LOGGER.error("SAMLSevereException loading certificate from properties.", e);
+            } catch (final X509CertificateException e) {
+                LOGGER.warn("SAMLSevereException loading certificate from properties.", e);
                 return null;
             }
         }
@@ -926,7 +936,7 @@ public class SettingsBuilder {
      *
      * @return the X509Certificate object
      */
-    protected X509Certificate loadCertificateFromProp(String propertyKey) {
+    protected X509Certificate loadCertificateFromProp(final String propertyKey) {
         return loadCertificateFromProp(samlData.get(propertyKey));
     }
 
@@ -938,15 +948,17 @@ public class SettingsBuilder {
      *
      * @return the X509Certificate object list
      */
-    private List<X509Certificate> loadCertificateListFromProp(String propertyKey) {
-        List<X509Certificate> list = new ArrayList<X509Certificate>();
+    private List<X509Certificate> loadCertificateListFromProp(final String propertyKey) {
+        final List<X509Certificate> list = new ArrayList<>();
 
         int i = 0;
         while (true) {
-            Object propValue = samlData.get(propertyKey + "." + i++);
+            final Object propValue = samlData.get(propertyKey + "." + i);
+            i++;
 
-            if (propValue == null)
+            if (propValue == null) {
                 break;
+            }
 
             list.add(loadCertificateFromProp(propValue));
         }
@@ -994,14 +1006,14 @@ public class SettingsBuilder {
      *
      * @return the PrivateKey object
      */
-    protected PrivateKey loadPrivateKeyFromProp(String propertyKey) {
-        Object propValue = samlData.get(propertyKey);
+    protected PrivateKey loadPrivateKeyFromProp(final String propertyKey) {
+        final Object propValue = samlData.get(propertyKey);
 
         if (isString(propValue)) {
             try {
                 return Util.loadPrivateKey(((String) propValue).trim());
-            } catch (Exception e) {
-                LOGGER.error("SAMLSevereException loading privatekey from properties.", e);
+            } catch (final Exception e) {
+                LOGGER.warn("SAMLSevereException loading privatekey from properties.", e);
                 return null;
             }
         }
@@ -1018,9 +1030,9 @@ public class SettingsBuilder {
      *
      * @param properties the Properties object to be parsed
      */
-    private void parseProperties(Properties properties) {
+    private void parseProperties(final Properties properties) {
         if (properties != null) {
-            for (String propertyKey : properties.stringPropertyNames()) {
+            for (final String propertyKey : properties.stringPropertyNames()) {
                 this.samlData.put(propertyKey, properties.getProperty(propertyKey));
             }
         }
@@ -1031,7 +1043,7 @@ public class SettingsBuilder {
      *
      * @param setting the KeyStoreSettings object to be parsed
      */
-    private void parseKeyStore(KeyStoreSettings setting) {
+    private void parseKeyStore(final KeyStoreSettings setting) {
         this.samlData.put(KEYSTORE_KEY, setting.getKeyStore());
         this.samlData.put(KEYSTORE_ALIAS, setting.getSpAlias());
         this.samlData.put(KEYSTORE_KEY_PASSWORD, setting.getSpKeyPass());
@@ -1042,7 +1054,7 @@ public class SettingsBuilder {
      *
      * @param propValue the Object to be verified
      */
-    private boolean isString(Object propValue) {
+    private boolean isString(final Object propValue) {
         return propValue instanceof String && StringUtils.isNotBlank((String) propValue);
     }
 }

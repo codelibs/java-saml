@@ -39,7 +39,7 @@ public class AuthnRequestParams {
      * @param setNameIdPolicy
      *              whether a <code>NameIDPolicy</code> should be set
      */
-    public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy) {
+    public AuthnRequestParams(final boolean forceAuthn, final boolean isPassive, final boolean setNameIdPolicy) {
         this(forceAuthn, isPassive, setNameIdPolicy, true);
     }
 
@@ -60,7 +60,7 @@ public class AuthnRequestParams {
      *              meaningful if <code>setNameIdPolicy</code> is also
      *              <code>true</code>
      */
-    public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, boolean allowCreate) {
+    public AuthnRequestParams(final boolean forceAuthn, final boolean isPassive, final boolean setNameIdPolicy, final boolean allowCreate) {
         this(forceAuthn, isPassive, setNameIdPolicy, allowCreate, null);
     }
 
@@ -78,7 +78,8 @@ public class AuthnRequestParams {
      * @param nameIdValueReq
      *              the subject that should be authenticated
      */
-    public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, String nameIdValueReq) {
+    public AuthnRequestParams(final boolean forceAuthn, final boolean isPassive, final boolean setNameIdPolicy,
+            final String nameIdValueReq) {
         this(forceAuthn, isPassive, setNameIdPolicy, true, nameIdValueReq);
     }
 
@@ -101,7 +102,8 @@ public class AuthnRequestParams {
      * @param nameIdValueReq
      *              the subject that should be authenticated
      */
-    public AuthnRequestParams(boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, boolean allowCreate, String nameIdValueReq) {
+    public AuthnRequestParams(final boolean forceAuthn, final boolean isPassive, final boolean setNameIdPolicy, final boolean allowCreate,
+            final String nameIdValueReq) {
         this.forceAuthn = forceAuthn;
         this.isPassive = isPassive;
         this.setNameIdPolicy = setNameIdPolicy;
@@ -116,7 +118,7 @@ public class AuthnRequestParams {
      * @param source
      *              the source set of authentication request input parameters
      */
-    protected AuthnRequestParams(AuthnRequestParams source) {
+    protected AuthnRequestParams(final AuthnRequestParams source) {
         this.forceAuthn = source.isForceAuthn();
         this.isPassive = source.isPassive();
         this.setNameIdPolicy = source.isSetNameIdPolicy();

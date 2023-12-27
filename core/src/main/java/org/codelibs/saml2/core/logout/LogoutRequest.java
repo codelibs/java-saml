@@ -1,6 +1,5 @@
 package org.codelibs.saml2.core.logout;
 
-import java.io.IOException;
 import java.net.URL;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -11,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.xpath.XPathExpressionException;
-
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
+import org.codelibs.saml2.core.exception.SAMLException;
 import org.codelibs.saml2.core.exception.SettingsException;
 import org.codelibs.saml2.core.exception.ValidationException;
+import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.util.Constants;
@@ -23,6 +22,7 @@ import org.codelibs.saml2.core.util.SchemaFactory;
 import org.codelibs.saml2.core.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -100,8 +100,8 @@ public class LogoutRequest {
      *             to build a new request to be sent
      */
     @Deprecated
-    public LogoutRequest(Saml2Settings settings, HttpRequest request, String nameId, String sessionIndex, String nameIdFormat,
-            String nameIdNameQualifier, String nameIdSPNameQualifier) {
+    public LogoutRequest(final Saml2Settings settings, final HttpRequest request, final String nameId, final String sessionIndex,
+            final String nameIdFormat, final String nameIdNameQualifier, final String nameIdSPNameQualifier) {
         this.settings = settings;
         this.request = request;
 
@@ -113,16 +113,16 @@ public class LogoutRequest {
         }
 
         if (samlLogoutRequest == null) {
-            LogoutRequestParams params =
+            final LogoutRequestParams params =
                     new LogoutRequestParams(sessionIndex, nameId, nameIdFormat, nameIdNameQualifier, nameIdSPNameQualifier);
             id = Util.generateUniqueID(settings.getUniqueIDPrefix());
             issueInstant = Calendar.getInstance();
 
-            StrSubstitutor substitutor = generateSubstitutor(params, settings);
+            final StringSubstitutor substitutor = generateSubstitutor(params, settings);
             logoutRequestString = postProcessXml(substitutor.replace(getLogoutRequestTemplate()), params, settings);
         } else {
             logoutRequestString = Util.base64decodedInflated(samlLogoutRequest);
-            Document doc = Util.loadXML(logoutRequestString);
+            final Document doc = Util.loadXML(logoutRequestString);
             id = getId(doc);
             issueInstant = getIssueInstant(doc);
         }
@@ -153,8 +153,8 @@ public class LogoutRequest {
      *             to build a new request to be sent
      */
     @Deprecated
-    public LogoutRequest(Saml2Settings settings, HttpRequest request, String nameId, String sessionIndex, String nameIdFormat,
-            String nameIdNameQualifier) {
+    public LogoutRequest(final Saml2Settings settings, final HttpRequest request, final String nameId, final String sessionIndex,
+            final String nameIdFormat, final String nameIdNameQualifier) {
         this(settings, request, nameId, sessionIndex, nameIdFormat, nameIdNameQualifier, null);
     }
 
@@ -181,7 +181,8 @@ public class LogoutRequest {
      *             to build a new request to be sent
      */
     @Deprecated
-    public LogoutRequest(Saml2Settings settings, HttpRequest request, String nameId, String sessionIndex, String nameIdFormat) {
+    public LogoutRequest(final Saml2Settings settings, final HttpRequest request, final String nameId, final String sessionIndex,
+            final String nameIdFormat) {
         this(settings, request, nameId, sessionIndex, nameIdFormat, null);
     }
 
@@ -206,7 +207,7 @@ public class LogoutRequest {
      *             to build a new request to be sent
      */
     @Deprecated
-    public LogoutRequest(Saml2Settings settings, HttpRequest request, String nameId, String sessionIndex) {
+    public LogoutRequest(final Saml2Settings settings, final HttpRequest request, final String nameId, final String sessionIndex) {
         this(settings, request, nameId, sessionIndex, null);
     }
 
@@ -219,7 +220,7 @@ public class LogoutRequest {
      *
      * @see #LogoutRequest(Saml2Settings, LogoutRequestParams)
      */
-    public LogoutRequest(Saml2Settings settings) {
+    public LogoutRequest(final Saml2Settings settings) {
         this(settings, new LogoutRequestParams());
     }
 
@@ -233,7 +234,7 @@ public class LogoutRequest {
      *              the HttpRequest object to be processed (Contains GET and POST
      *              parameters, request URL, ...).
      */
-    public LogoutRequest(Saml2Settings settings, HttpRequest request) {
+    public LogoutRequest(final Saml2Settings settings, final HttpRequest request) {
         this(settings, request, null, null);
     }
 
@@ -247,13 +248,13 @@ public class LogoutRequest {
      *              a set of logout request input parameters that shape the
      *              request to create
      */
-    public LogoutRequest(Saml2Settings settings, LogoutRequestParams params) {
+    public LogoutRequest(final Saml2Settings settings, final LogoutRequestParams params) {
         this.settings = settings;
         this.request = null;
         id = Util.generateUniqueID(settings.getUniqueIDPrefix());
         issueInstant = Calendar.getInstance();
 
-        StrSubstitutor substitutor = generateSubstitutor(params, settings);
+        final StringSubstitutor substitutor = generateSubstitutor(params, settings);
         logoutRequestString = postProcessXml(substitutor.replace(getLogoutRequestTemplate()), params, settings);
     }
 
@@ -287,9 +288,8 @@ public class LogoutRequest {
      * @param deflated
      *				If deflated or not the encoded Logout Request
      *
-     * @throws IOException
      */
-    public String getEncodedLogoutRequest(Boolean deflated) throws IOException {
+    public String getEncodedLogoutRequest(Boolean deflated) {
         String encodedLogoutRequest;
         if (deflated == null) {
             deflated = settings.isCompressRequestEnabled();
@@ -305,9 +305,8 @@ public class LogoutRequest {
     /**
      * @return the base64 encoded unsigned Logout Request (deflated or not)
      *
-     * @throws IOException
      */
-    public String getEncodedLogoutRequest() throws IOException {
+    public String getEncodedLogoutRequest() {
         return getEncodedLogoutRequest(null);
     }
 
@@ -326,18 +325,18 @@ public class LogoutRequest {
      * @param settings
      *              Saml2Settings object. Setting data
      *
-     * @return the StrSubstitutor object of the LogoutRequest
+     * @return the StringSubstitutor object of the LogoutRequest
      */
-    private StrSubstitutor generateSubstitutor(LogoutRequestParams params, Saml2Settings settings) {
-        Map<String, String> valueMap = new HashMap<String, String>();
+    private StringSubstitutor generateSubstitutor(final LogoutRequestParams params, final Saml2Settings settings) {
+        final Map<String, String> valueMap = new HashMap<>();
 
         valueMap.put("id", Util.toXml(id));
 
-        String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
+        final String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
         valueMap.put("issueInstant", issueInstantString);
 
         String destinationStr = "";
-        URL slo = settings.getIdpSingleLogoutServiceUrl();
+        final URL slo = settings.getIdpSingleLogoutServiceUrl();
         if (slo != null) {
             destinationStr = " Destination=\"" + Util.toXml(slo.toString()) + "\"";
         }
@@ -346,12 +345,12 @@ public class LogoutRequest {
         valueMap.put("issuer", Util.toXml(settings.getSpEntityId()));
 
         String nameId = params.getNameId();
-        String requestedNameIdFormat = params.getNameIdFormat();
+        final String requestedNameIdFormat = params.getNameIdFormat();
         String nameIdFormat = null;
         String spNameQualifier = params.getNameIdSPNameQualifier();
         String nameQualifier = params.getNameIdNameQualifier();
         if (nameId != null) {
-            if (requestedNameIdFormat == null && !settings.getSpNameIDFormat().equals(Constants.NAMEID_UNSPECIFIED)) {
+            if (requestedNameIdFormat == null && !Constants.NAMEID_UNSPECIFIED.equals(settings.getSpNameIDFormat())) {
                 nameIdFormat = settings.getSpNameIDFormat();
             } else {
                 nameIdFormat = requestedNameIdFormat;
@@ -363,13 +362,13 @@ public class LogoutRequest {
 
         // From saml-core-2.0-os 8.3.6, when the entity Format is used: "The NameQualifier, SPNameQualifier, and
         // SPProvidedID attributes MUST be omitted.
-        if (nameIdFormat != null && nameIdFormat.equals(Constants.NAMEID_ENTITY)) {
+        if (nameIdFormat != null && Constants.NAMEID_ENTITY.equals(nameIdFormat)) {
             nameQualifier = null;
             spNameQualifier = null;
         }
 
         // NameID Format UNSPECIFIED omitted
-        if (nameIdFormat != null && nameIdFormat.equals(Constants.NAMEID_UNSPECIFIED)) {
+        if (nameIdFormat != null && Constants.NAMEID_UNSPECIFIED.equals(nameIdFormat)) {
             nameIdFormat = null;
         }
 
@@ -377,30 +376,31 @@ public class LogoutRequest {
         if (settings.getNameIdEncrypted()) {
             cert = settings.getIdpx509cert();
             if (cert == null) {
-                List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
-                if (multipleCertList != null && !multipleCertList.isEmpty())
+                final List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
+                if (multipleCertList != null && !multipleCertList.isEmpty()) {
                     cert = multipleCertList.get(0);
+                }
             }
         }
 
-        String nameIdStr = Util.generateNameId(nameId, spNameQualifier, nameIdFormat, nameQualifier, cert);
+        final String nameIdStr = Util.generateNameId(nameId, spNameQualifier, nameIdFormat, nameQualifier, cert);
         valueMap.put("nameIdStr", nameIdStr);
 
         String sessionIndexStr = "";
-        String sessionIndex = params.getSessionIndex();
+        final String sessionIndex = params.getSessionIndex();
         if (sessionIndex != null) {
             sessionIndexStr = " <samlp:SessionIndex>" + Util.toXml(sessionIndex) + "</samlp:SessionIndex>";
         }
         valueMap.put("sessionIndexStr", sessionIndexStr);
 
-        return new StrSubstitutor(valueMap);
+        return new StringSubstitutor(valueMap);
     }
 
     /**
      * @return the LogoutRequest's template
      */
     private static StringBuilder getLogoutRequestTemplate() {
-        StringBuilder template = new StringBuilder();
+        final StringBuilder template = new StringBuilder();
         template.append(
                 "<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ");
         template.append("ID=\"${id}\" ");
@@ -416,7 +416,7 @@ public class LogoutRequest {
        *
        * @return true if the SAML LogoutRequest is valid
        */
-    public Boolean isValid() {
+    public boolean isValid() {
         validationException = null;
 
         try {
@@ -425,32 +425,30 @@ public class LogoutRequest {
             }
 
             if (this.request == null) {
-                throw new Exception("The HttpRequest of the current host was not established");
+                throw new IllegalArgumentException("The HttpRequest of the current host was not established");
             }
 
             if (this.currentUrl == null || this.currentUrl.isEmpty()) {
-                throw new Exception("The URL of the current host was not established");
+                throw new IllegalArgumentException("The URL of the current host was not established");
             }
 
-            String signature = request.getParameter("Signature");
+            final String signature = request.getParameter("Signature");
 
-            Document logoutRequestDocument = Util.loadXML(logoutRequestString);
+            final Document logoutRequestDocument = Util.loadXML(logoutRequestString);
 
             if (settings.isStrict()) {
-                Element rootElement = logoutRequestDocument.getDocumentElement();
+                final Element rootElement = logoutRequestDocument.getDocumentElement();
                 rootElement.normalize();
 
-                if (settings.getWantXMLValidation()) {
-                    if (!Util.validateXML(logoutRequestDocument, SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0)) {
-                        throw new ValidationException("Invalid SAML Logout Request. Not match the saml-schema-protocol-2.0.xsd",
-                                ValidationException.INVALID_XML_FORMAT);
-                    }
+                if (settings.getWantXMLValidation() && !Util.validateXML(logoutRequestDocument, SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0)) {
+                    throw new ValidationException("Invalid SAML Logout Request. Not match the saml-schema-protocol-2.0.xsd",
+                            ValidationException.INVALID_XML_FORMAT);
                 }
 
                 // Check NotOnOrAfter
                 if (rootElement.hasAttribute("NotOnOrAfter")) {
-                    String notOnOrAfter = rootElement.getAttribute("NotOnOrAfter");
-                    Instant notOnOrAfterDate = Util.parseDateTime(notOnOrAfter);
+                    final String notOnOrAfter = rootElement.getAttribute("NotOnOrAfter");
+                    final Instant notOnOrAfterDate = Util.parseDateTime(notOnOrAfter);
                     if (Util.isEqualNow(notOnOrAfterDate) || Util.isBeforeNow(notOnOrAfterDate)) {
                         throw new ValidationException("Could not validate timestamp: expired. Check system clock.",
                                 ValidationException.RESPONSE_EXPIRED);
@@ -459,21 +457,17 @@ public class LogoutRequest {
 
                 // Check destination
                 if (rootElement.hasAttribute("Destination")) {
-                    String destinationUrl = rootElement.getAttribute("Destination");
-                    if (destinationUrl != null) {
-                        if (!destinationUrl.isEmpty() && !destinationUrl.equals(currentUrl)) {
-                            throw new ValidationException(
-                                    "The LogoutRequest was received at " + currentUrl + " instead of " + destinationUrl,
-                                    ValidationException.WRONG_DESTINATION);
-                        }
+                    final String destinationUrl = rootElement.getAttribute("Destination");
+                    if ((destinationUrl != null) && (!destinationUrl.isEmpty() && !destinationUrl.equals(currentUrl))) {
+                        throw new ValidationException("The LogoutRequest was received at " + currentUrl + " instead of " + destinationUrl,
+                                ValidationException.WRONG_DESTINATION);
                     }
                 }
 
-                // Try get the nameID
-                String nameID = getNameId(logoutRequestDocument, settings.getSPkey(), settings.isTrimNameIds());
+                getNameId(logoutRequestDocument, settings.getSPkey(), settings.isTrimNameIds());
 
                 // Check the issuer
-                String issuer = getIssuer(logoutRequestDocument, settings.isTrimNameIds());
+                final String issuer = getIssuer(logoutRequestDocument, settings.isTrimNameIds());
                 if (issuer != null && (issuer.isEmpty() || !issuer.equals(settings.getIdpEntityId()))) {
                     throw new ValidationException(String.format("Invalid issuer in the Logout Request. Was '%s', but expected '%s'", issuer,
                             settings.getIdpEntityId()), ValidationException.WRONG_ISSUER);
@@ -486,19 +480,17 @@ public class LogoutRequest {
             }
 
             if (signature != null && !signature.isEmpty()) {
-                X509Certificate cert = settings.getIdpx509cert();
+                final X509Certificate cert = settings.getIdpx509cert();
 
-                List<X509Certificate> certList = new ArrayList<X509Certificate>();
-                List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
+                final List<X509Certificate> certList = new ArrayList<>();
+                final List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
 
                 if (multipleCertList != null && multipleCertList.size() != 0) {
                     certList.addAll(multipleCertList);
                 }
 
-                if (cert != null) {
-                    if (certList.isEmpty() || !certList.contains(cert)) {
-                        certList.add(0, cert);
-                    }
+                if ((cert != null) && (certList.isEmpty() || !certList.contains(cert))) {
+                    certList.add(0, cert);
                 }
 
                 if (certList.isEmpty()) {
@@ -511,33 +503,33 @@ public class LogoutRequest {
                     signAlg = Constants.RSA_SHA1;
                 }
 
-                Boolean rejectDeprecatedAlg = settings.getRejectDeprecatedAlg();
+                final Boolean rejectDeprecatedAlg = settings.getRejectDeprecatedAlg();
                 if (Util.mustRejectDeprecatedSignatureAlgo(signAlg, rejectDeprecatedAlg)) {
                     return false;
                 }
 
-                String relayState = request.getEncodedParameter("RelayState");
+                final String relayState = request.getEncodedParameter("RelayState");
 
-                String signedQuery = "SAMLRequest=" + request.getEncodedParameter("SAMLRequest");
+                StringBuilder signedQuery = new StringBuilder("SAMLRequest=").append(request.getEncodedParameter("SAMLRequest"));
 
                 if (relayState != null && !relayState.isEmpty()) {
-                    signedQuery += "&RelayState=" + relayState;
+                    signedQuery.append("&RelayState=").append(relayState);
                 }
 
-                signedQuery += "&SigAlg=" + request.getEncodedParameter("SigAlg", signAlg);
+                signedQuery.append("&SigAlg=").append(request.getEncodedParameter("SigAlg", signAlg));
 
-                if (!Util.validateBinarySignature(signedQuery, Util.base64decoder(signature), certList, signAlg)) {
+                if (!Util.validateBinarySignature(signedQuery.toString(), Util.base64decoder(signature), certList, signAlg)) {
                     throw new ValidationException("Signature validation failed. Logout Request rejected",
                             ValidationException.INVALID_SIGNATURE);
                 }
             }
 
-            LOGGER.debug("LogoutRequest validated --> " + logoutRequestString);
+            LOGGER.debug("LogoutRequest validated --> {}", logoutRequestString);
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             validationException = e;
-            LOGGER.debug("LogoutRequest invalid --> " + logoutRequestString);
-            LOGGER.error(validationException.getMessage());
+            LOGGER.debug("LogoutRequest invalid --> {}", logoutRequestString, e);
+            LOGGER.warn(validationException.getMessage());
             return false;
         }
     }
@@ -545,18 +537,20 @@ public class LogoutRequest {
     /**
      * Returns the ID of the Logout Request Document.
      *
-    * @param samlLogoutRequestDocument
-    * 				A DOMDocument object loaded from the SAML Logout Request.
-    *
+     * @param samlLogoutRequestDocument
+     * 				A DOMDocument object loaded from the SAML Logout Request.
+     *
      * @return the ID of the Logout Request.
      */
-    public static String getId(Document samlLogoutRequestDocument) {
+    public static String getId(final Document samlLogoutRequestDocument) {
         String id = null;
         try {
-            Element rootElement = samlLogoutRequestDocument.getDocumentElement();
+            final Element rootElement = samlLogoutRequestDocument.getDocumentElement();
             rootElement.normalize();
             id = rootElement.getAttribute("ID");
-        } catch (Exception e) {}
+        } catch (final Exception e) {
+            LOGGER.debug("Failed to get ID.", e);
+        }
         return id;
     }
 
@@ -568,17 +562,20 @@ public class LogoutRequest {
      *
      * @return the issue instant of the Logout Request.
      */
-    public static Calendar getIssueInstant(Document samlLogoutRequestDocument) {
+    public static Calendar getIssueInstant(final Document samlLogoutRequestDocument) {
         Calendar issueInstant = null;
         try {
-            Element rootElement = samlLogoutRequestDocument.getDocumentElement();
+            final Element rootElement = samlLogoutRequestDocument.getDocumentElement();
             rootElement.normalize();
-            String issueInstantString = rootElement.hasAttribute("IssueInstant") ? rootElement.getAttribute("IssueInstant") : null;
-            if (issueInstantString == null)
+            final String issueInstantString = rootElement.hasAttribute("IssueInstant") ? rootElement.getAttribute("IssueInstant") : null;
+            if (issueInstantString == null) {
                 return null;
+            }
             issueInstant = Calendar.getInstance();
             issueInstant.setTimeInMillis(Util.parseDateTime(issueInstantString).toEpochMilli());
-        } catch (Exception e) {}
+        } catch (final Exception e) {
+            LOGGER.debug("Failed to get an issue instant.", e);
+        }
         return issueInstant;
     }
 
@@ -591,8 +588,8 @@ public class LogoutRequest {
      * @return the ID of the Logout Request.
      *
      */
-    public static String getId(String samlLogoutRequestString) {
-        Document doc = Util.loadXML(samlLogoutRequestString);
+    public static String getId(final String samlLogoutRequestString) {
+        final Document doc = Util.loadXML(samlLogoutRequestString);
         return getId(doc);
     }
 
@@ -604,8 +601,8 @@ public class LogoutRequest {
      *
      * @return the issue instant of the Logout Request.
      */
-    public static Calendar getIssueInstant(String samlLogoutRequestString) {
-        Document doc = Util.loadXML(samlLogoutRequestString);
+    public static Calendar getIssueInstant(final String samlLogoutRequestString) {
+        final Document doc = Util.loadXML(samlLogoutRequestString);
         return getIssueInstant(doc);
     }
 
@@ -619,9 +616,8 @@ public class LogoutRequest {
      *
      * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
      *
-     * @throws Exception
      */
-    public static Map<String, String> getNameIdData(Document samlLogoutRequestDocument, PrivateKey key) throws Exception {
+    public static Map<String, String> getNameIdData(final Document samlLogoutRequestDocument, final PrivateKey key) {
         return getNameIdData(samlLogoutRequestDocument, key, false);
     }
 
@@ -637,56 +633,60 @@ public class LogoutRequest {
      *
      * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
      *
-     * @throws Exception
      */
-    public static Map<String, String> getNameIdData(Document samlLogoutRequestDocument, PrivateKey key, boolean trimValue)
-            throws Exception {
-        NodeList encryptedIDNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:EncryptedID");
-        NodeList nameIdNodes;
-        Element nameIdElem;
+    public static Map<String, String> getNameIdData(final Document samlLogoutRequestDocument, final PrivateKey key,
+            final boolean trimValue) {
+        try {
+            final NodeList encryptedIDNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:EncryptedID");
+            NodeList nameIdNodes;
+            Element nameIdElem;
 
-        if (encryptedIDNodes.getLength() == 1) {
-            if (key == null) {
-                throw new SettingsException("Key is required in order to decrypt the NameID", SettingsException.PRIVATE_KEY_NOT_FOUND);
+            if (encryptedIDNodes.getLength() == 1) {
+                if (key == null) {
+                    throw new SettingsException("Key is required in order to decrypt the NameID", SettingsException.PRIVATE_KEY_NOT_FOUND);
+                }
+
+                final Element encryptedData = (Element) encryptedIDNodes.item(0);
+                Util.decryptElement(encryptedData, key);
+                nameIdNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:NameID");
+
+                if (nameIdNodes == null || nameIdNodes.getLength() != 1) {
+                    throw new SAMLException("Not able to decrypt the EncryptedID and get a NameID");
+                }
+            } else {
+                nameIdNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:NameID");
             }
 
-            Element encryptedData = (Element) encryptedIDNodes.item(0);
-            Util.decryptElement(encryptedData, key);
-            nameIdNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:NameID");
-
-            if (nameIdNodes == null || nameIdNodes.getLength() != 1) {
-                throw new Exception("Not able to decrypt the EncryptedID and get a NameID");
+            if ((nameIdNodes == null) || (nameIdNodes.getLength() != 1)) {
+                throw new ValidationException("No name id found in Logout Request.", ValidationException.NO_NAMEID);
             }
-        } else {
-            nameIdNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:NameID");
-        }
-
-        if (nameIdNodes != null && nameIdNodes.getLength() == 1) {
             nameIdElem = (Element) nameIdNodes.item(0);
-        } else {
-            throw new ValidationException("No name id found in Logout Request.", ValidationException.NO_NAMEID);
+
+            final Map<String, String> nameIdData = new HashMap<>();
+
+            if (nameIdElem != null) {
+                String value = nameIdElem.getTextContent();
+                if (value != null && trimValue) {
+                    value = value.trim();
+                }
+                nameIdData.put("Value", value);
+
+                if (nameIdElem.hasAttribute("Format")) {
+                    nameIdData.put("Format", nameIdElem.getAttribute("Format"));
+                }
+                if (nameIdElem.hasAttribute("SPNameQualifier")) {
+                    nameIdData.put("SPNameQualifier", nameIdElem.getAttribute("SPNameQualifier"));
+                }
+                if (nameIdElem.hasAttribute("NameQualifier")) {
+                    nameIdData.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
+                }
+            }
+            return nameIdData;
+        } catch (SAMLException e) {
+            throw e;
+        } catch (DOMException e) {
+            throw new XMLParsingException("Failed to get NameID Data.", e);
         }
-
-        Map<String, String> nameIdData = new HashMap<String, String>();
-
-        if (nameIdElem != null) {
-            String value = nameIdElem.getTextContent();
-            if (value != null && trimValue) {
-                value = value.trim();
-            }
-            nameIdData.put("Value", value);
-
-            if (nameIdElem.hasAttribute("Format")) {
-                nameIdData.put("Format", nameIdElem.getAttribute("Format"));
-            }
-            if (nameIdElem.hasAttribute("SPNameQualifier")) {
-                nameIdData.put("SPNameQualifier", nameIdElem.getAttribute("SPNameQualifier"));
-            }
-            if (nameIdElem.hasAttribute("NameQualifier")) {
-                nameIdData.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
-            }
-        }
-        return nameIdData;
     }
 
     /**
@@ -699,9 +699,9 @@ public class LogoutRequest {
      *
      * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
      *
-     * @throws Exception
+     * @
      */
-    public static Map<String, String> getNameIdData(String samlLogoutRequestString, PrivateKey key) throws Exception {
+    public static Map<String, String> getNameIdData(final String samlLogoutRequestString, final PrivateKey key) {
         return getNameIdData(samlLogoutRequestString, key, false);
     }
 
@@ -717,10 +717,10 @@ public class LogoutRequest {
      *
      * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
      *
-     * @throws Exception
+     * @
      */
-    public static Map<String, String> getNameIdData(String samlLogoutRequestString, PrivateKey key, boolean trimValue) throws Exception {
-        Document doc = Util.loadXML(samlLogoutRequestString);
+    public static Map<String, String> getNameIdData(final String samlLogoutRequestString, final PrivateKey key, final boolean trimValue) {
+        final Document doc = Util.loadXML(samlLogoutRequestString);
         return getNameIdData(doc, key, trimValue);
     }
 
@@ -735,9 +735,8 @@ public class LogoutRequest {
      *
      * @return the Name ID value
      *
-     * @throws Exception
      */
-    public static String getNameId(Document samlLogoutRequestDocument, PrivateKey key) throws Exception {
+    public static String getNameId(final Document samlLogoutRequestDocument, final PrivateKey key) {
         return getNameId(samlLogoutRequestDocument, key, false);
     }
 
@@ -755,11 +754,12 @@ public class LogoutRequest {
      *
      * @return the Name ID value
      *
-     * @throws Exception
      */
-    public static String getNameId(Document samlLogoutRequestDocument, PrivateKey key, boolean trimValue) throws Exception {
-        Map<String, String> nameIdData = getNameIdData(samlLogoutRequestDocument, key, trimValue);
-        LOGGER.debug("LogoutRequest has NameID --> " + nameIdData.get("Value"));
+    public static String getNameId(final Document samlLogoutRequestDocument, final PrivateKey key, final boolean trimValue) {
+        final Map<String, String> nameIdData = getNameIdData(samlLogoutRequestDocument, key, trimValue);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("LogoutRequest has NameID --> {}", nameIdData.get("Value"));
+        }
         return nameIdData.get("Value");
     }
 
@@ -771,9 +771,8 @@ public class LogoutRequest {
      *
      * @return the Name ID value
      *
-     * @throws Exception
      */
-    public static String getNameId(Document samlLogoutRequestDocument) throws Exception {
+    public static String getNameId(final Document samlLogoutRequestDocument) {
         return getNameId(samlLogoutRequestDocument, null);
     }
 
@@ -787,9 +786,8 @@ public class LogoutRequest {
      *
      * @return the Name ID value
      *
-     * @throws Exception
      */
-    public static String getNameId(String samlLogoutRequestString, PrivateKey key) throws Exception {
+    public static String getNameId(final String samlLogoutRequestString, final PrivateKey key) {
         return getNameId(samlLogoutRequestString, key, false);
     }
 
@@ -805,10 +803,9 @@ public class LogoutRequest {
      *
      * @return the Name ID value
      *
-     * @throws Exception
      */
-    public static String getNameId(String samlLogoutRequestString, PrivateKey key, boolean trimValue) throws Exception {
-        Map<String, String> nameId = getNameIdData(samlLogoutRequestString, key, trimValue);
+    public static String getNameId(final String samlLogoutRequestString, final PrivateKey key, final boolean trimValue) {
+        final Map<String, String> nameId = getNameIdData(samlLogoutRequestString, key, trimValue);
         return nameId.get("Value");
     }
 
@@ -820,9 +817,8 @@ public class LogoutRequest {
      *
      * @return the Name ID value
      *
-     * @throws Exception
      */
-    public static String getNameId(String samlLogoutRequestString) throws Exception {
+    public static String getNameId(final String samlLogoutRequestString) {
         return getNameId(samlLogoutRequestString, null);
     }
 
@@ -834,9 +830,9 @@ public class LogoutRequest {
      *
      * @return the issuer of the logout request
      *
-     * @throws XPathExpressionException
+     *
      */
-    public static String getIssuer(Document samlLogoutRequestDocument) throws XPathExpressionException {
+    public static String getIssuer(final Document samlLogoutRequestDocument) {
         return getIssuer(samlLogoutRequestDocument, false);
     }
 
@@ -850,12 +846,11 @@ public class LogoutRequest {
      *
      * @return the issuer of the logout request
      *
-     * @throws XPathExpressionException
      */
-    public static String getIssuer(Document samlLogoutRequestDocument, boolean trim) throws XPathExpressionException {
+    public static String getIssuer(final Document samlLogoutRequestDocument, final boolean trim) {
         String issuer = null;
 
-        NodeList nodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:Issuer");
+        final NodeList nodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:Issuer");
 
         if (nodes.getLength() == 1) {
             issuer = nodes.item(0).getTextContent();
@@ -874,9 +869,9 @@ public class LogoutRequest {
      *
      * @return the issuer of the logout request
      *
-     * @throws XPathExpressionException
+     *
      */
-    public static String getIssuer(String samlLogoutRequestString) throws XPathExpressionException {
+    public static String getIssuer(final String samlLogoutRequestString) {
         return getIssuer(samlLogoutRequestString, false);
     }
 
@@ -890,10 +885,10 @@ public class LogoutRequest {
      *
      * @return the issuer of the logout request
      *
-     * @throws XPathExpressionException
+     *
      */
-    public static String getIssuer(String samlLogoutRequestString, boolean trim) throws XPathExpressionException {
-        Document doc = Util.loadXML(samlLogoutRequestString);
+    public static String getIssuer(final String samlLogoutRequestString, final boolean trim) {
+        final Document doc = Util.loadXML(samlLogoutRequestString);
         return getIssuer(doc, trim);
     }
 
@@ -904,9 +899,9 @@ public class LogoutRequest {
      *              A DOMDocument object loaded from the SAML Logout Request.
      * @return the SessionIndexes
      *
-     * @throws XPathExpressionException
+     *
      */
-    public static List<String> getSessionIndexes(Document samlLogoutRequestDocument) throws XPathExpressionException {
+    public static List<String> getSessionIndexes(final Document samlLogoutRequestDocument) {
         return getSessionIndexes(samlLogoutRequestDocument, false);
     }
 
@@ -919,12 +914,12 @@ public class LogoutRequest {
      *              whether the extracted session indexes should be trimmed
      * @return the SessionIndexes
      *
-     * @throws XPathExpressionException
+     *
      */
-    public static List<String> getSessionIndexes(Document samlLogoutRequestDocument, boolean trim) throws XPathExpressionException {
-        List<String> sessionIndexes = new ArrayList<String>();
+    public static List<String> getSessionIndexes(final Document samlLogoutRequestDocument, final boolean trim) {
+        final List<String> sessionIndexes = new ArrayList<>();
 
-        NodeList nodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/samlp:SessionIndex");
+        final NodeList nodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/samlp:SessionIndex");
 
         for (int i = 0; i < nodes.getLength(); i++) {
             String sessionIndex = nodes.item(i).getTextContent();
@@ -946,9 +941,9 @@ public class LogoutRequest {
      *              A Logout Request string.
      * @return the SessionIndexes
      *
-     * @throws XPathExpressionException
+     *
      */
-    public static List<String> getSessionIndexes(String samlLogoutRequestString) throws XPathExpressionException {
+    public static List<String> getSessionIndexes(final String samlLogoutRequestString) {
         return getSessionIndexes(samlLogoutRequestString, false);
     }
 
@@ -961,10 +956,10 @@ public class LogoutRequest {
      *              whether the extracted session indexes should be trimmed
      * @return the SessionIndexes
      *
-     * @throws XPathExpressionException
+     *
      */
-    public static List<String> getSessionIndexes(String samlLogoutRequestString, boolean trim) throws XPathExpressionException {
-        Document doc = Util.loadXML(samlLogoutRequestString);
+    public static List<String> getSessionIndexes(final String samlLogoutRequestString, final boolean trim) {
+        final Document doc = Util.loadXML(samlLogoutRequestString);
         return getSessionIndexes(doc, trim);
     }
 
@@ -996,7 +991,7 @@ public class LogoutRequest {
      * @param validationException
      *              the validation exception to set
      */
-    protected void setValidationException(Exception validationException) {
+    protected void setValidationException(final Exception validationException) {
         this.validationException = validationException;
     }
 

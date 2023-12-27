@@ -10,7 +10,7 @@ import org.junit.Test;
 public class NaiveUrlEncodeTest {
 
     @Test
-    public void testDemonstratingUrlEncodingNotCanonical () throws UnsupportedEncodingException {
+    public void testDemonstratingUrlEncodingNotCanonical() throws UnsupportedEncodingException {
         String theString = "Hello World!";
 
         String naiveEncoded = NaiveUrlEncoder.encode(theString);

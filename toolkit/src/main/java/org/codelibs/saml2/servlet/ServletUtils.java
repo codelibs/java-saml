@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.util.Util;
 
@@ -31,8 +31,7 @@ public class ServletUtils {
      * @return a HttpRequest
      */
     public static HttpRequest makeHttpRequest(HttpServletRequest req) {
-        @SuppressWarnings("unchecked")
-        final Map<String, String[]> paramsAsArray = (Map<String, String[]>) req.getParameterMap();
+        final Map<String, String[]> paramsAsArray = req.getParameterMap();
         final Map<String, List<String>> paramsAsList = new HashMap<>();
         for (Map.Entry<String, String[]> param : paramsAsArray.entrySet()) {
             paramsAsList.put(param.getKey(), Arrays.asList(param.getValue()));
@@ -51,7 +50,7 @@ public class ServletUtils {
      * @return the HOST URL
      */
     public static String getSelfURLhost(HttpServletRequest request) {
-        String hostUrl = StringUtils.EMPTY;
+        String hostUrl;
         final int serverPort = request.getServerPort();
         if ((serverPort == 80) || (serverPort == 443) || serverPort == 0) {
             hostUrl = String.format("%s://%s", request.getScheme(), request.getServerName());
@@ -149,12 +148,10 @@ public class ServletUtils {
      *            True if we want to stay (returns the url string) False to execute redirection
      *
      * @return string the target URL
-     * @throws IOException
      *
      * @see jakarta.servlet.http.HttpServletResponse#sendRedirect(String)
      */
-    public static String sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters, Boolean stay)
-            throws IOException {
+    public static String sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters, Boolean stay) {
         String target = location;
 
         if (!parameters.isEmpty()) {
@@ -173,7 +170,11 @@ public class ServletUtils {
             }
         }
         if (!stay) {
-            response.sendRedirect(target);
+            try {
+                response.sendRedirect(target);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         return target;
@@ -189,11 +190,10 @@ public class ServletUtils {
      * @param parameters
      * 				GET parameters to be added
      *
-     * @throws IOException
      *
      * @see jakarta.servlet.http.HttpServletResponse#sendRedirect(String)
      */
-    public static void sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters) throws IOException {
+    public static void sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters) {
         sendRedirect(response, location, parameters, false);
     }
 
@@ -205,11 +205,10 @@ public class ServletUtils {
      * @param location
      * 				target location url
      *
-     * @throws IOException
      *
      * @see HttpServletResponse#sendRedirect(String)
      */
-    public static void sendRedirect(HttpServletResponse response, String location) throws IOException {
+    public static void sendRedirect(HttpServletResponse response, String location) {
         Map<String, String> parameters = new HashMap<String, String>();
         sendRedirect(response, location, parameters);
     }

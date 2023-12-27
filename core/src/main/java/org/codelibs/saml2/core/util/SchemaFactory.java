@@ -34,8 +34,10 @@ public abstract class SchemaFactory {
     public static final URL SAML_SCHEMA_METADATA_2_0 = SchemaFactory.class.getResource("/schemas/saml-schema-metadata-2.0.xsd");
     public static final URL SAML_SCHEMA_PROTOCOL_2_0 = SchemaFactory.class.getResource("/schemas/saml-schema-protocol-2.0.xsd");
 
-    public static Schema loadFromUrl(URL schemaUrl) throws SAXException {
-        javax.xml.validation.SchemaFactory factory = javax.xml.validation.SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    public static Schema loadFromUrl(final URL schemaUrl) throws SAXException {
+        final javax.xml.validation.SchemaFactory factory =
+                javax.xml.validation.SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         factory.setResourceResolver(new LSResourceResolver() {
 
             private DOMImplementationLS ls;
@@ -44,7 +46,7 @@ public abstract class SchemaFactory {
             public LSInput resolveResource(final String type, final String namespaceURI, final String publicId, final String systemId,
                     final String baseURI) {
                 try {
-                    if (namespaceURI != null)
+                    if (namespaceURI != null) {
                         switch (namespaceURI) {
                         case "urn:oasis:names:tc:SAML:2.0:assertion":
                             return getLocalResource("saml-schema-assertion-2.0.xsd");
@@ -69,31 +71,34 @@ public abstract class SchemaFactory {
                         case "http://www.w3.org/2000/09/xmldsig#":
                             return getLocalResource("xmldsig-core-schema.xsd");
                         }
-                    if ("saml-schema-authn-context-types-2.0.xsd".equals(systemId))
+                    }
+                    if ("saml-schema-authn-context-types-2.0.xsd".equals(systemId)) {
                         return getLocalResource("saml-schema-authn-context-types-2.0.xsd");
-                    if (publicId != null)
+                    }
+                    if (publicId != null) {
                         switch (publicId.toUpperCase(Locale.ROOT)) {
                         case "-//W3C//DTD XMLSCHEMA 200102//EN":
                             return getLocalResource("XMLSchema.dtd");
                         case "DATATYPES":
                             return getLocalResource("datatypes.dtd");
                         }
+                    }
                 } catch (final Throwable e) {
                     // fallback to standard behaviour in case of errors
                     LOGGER.warn("could not resolve schema or DTD locally, proceeding the standard way", e);
-                    return null;
                 }
                 return null;
             }
 
-            public LSInput getLocalResource(String name) throws Throwable {
+            public LSInput getLocalResource(final String name) throws Exception {
                 if (ls == null) {
-                    DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+                    final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
                     ls = (DOMImplementationLS) registry.getDOMImplementation("LS 3.0");
                 }
                 final InputStream inputStream = getClass().getResourceAsStream("/schemas/" + name);
-                if (inputStream == null)
+                if (inputStream == null) {
                     return null;
+                }
                 final LSInput lsInput = ls.createLSInput();
                 lsInput.setByteStream(inputStream);
                 return lsInput;

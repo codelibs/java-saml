@@ -13,12 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.apache.commons.lang3.StringUtils;
+import org.codelibs.saml2.core.exception.SAMLException;
 import org.codelibs.saml2.core.exception.SettingsException;
 import org.codelibs.saml2.core.exception.ValidationException;
+import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.model.SamlResponseStatus;
 import org.codelibs.saml2.core.model.SubjectConfirmationIssue;
@@ -29,12 +28,12 @@ import org.codelibs.saml2.core.util.SchemaFactory;
 import org.codelibs.saml2.core.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
  * SamlResponse class of Java Toolkit.
@@ -103,17 +102,8 @@ public class SamlResponse {
      * @param samlResponse
      *              A string containting the base64 encoded response from the IdP
      *
-     *
-     * @throws ValidationException
-     * @throws SettingsException
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     *
      */
-    public SamlResponse(Saml2Settings settings, String currentUrl, String samlResponse) throws XPathExpressionException,
-            ParserConfigurationException, SAXException, IOException, SettingsException, ValidationException {
+    public SamlResponse(final Saml2Settings settings, final String currentUrl, final String samlResponse) {
         this.settings = settings;
         this.currentUrl = currentUrl;
         loadXmlFromBase64(samlResponse);
@@ -127,17 +117,8 @@ public class SamlResponse {
      * @param request
      *				the HttpRequest object to be processed (Contains GET and POST parameters, request URL, ...).
      *
-     * @throws ValidationException
-     * @throws SettingsException
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws XPathExpressionException
-     * @throws NullPointerException
-     *
      */
-    public SamlResponse(Saml2Settings settings, HttpRequest request) throws XPathExpressionException, ParserConfigurationException,
-            SAXException, IOException, SettingsException, ValidationException {
+    public SamlResponse(final Saml2Settings settings, final HttpRequest request) {
         this(settings, request.getRequestURL(), request.getParameter("SAMLResponse"));
     }
 
@@ -147,28 +128,27 @@ public class SamlResponse {
      * @param responseStr
      *              Saml2Settings object. Setting data
      *
-     * @throws ParserConfigurationException
-     * @throws SettingsException
-     * @throws IOException
-     * @throws SAXException
-     * @throws XPathExpressionException
-     * @throws ValidationException
      */
-    public void loadXmlFromBase64(String responseStr) throws ParserConfigurationException, XPathExpressionException, SAXException,
-            IOException, SettingsException, ValidationException {
-        samlResponseString = new String(Util.base64decoder(responseStr), "UTF-8");
-        samlResponseDocument = Util.loadXML(samlResponseString);
+    public void loadXmlFromBase64(final String responseStr) {
+        try {
+            samlResponseString = new String(Util.base64decoder(responseStr), "UTF-8");
+            samlResponseDocument = Util.loadXML(samlResponseString);
 
-        if (samlResponseDocument == null) {
-            throw new ValidationException("SAML Response could not be processed", ValidationException.INVALID_XML_FORMAT);
-        }
+            if (samlResponseDocument == null) {
+                throw new ValidationException("SAML Response could not be processed", ValidationException.INVALID_XML_FORMAT);
+            }
 
-        NodeList encryptedAssertionNodes = samlResponseDocument.getElementsByTagNameNS(Constants.NS_SAML, "EncryptedAssertion");
+            final NodeList encryptedAssertionNodes = samlResponseDocument.getElementsByTagNameNS(Constants.NS_SAML, "EncryptedAssertion");
 
-        if (encryptedAssertionNodes.getLength() != 0) {
-            decryptedDocument = Util.copyDocument(samlResponseDocument);
-            encrypted = true;
-            decryptedDocument = this.decryptAssertion(decryptedDocument);
+            if (encryptedAssertionNodes.getLength() != 0) {
+                decryptedDocument = Util.copyDocument(samlResponseDocument);
+                encrypted = true;
+                decryptedDocument = this.decryptAssertion(decryptedDocument);
+            }
+        } catch (SAMLException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new XMLParsingException("Failed to load XML data.", e);
         }
     }
 
@@ -179,7 +159,7 @@ public class SamlResponse {
      *
      * @return if the response is valid or not
      */
-    public boolean isValid(String requestId) {
+    public boolean isValid(final String requestId) {
         validationException = null;
 
         try {
@@ -191,7 +171,7 @@ public class SamlResponse {
                 throw new Exception("The URL of the current host was not established");
             }
 
-            Element rootElement = samlResponseDocument.getDocumentElement();
+            final Element rootElement = samlResponseDocument.getDocumentElement();
             rootElement.normalize();
 
             // Check SAML version on the response
@@ -210,10 +190,10 @@ public class SamlResponse {
                 throw new ValidationException("SAML Response must contain 1 Assertion.", ValidationException.WRONG_NUMBER_OF_ASSERTIONS);
             }
 
-            List<String> signedElements = processSignedElements();
+            final List<String> signedElements = processSignedElements();
 
-            String responseTag = "{" + Constants.NS_SAMLP + "}Response";
-            String assertionTag = "{" + Constants.NS_SAML + "}Assertion";
+            final String responseTag = "{" + Constants.NS_SAMLP + "}Response";
+            final String assertionTag = "{" + Constants.NS_SAML + "}Assertion";
 
             final boolean hasSignedResponse = signedElements.contains(responseTag);
             final boolean hasSignedAssertion = signedElements.contains(assertionTag);
@@ -226,15 +206,14 @@ public class SamlResponse {
                     }
 
                     // If encrypted, check also the decrypted document
-                    if (encrypted) {
-                        if (!Util.validateXML(decryptedDocument, SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0)) {
-                            throw new ValidationException("Invalid decrypted SAML Response. Not match the saml-schema-protocol-2.0.xsd",
-                                    ValidationException.INVALID_XML_FORMAT);
-                        }
+                    if (encrypted && !Util.validateXML(decryptedDocument, SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0)) {
+                        throw new ValidationException("Invalid decrypted SAML Response. Not match the saml-schema-protocol-2.0.xsd",
+                                ValidationException.INVALID_XML_FORMAT);
                     }
                 }
 
-                String responseInResponseTo = rootElement.hasAttribute("InResponseTo") ? rootElement.getAttribute("InResponseTo") : null;
+                final String responseInResponseTo =
+                        rootElement.hasAttribute("InResponseTo") ? rootElement.getAttribute("InResponseTo") : null;
                 if (requestId == null && responseInResponseTo != null && settings.isRejectUnsolicitedResponsesWithInResponseTo()) {
                     throw new ValidationException(
                             "The Response has an InResponseTo attribute: " + responseInResponseTo + " while no InResponseTo was expected",
@@ -250,8 +229,8 @@ public class SamlResponse {
                 }
 
                 // Check SAML version on the assertion
-                NodeList assertions = queryAssertion("");
-                Node versionAttribute = assertions.item(0).getAttributes().getNamedItem("Version");
+                final NodeList assertions = queryAssertion("");
+                final Node versionAttribute = assertions.item(0).getAttributes().getNamedItem("Version");
                 if (versionAttribute == null || !"2.0".equals(versionAttribute.getNodeValue())) {
                     throw new ValidationException("Unsupported SAML Version on Assertion.", ValidationException.UNSUPPORTED_SAML_VERSION);
                 }
@@ -262,7 +241,7 @@ public class SamlResponse {
                 }
 
                 if (settings.getWantNameIdEncrypted()) {
-                    NodeList encryptedNameIdNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID/xenc:EncryptedData");
+                    final NodeList encryptedNameIdNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID/xenc:EncryptedData");
                     if (encryptedNameIdNodes.getLength() == 0) {
                         throw new ValidationException("The NameID of the Response is not encrypted and the SP requires it",
                                 ValidationException.NO_ENCRYPTED_NAMEID);
@@ -287,7 +266,7 @@ public class SamlResponse {
                 }
 
                 // EncryptedAttributes are not supported
-                NodeList encryptedAttributeNodes = this.queryAssertion("/saml:AttributeStatement/saml:EncryptedAttribute");
+                final NodeList encryptedAttributeNodes = this.queryAssertion("/saml:AttributeStatement/saml:EncryptedAttribute");
                 if (encryptedAttributeNodes.getLength() > 0) {
                     throw new ValidationException("There is an EncryptedAttribute in the Response and this SP does not support them",
                             ValidationException.ENCRYPTED_ATTRIBUTES);
@@ -300,7 +279,7 @@ public class SamlResponse {
                 validateAudiences();
 
                 // Check the issuers
-                List<String> issuers = this.getIssuers();
+                final List<String> issuers = this.getIssuers();
                 for (final String issuer : issuers) {
                     if (issuer.isEmpty() || !issuer.equals(settings.getIdpEntityId())) {
                         throw new ValidationException(String.format("Invalid issuer in the Assertion/Response. Was '%s', but expected '%s'",
@@ -334,44 +313,41 @@ public class SamlResponse {
 
             if (signedElements.isEmpty() || (!hasSignedAssertion && !hasSignedResponse)) {
                 throw new ValidationException("No Signature found. SAML Response rejected", ValidationException.NO_SIGNATURE_FOUND);
-            } else {
-                X509Certificate cert = settings.getIdpx509cert();
-                List<X509Certificate> certList = new ArrayList<>();
-                List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
+            }
+            final X509Certificate cert = settings.getIdpx509cert();
+            final List<X509Certificate> certList = new ArrayList<>();
+            final List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
 
-                if (multipleCertList != null && !multipleCertList.isEmpty()) {
-                    certList.addAll(multipleCertList);
-                }
+            if (multipleCertList != null && !multipleCertList.isEmpty()) {
+                certList.addAll(multipleCertList);
+            }
 
-                if (cert != null && !certList.contains(cert)) {
-                    certList.add(0, cert);
-                }
+            if (cert != null && !certList.contains(cert)) {
+                certList.add(0, cert);
+            }
 
-                String fingerprint = settings.getIdpCertFingerprint();
-                String alg = settings.getIdpCertFingerprintAlgorithm();
+            final String fingerprint = settings.getIdpCertFingerprint();
+            final String alg = settings.getIdpCertFingerprintAlgorithm();
 
-                Boolean rejectDeprecatedAlg = settings.getRejectDeprecatedAlg();
+            final Boolean rejectDeprecatedAlg = settings.getRejectDeprecatedAlg();
 
-                if (hasSignedResponse && !Util.validateSign(samlResponseDocument, certList, fingerprint, alg, Util.RESPONSE_SIGNATURE_XPATH,
-                        rejectDeprecatedAlg)) {
-                    throw new ValidationException("Signature validation failed. SAML Response rejected",
-                            ValidationException.INVALID_SIGNATURE);
-                }
+            if (hasSignedResponse && !Util.validateSign(samlResponseDocument, certList, fingerprint, alg, Util.RESPONSE_SIGNATURE_XPATH,
+                    rejectDeprecatedAlg)) {
+                throw new ValidationException("Signature validation failed. SAML Response rejected", ValidationException.INVALID_SIGNATURE);
+            }
 
-                final Document documentToCheckAssertion = encrypted ? decryptedDocument : samlResponseDocument;
-                if (hasSignedAssertion && !Util.validateSign(documentToCheckAssertion, certList, fingerprint, alg,
-                        Util.ASSERTION_SIGNATURE_XPATH, rejectDeprecatedAlg)) {
-                    throw new ValidationException("Signature validation failed. SAML Response rejected",
-                            ValidationException.INVALID_SIGNATURE);
-                }
+            final Document documentToCheckAssertion = encrypted ? decryptedDocument : samlResponseDocument;
+            if (hasSignedAssertion && !Util.validateSign(documentToCheckAssertion, certList, fingerprint, alg,
+                    Util.ASSERTION_SIGNATURE_XPATH, rejectDeprecatedAlg)) {
+                throw new ValidationException("Signature validation failed. SAML Response rejected", ValidationException.INVALID_SIGNATURE);
             }
 
             LOGGER.debug("SAMLResponse validated --> {}", samlResponseString);
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             validationException = e;
             LOGGER.debug("SAMLResponse invalid --> {}", samlResponseString);
-            LOGGER.error(validationException.getMessage());
+            LOGGER.warn(validationException.getMessage());
             return false;
         }
     }
@@ -382,41 +358,39 @@ public class SamlResponse {
      * @param responseInResponseTo
      *     The InResponseTo value of the SAML Response
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
      */
-    private void validateSubjectConfirmation(String responseInResponseTo) throws XPathExpressionException, ValidationException {
+    private void validateSubjectConfirmation(final String responseInResponseTo) {
         final List<SubjectConfirmationIssue> validationIssues = new ArrayList<>();
         boolean validSubjectConfirmation = false;
-        NodeList subjectConfirmationNodes = this.queryAssertion("/saml:Subject/saml:SubjectConfirmation");
+        final NodeList subjectConfirmationNodes = this.queryAssertion("/saml:Subject/saml:SubjectConfirmation");
         for (int i = 0; i < subjectConfirmationNodes.getLength(); i++) {
-            Node scn = subjectConfirmationNodes.item(i);
+            final Node scn = subjectConfirmationNodes.item(i);
 
-            Node method = scn.getAttributes().getNamedItem("Method");
-            if (method != null && !method.getNodeValue().equals(Constants.CM_BEARER)) {
+            final Node method = scn.getAttributes().getNamedItem("Method");
+            if (method != null && !Constants.CM_BEARER.equals(method.getNodeValue())) {
                 continue;
             }
 
-            NodeList subjectConfirmationDataNodes = scn.getChildNodes();
+            final NodeList subjectConfirmationDataNodes = scn.getChildNodes();
             for (int c = 0; c < subjectConfirmationDataNodes.getLength(); c++) {
                 if (subjectConfirmationDataNodes.item(c).getLocalName() != null
-                        && subjectConfirmationDataNodes.item(c).getLocalName().equals("SubjectConfirmationData")) {
+                        && "SubjectConfirmationData".equals(subjectConfirmationDataNodes.item(c).getLocalName())) {
 
-                    Node recipient = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("Recipient");
+                    final Node recipient = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("Recipient");
                     final SubjectConfirmationIssue issue = validateRecipient(recipient, i);
                     if (issue != null) {
                         validationIssues.add(issue);
                         continue;
                     }
 
-                    Node inResponseTo = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("InResponseTo");
+                    final Node inResponseTo = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("InResponseTo");
                     if (inResponseTo == null && responseInResponseTo != null
                             || inResponseTo != null && !inResponseTo.getNodeValue().equals(responseInResponseTo)) {
                         validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData has an invalid InResponseTo value"));
                         continue;
                     }
 
-                    Node notOnOrAfter = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotOnOrAfter");
+                    final Node notOnOrAfter = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotOnOrAfter");
                     if (notOnOrAfter == null) {
                         validationIssues
                                 .add(new SubjectConfirmationIssue(i, "SubjectConfirmationData doesn't contain a NotOnOrAfter attribute"));
@@ -430,7 +404,7 @@ public class SamlResponse {
                         continue;
                     }
 
-                    Node notBefore = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotBefore");
+                    final Node notBefore = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotBefore");
                     if (notBefore != null) {
                         Instant nb = Util.parseDateTime(notBefore.getNodeValue());
                         nb = ChronoUnit.SECONDS.addTo(nb, Constants.ALOWED_CLOCK_DRIFT * -1);
@@ -464,71 +438,74 @@ public class SamlResponse {
      *
      * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
      *
-     * @throws Exception
-     *
      */
-    public Map<String, String> getNameIdData() throws Exception {
+    public Map<String, String> getNameIdData() {
         if (this.nameIdData != null) {
             return this.nameIdData;
         }
-        Map<String, String> nameIdData = new HashMap<>();
+        try {
+            final Map<String, String> nameIdData = new HashMap<>();
 
-        NodeList encryptedIDNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID");
-        NodeList nameIdNodes;
-        Element nameIdElem;
-        if (encryptedIDNodes.getLength() == 1) {
-            NodeList encryptedDataNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID/xenc:EncryptedData");
-            if (encryptedDataNodes.getLength() == 1) {
-                Element encryptedData = (Element) encryptedDataNodes.item(0);
-                PrivateKey key = settings.getSPkey();
-                if (key == null) {
-                    throw new SettingsException("Key is required in order to decrypt the NameID", SettingsException.PRIVATE_KEY_NOT_FOUND);
+            final NodeList encryptedIDNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID");
+            NodeList nameIdNodes;
+            Element nameIdElem;
+            if (encryptedIDNodes.getLength() == 1) {
+                final NodeList encryptedDataNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID/xenc:EncryptedData");
+                if (encryptedDataNodes.getLength() == 1) {
+                    final Element encryptedData = (Element) encryptedDataNodes.item(0);
+                    final PrivateKey key = settings.getSPkey();
+                    if (key == null) {
+                        throw new SettingsException("Key is required in order to decrypt the NameID",
+                                SettingsException.PRIVATE_KEY_NOT_FOUND);
+                    }
+
+                    Util.decryptElement(encryptedData, key);
                 }
+                nameIdNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID/saml:NameID|/saml:Subject/saml:NameID");
 
-                Util.decryptElement(encryptedData, key);
+                if (nameIdNodes == null || nameIdNodes.getLength() == 0) {
+                    throw new SAMLException("Not able to decrypt the EncryptedID and get a NameID");
+                }
+            } else {
+                nameIdNodes = this.queryAssertion("/saml:Subject/saml:NameID");
             }
-            nameIdNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID/saml:NameID|/saml:Subject/saml:NameID");
 
-            if (nameIdNodes == null || nameIdNodes.getLength() == 0) {
-                throw new Exception("Not able to decrypt the EncryptedID and get a NameID");
-            }
-        } else {
-            nameIdNodes = this.queryAssertion("/saml:Subject/saml:NameID");
-        }
+            if (nameIdNodes != null && nameIdNodes.getLength() == 1) {
+                nameIdElem = (Element) nameIdNodes.item(0);
 
-        if (nameIdNodes != null && nameIdNodes.getLength() == 1) {
-            nameIdElem = (Element) nameIdNodes.item(0);
+                if (nameIdElem != null) {
+                    String value = nameIdElem.getTextContent();
+                    if (value != null && settings.isTrimNameIds()) {
+                        value = value.trim();
+                    }
+                    if (settings.isStrict() && StringUtils.isEmpty(value)) {
+                        throw new ValidationException("An empty NameID value found", ValidationException.EMPTY_NAMEID);
+                    }
 
-            if (nameIdElem != null) {
-                String value = nameIdElem.getTextContent();
-                if (value != null && settings.isTrimNameIds()) {
-                    value = value.trim();
-                }
-                if (settings.isStrict() && StringUtils.isEmpty(value)) {
-                    throw new ValidationException("An empty NameID value found", ValidationException.EMPTY_NAMEID);
-                }
+                    nameIdData.put("Value", value);
 
-                nameIdData.put("Value", value);
-
-                if (nameIdElem.hasAttribute("Format")) {
-                    nameIdData.put("Format", nameIdElem.getAttribute("Format"));
+                    if (nameIdElem.hasAttribute("Format")) {
+                        nameIdData.put("Format", nameIdElem.getAttribute("Format"));
+                    }
+                    if (nameIdElem.hasAttribute("SPNameQualifier")) {
+                        final String spNameQualifier = nameIdElem.getAttribute("SPNameQualifier");
+                        validateSpNameQualifier(spNameQualifier);
+                        nameIdData.put("SPNameQualifier", spNameQualifier);
+                    }
+                    if (nameIdElem.hasAttribute("NameQualifier")) {
+                        nameIdData.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
+                    }
                 }
-                if (nameIdElem.hasAttribute("SPNameQualifier")) {
-                    String spNameQualifier = nameIdElem.getAttribute("SPNameQualifier");
-                    validateSpNameQualifier(spNameQualifier);
-                    nameIdData.put("SPNameQualifier", spNameQualifier);
-                }
-                if (nameIdElem.hasAttribute("NameQualifier")) {
-                    nameIdData.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
-                }
-            }
-        } else {
-            if (settings.getWantNameId()) {
+            } else if (settings.getWantNameId()) {
                 throw new ValidationException("No name id found in Document.", ValidationException.NO_NAMEID);
             }
+            this.nameIdData = nameIdData;
+            return nameIdData;
+        } catch (SAMLException e) {
+            throw e;
+        } catch (DOMException e) {
+            throw new XMLParsingException("Failed to get NameID.", e);
         }
-        this.nameIdData = nameIdData;
-        return nameIdData;
     }
 
     /**
@@ -536,10 +513,9 @@ public class SamlResponse {
      *
      * @return string Name ID Value
      *
-     * @throws Exception
      */
-    public String getNameId() throws Exception {
-        Map<String, String> nameIdData = getNameIdData();
+    public String getNameId() {
+        final Map<String, String> nameIdData = getNameIdData();
         String nameID = null;
         if (!nameIdData.isEmpty()) {
             LOGGER.debug("SAMLResponse has NameID --> {}", nameIdData.get("Value"));
@@ -553,10 +529,9 @@ public class SamlResponse {
      *
      * @return string NameID Format
      *
-     * @throws Exception
      */
-    public String getNameIdFormat() throws Exception {
-        Map<String, String> nameIdData = getNameIdData();
+    public String getNameIdFormat() {
+        final Map<String, String> nameIdData = getNameIdData();
         String nameidFormat = null;
         if (!nameIdData.isEmpty() && nameIdData.containsKey("Format")) {
             LOGGER.debug("SAMLResponse has NameID Format --> {}", nameIdData.get("Format"));
@@ -570,10 +545,10 @@ public class SamlResponse {
      *
      * @return string NameQualifier
      *
-     * @throws Exception
+     * @
      */
-    public String getNameIdNameQualifier() throws Exception {
-        Map<String, String> nameIdData = getNameIdData();
+    public String getNameIdNameQualifier() {
+        final Map<String, String> nameIdData = getNameIdData();
         String nameQualifier = null;
         if (!nameIdData.isEmpty() && nameIdData.containsKey("NameQualifier")) {
             LOGGER.debug("SAMLResponse has NameID NameQualifier --> " + nameIdData.get("NameQualifier"));
@@ -587,10 +562,10 @@ public class SamlResponse {
      *
      * @return string SP NameQualifier
      *
-     * @throws Exception
+     * @
      */
-    public String getNameIdSPNameQualifier() throws Exception {
-        Map<String, String> nameIdData = getNameIdData();
+    public String getNameIdSPNameQualifier() {
+        final Map<String, String> nameIdData = getNameIdData();
         String spNameQualifier = null;
         if (!nameIdData.isEmpty() && nameIdData.containsKey("SPNameQualifier")) {
             LOGGER.debug("SAMLResponse has NameID NameQualifier --> " + nameIdData.get("SPNameQualifier"));
@@ -604,31 +579,29 @@ public class SamlResponse {
      *
      * @return the attributes of the SAML Assertion
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
      *
      */
-    public HashMap<String, List<String>> getAttributes() throws XPathExpressionException, ValidationException {
-        HashMap<String, List<String>> attributes = new LinkedHashMap<String, List<String>>();
+    public Map<String, List<String>> getAttributes() {
+        final Map<String, List<String>> attributes = new LinkedHashMap<>();
 
-        NodeList nodes = this.queryAssertion("/saml:AttributeStatement/saml:Attribute");
+        final NodeList nodes = this.queryAssertion("/saml:AttributeStatement/saml:Attribute");
 
         if (nodes.getLength() != 0) {
             for (int i = 0; i < nodes.getLength(); i++) {
-                NamedNodeMap attrName = nodes.item(i).getAttributes();
-                String attName = attrName.getNamedItem("Name").getNodeValue();
+                final NamedNodeMap attrName = nodes.item(i).getAttributes();
+                final String attName = attrName.getNamedItem("Name").getNodeValue();
                 if (attributes.containsKey(attName) && !settings.isAllowRepeatAttributeName()) {
                     throw new ValidationException("Found an Attribute element with duplicated Name",
                             ValidationException.DUPLICATED_ATTRIBUTE_NAME_FOUND);
                 }
 
-                NodeList childrens = nodes.item(i).getChildNodes();
+                final NodeList childrens = nodes.item(i).getChildNodes();
 
                 List<String> attrValues = null;
                 if (attributes.containsKey(attName) && settings.isAllowRepeatAttributeName()) {
                     attrValues = attributes.get(attName);
                 } else {
-                    attrValues = new ArrayList<String>();
+                    attrValues = new ArrayList<>();
                 }
                 for (int j = 0; j < childrens.getLength(); j++) {
                     if ("AttributeValue".equals(childrens.item(j).getLocalName())) {
@@ -642,7 +615,7 @@ public class SamlResponse {
 
                 attributes.put(attName, attrValues);
             }
-            LOGGER.debug("SAMLResponse has attributes: " + attributes.toString());
+            LOGGER.debug("SAMLResponse has attributes: {}", attributes.toString());
         } else {
             LOGGER.debug("SAMLResponse has no attributes");
         }
@@ -661,16 +634,17 @@ public class SamlResponse {
     /**
      * Checks the Status
      *
-     * @throws ValidationException If status is not success
+     * If status is not success
      */
-    public void checkStatus() throws ValidationException {
+    public void checkStatus() {
         this.responseStatus = getStatus(samlResponseDocument);
         if (!this.responseStatus.is(Constants.STATUS_SUCCESS)) {
-            String statusExceptionMsg = "The status code of the Response was not Success, was " + this.responseStatus.getStatusCode();
+            StringBuilder statusExceptionMsg =
+                    new StringBuilder("The status code of the Response was not Success, was ").append(this.responseStatus.getStatusCode());
             if (this.responseStatus.getStatusMessage() != null) {
-                statusExceptionMsg += " -> " + this.responseStatus.getStatusMessage();
+                statusExceptionMsg.append(" -> ").append(this.responseStatus.getStatusMessage());
             }
-            throw new ValidationException(statusExceptionMsg, ValidationException.STATUS_CODE_IS_NOT_SUCCESS);
+            throw new ValidationException(statusExceptionMsg.toString(), ValidationException.STATUS_CODE_IS_NOT_SUCCESS);
         }
     }
 
@@ -682,12 +656,9 @@ public class SamlResponse {
      *
      * @return SamlResponseStatus
      *
-     * @throws IllegalArgumentException
-     *             if the response not contain status or if Unexpected XPath error
-     * @throws ValidationException
      */
-    public static SamlResponseStatus getStatus(Document dom) throws ValidationException {
-        String statusXpath = "/samlp:Response/samlp:Status";
+    public static SamlResponseStatus getStatus(final Document dom) {
+        final String statusXpath = "/samlp:Response/samlp:Status";
         return Util.getStatus(statusXpath, dom);
     }
 
@@ -696,15 +667,14 @@ public class SamlResponse {
      *
      * @return true if the Conditions element exists and is unique
      *
-     * @throws XPathExpressionException
+     *
      */
-    public Boolean checkOneCondition() throws XPathExpressionException {
-        NodeList entries = this.queryAssertion("/saml:Conditions");
+    public Boolean checkOneCondition() {
+        final NodeList entries = this.queryAssertion("/saml:Conditions");
         if (entries.getLength() == 1) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -712,15 +682,14 @@ public class SamlResponse {
      *
      * @return true if the AuthnStatement element exists and is unique
      *
-     * @throws XPathExpressionException
+     *
      */
-    public Boolean checkOneAuthnStatement() throws XPathExpressionException {
-        NodeList entries = this.queryAssertion("/saml:AuthnStatement");
+    public Boolean checkOneAuthnStatement() {
+        final NodeList entries = this.queryAssertion("/saml:AuthnStatement");
         if (entries.getLength() == 1) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -728,12 +697,12 @@ public class SamlResponse {
      *
      * @return the audiences of the response
      *
-     * @throws XPathExpressionException
+     *
      */
-    public List<String> getAudiences() throws XPathExpressionException {
-        List<String> audiences = new ArrayList<String>();
+    public List<String> getAudiences() {
+        final List<String> audiences = new ArrayList<>();
 
-        NodeList entries = this.queryAssertion("/saml:Conditions/saml:AudienceRestriction/saml:Audience");
+        final NodeList entries = this.queryAssertion("/saml:Conditions/saml:AudienceRestriction/saml:Audience");
 
         for (int i = 0; i < entries.getLength(); i++) {
             if (entries.item(i) != null) {
@@ -754,24 +723,23 @@ public class SamlResponse {
      *
      * @return the Response Issuer, or <code>null</code> if not specified
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
+     *
+     *
      *               if multiple Response issuers were found
      * @see #getAssertionIssuer()
      * @see #getIssuers()
      */
-    public String getResponseIssuer() throws XPathExpressionException, ValidationException {
-        NodeList responseIssuer = Util.query(samlResponseDocument, "/samlp:Response/saml:Issuer");
+    public String getResponseIssuer() {
+        final NodeList responseIssuer = Util.query(samlResponseDocument, "/samlp:Response/saml:Issuer");
         if (responseIssuer.getLength() > 0) {
-            if (responseIssuer.getLength() == 1) {
-                String value = responseIssuer.item(0).getTextContent();
-                if (value != null && settings.isTrimNameIds()) {
-                    value = value.trim();
-                }
-                return value;
-            } else {
+            if (responseIssuer.getLength() != 1) {
                 throw new ValidationException("Issuer of the Response is multiple.", ValidationException.ISSUER_MULTIPLE_IN_RESPONSE);
             }
+            String value = responseIssuer.item(0).getTextContent();
+            if (value != null && settings.isTrimNameIds()) {
+                value = value.trim();
+            }
+            return value;
         }
         return null;
     }
@@ -781,25 +749,24 @@ public class SamlResponse {
      *
      * @return the Assertion Issuer
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
+     *
+     *
      *               if no Assertion Issuer could be found, or if multiple Assertion
      *               issuers were found
      * @see #getResponseIssuer()
      * @see #getIssuers()
      */
-    public String getAssertionIssuer() throws XPathExpressionException, ValidationException {
-        NodeList assertionIssuer = this.queryAssertion("/saml:Issuer");
-        if (assertionIssuer.getLength() == 1) {
-            String value = assertionIssuer.item(0).getTextContent();
-            if (value != null && settings.isTrimNameIds()) {
-                value = value.trim();
-            }
-            return value;
-        } else {
+    public String getAssertionIssuer() {
+        final NodeList assertionIssuer = this.queryAssertion("/saml:Issuer");
+        if (assertionIssuer.getLength() != 1) {
             throw new ValidationException("Issuer of the Assertion not found or multiple.",
                     ValidationException.ISSUER_NOT_FOUND_IN_ASSERTION);
         }
+        String value = assertionIssuer.item(0).getTextContent();
+        if (value != null && settings.isTrimNameIds()) {
+            value = value.trim();
+        }
+        return value;
     }
 
     /**
@@ -823,8 +790,8 @@ public class SamlResponse {
      *
      * @return the issuers of the assertion/response
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
+     *
+     *
      *               if multiple Response Issuers or multiple Assertion Issuers were
      *               found, or if no Assertion Issuer could be found
      * @see #getResponseIssuer()
@@ -834,14 +801,16 @@ public class SamlResponse {
      *             quite controversial
      */
     @Deprecated
-    public List<String> getIssuers() throws XPathExpressionException, ValidationException {
-        List<String> issuers = new ArrayList<String>();
-        String responseIssuer = getResponseIssuer();
-        if (responseIssuer != null)
+    public List<String> getIssuers() {
+        final List<String> issuers = new ArrayList<>();
+        final String responseIssuer = getResponseIssuer();
+        if (responseIssuer != null) {
             issuers.add(responseIssuer);
-        String assertionIssuer = getAssertionIssuer();
-        if (!issuers.contains(assertionIssuer))
+        }
+        final String assertionIssuer = getAssertionIssuer();
+        if (!issuers.contains(assertionIssuer)) {
             issuers.add(assertionIssuer);
+        }
         return issuers;
     }
 
@@ -851,11 +820,11 @@ public class SamlResponse {
      *
      * @return the SessionNotOnOrAfter value
      *
-     * @throws XPathExpressionException
+     *
      */
-    public Instant getSessionNotOnOrAfter() throws XPathExpressionException {
+    public Instant getSessionNotOnOrAfter() {
         String notOnOrAfter = null;
-        NodeList entries = this.queryAssertion("/saml:AuthnStatement[@SessionNotOnOrAfter]");
+        final NodeList entries = this.queryAssertion("/saml:AuthnStatement[@SessionNotOnOrAfter]");
         if (entries.getLength() > 0) {
             notOnOrAfter = entries.item(0).getAttributes().getNamedItem("SessionNotOnOrAfter").getNodeValue();
             return Util.parseDateTime(notOnOrAfter);
@@ -871,11 +840,11 @@ public class SamlResponse {
      *
      * @return the SessionIndex value
      *
-     * @throws XPathExpressionException
+     *
      */
-    public String getSessionIndex() throws XPathExpressionException {
+    public String getSessionIndex() {
         String sessionIndex = null;
-        NodeList entries = this.queryAssertion("/saml:AuthnStatement[@SessionIndex]");
+        final NodeList entries = this.queryAssertion("/saml:AuthnStatement[@SessionIndex]");
         if (entries.getLength() > 0) {
             sessionIndex = entries.item(0).getAttributes().getNamedItem("SessionIndex").getNodeValue();
         }
@@ -891,10 +860,10 @@ public class SamlResponse {
 
     /**
      * @return the ID of the assertion in the Response
-     * @throws XPathExpressionException
+     *
      *
      */
-    public String getAssertionId() throws XPathExpressionException {
+    public String getAssertionId() {
         if (!validateNumAssertions()) {
             throw new IllegalArgumentException("SAML Response must contain 1 Assertion.");
         }
@@ -904,10 +873,10 @@ public class SamlResponse {
 
     /**
      * @return a list of NotOnOrAfter values from SubjectConfirmationData nodes in this Response
-     * @throws XPathExpressionException
+     *
      *
      */
-    public List<Instant> getAssertionNotOnOrAfter() throws XPathExpressionException {
+    public List<Instant> getAssertionNotOnOrAfter() {
         final NodeList notOnOrAfterNodes = queryAssertion("/saml:Subject/saml:SubjectConfirmation/saml:SubjectConfirmationData");
         final ArrayList<Instant> notOnOrAfters = new ArrayList<>();
         for (int i = 0; i < notOnOrAfterNodes.getLength(); i++) {
@@ -924,13 +893,12 @@ public class SamlResponse {
      *
      * @return true if the document passes.
      *
-     * @throws IllegalArgumentException
      */
-    public Boolean validateNumAssertions() throws IllegalArgumentException {
-        NodeList encryptedAssertionNodes = samlResponseDocument.getElementsByTagNameNS(Constants.NS_SAML, "EncryptedAssertion");
-        NodeList assertionNodes = samlResponseDocument.getElementsByTagNameNS(Constants.NS_SAML, "Assertion");
+    public boolean validateNumAssertions() {
+        final NodeList encryptedAssertionNodes = samlResponseDocument.getElementsByTagNameNS(Constants.NS_SAML, "EncryptedAssertion");
+        final NodeList assertionNodes = samlResponseDocument.getElementsByTagNameNS(Constants.NS_SAML, "Assertion");
 
-        Boolean valid = assertionNodes.getLength() + encryptedAssertionNodes.getLength() == 1;
+        boolean valid = assertionNodes.getLength() + encryptedAssertionNodes.getLength() == 1;
 
         if (encrypted) {
             valid = valid && decryptedDocument.getElementsByTagNameNS(Constants.NS_SAML, "Assertion").getLength() == 1;
@@ -946,72 +914,69 @@ public class SamlResponse {
      *
      * @return array Signed element tags
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
+     *
+     *
      */
-    public ArrayList<String> processSignedElements() throws XPathExpressionException, ValidationException {
-        ArrayList<String> signedElements = new ArrayList<String>();
-        ArrayList<String> verifiedSeis = new ArrayList<String>();
-        ArrayList<String> verifiedIds = new ArrayList<String>();
+    public ArrayList<String> processSignedElements() {
+        final ArrayList<String> signedElements = new ArrayList<>();
+        final ArrayList<String> verifiedSeis = new ArrayList<>();
+        final ArrayList<String> verifiedIds = new ArrayList<>();
 
-        NodeList signNodes = query("//ds:Signature", null);
+        final NodeList signNodes = query("//ds:Signature", null);
         for (int i = 0; i < signNodes.getLength(); i++) {
-            Node signNode = signNodes.item(i);
-            String signedElement = "{" + signNode.getParentNode().getNamespaceURI() + "}" + signNode.getParentNode().getLocalName();
+            final Node signNode = signNodes.item(i);
+            final String signedElement = "{" + signNode.getParentNode().getNamespaceURI() + "}" + signNode.getParentNode().getLocalName();
 
-            String responseTag = "{" + Constants.NS_SAMLP + "}Response";
-            String assertionTag = "{" + Constants.NS_SAML + "}Assertion";
+            final String responseTag = "{" + Constants.NS_SAMLP + "}Response";
+            final String assertionTag = "{" + Constants.NS_SAML + "}Assertion";
 
-            if (!signedElement.equals(responseTag) && !signedElement.equals(assertionTag)) {
+            if (!responseTag.equals(signedElement) && !assertionTag.equals(signedElement)) {
                 throw new ValidationException("Invalid Signature Element " + signedElement + " SAML Response rejected",
                         ValidationException.WRONG_SIGNED_ELEMENT);
             }
 
             // Check that reference URI matches the parent ID and no duplicate References or IDs
-            Node idNode = signNode.getParentNode().getAttributes().getNamedItem("ID");
+            final Node idNode = signNode.getParentNode().getAttributes().getNamedItem("ID");
             if (idNode == null || idNode.getNodeValue() == null || idNode.getNodeValue().isEmpty()) {
                 throw new ValidationException("Signed Element must contain an ID. SAML Response rejected",
                         ValidationException.ID_NOT_FOUND_IN_SIGNED_ELEMENT);
             }
 
-            String idValue = idNode.getNodeValue();
+            final String idValue = idNode.getNodeValue();
             if (verifiedIds.contains(idValue)) {
                 throw new ValidationException("Duplicated ID. SAML Response rejected",
                         ValidationException.DUPLICATED_ID_IN_SIGNED_ELEMENTS);
             }
             verifiedIds.add(idValue);
 
-            NodeList refNodes = Util.query(null, "ds:SignedInfo/ds:Reference", signNode);
-            if (refNodes.getLength() == 1) {
-                Node refNode = refNodes.item(0);
-                Node seiNode = refNode.getAttributes().getNamedItem("URI");
-                if (seiNode != null && seiNode.getNodeValue() != null && !seiNode.getNodeValue().isEmpty()) {
-                    String sei = seiNode.getNodeValue().substring(1);
-                    if (!sei.equals(idValue)) {
-                        throw new ValidationException("Found an invalid Signed Element. SAML Response rejected",
-                                ValidationException.INVALID_SIGNED_ELEMENT);
-                    }
-
-                    if (verifiedSeis.contains(sei)) {
-                        throw new ValidationException("Duplicated Reference URI. SAML Response rejected",
-                                ValidationException.DUPLICATED_REFERENCE_IN_SIGNED_ELEMENTS);
-                    }
-                    verifiedSeis.add(sei);
-                }
-            } else {
+            final NodeList refNodes = Util.query(null, "ds:SignedInfo/ds:Reference", signNode);
+            if (refNodes.getLength() != 1) {
                 // Signatures MUST contain a single <ds:Reference> containing a same-document reference to the ID
                 // attribute value of the root element of the assertion or protocol message being signed
                 throw new ValidationException("Unexpected number of Reference nodes found for signature. SAML Response rejected.",
                         ValidationException.UNEXPECTED_REFERENCE);
             }
+            final Node refNode = refNodes.item(0);
+            final Node seiNode = refNode.getAttributes().getNamedItem("URI");
+            if (seiNode != null && seiNode.getNodeValue() != null && !seiNode.getNodeValue().isEmpty()) {
+                final String sei = seiNode.getNodeValue().substring(1);
+                if (!sei.equals(idValue)) {
+                    throw new ValidationException("Found an invalid Signed Element. SAML Response rejected",
+                            ValidationException.INVALID_SIGNED_ELEMENT);
+                }
+
+                if (verifiedSeis.contains(sei)) {
+                    throw new ValidationException("Duplicated Reference URI. SAML Response rejected",
+                            ValidationException.DUPLICATED_REFERENCE_IN_SIGNED_ELEMENTS);
+                }
+                verifiedSeis.add(sei);
+            }
 
             signedElements.add(signedElement);
         }
-        if (!signedElements.isEmpty()) {
-            if (!validateSignedElements(signedElements)) {
-                throw new ValidationException("Found an unexpected Signature Element. SAML Response rejected",
-                        ValidationException.UNEXPECTED_SIGNED_ELEMENTS);
-            }
+        if (!signedElements.isEmpty() && !validateSignedElements(signedElements)) {
+            throw new ValidationException("Found an unexpected Signature Element. SAML Response rejected",
+                    ValidationException.UNEXPECTED_SIGNED_ELEMENTS);
         }
         return signedElements;
     }
@@ -1023,17 +988,17 @@ public class SamlResponse {
      *				the elements to be validated
      * @return true if is valid
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
+     *
+     *
      *
      */
-    public boolean validateSignedElements(ArrayList<String> signedElements) throws XPathExpressionException, ValidationException {
+    public boolean validateSignedElements(final ArrayList<String> signedElements) {
         if (signedElements.size() > 2) {
             return false;
         }
 
-        Map<String, Integer> occurrences = new HashMap<String, Integer>();
-        for (String e : signedElements) {
+        final Map<String, Integer> occurrences = new HashMap<>();
+        for (final String e : signedElements) {
             if (occurrences.containsKey(e)) {
                 occurrences.put(e, occurrences.get(e).intValue() + 1);
             } else {
@@ -1041,8 +1006,8 @@ public class SamlResponse {
             }
         }
 
-        String responseTag = "{" + Constants.NS_SAMLP + "}Response";
-        String assertionTag = "{" + Constants.NS_SAML + "}Assertion";
+        final String responseTag = "{" + Constants.NS_SAMLP + "}Response";
+        final String assertionTag = "{" + Constants.NS_SAML + "}Assertion";
 
         if ((occurrences.containsKey(responseTag) && occurrences.get(responseTag) > 1)
                 || (occurrences.containsKey(assertionTag) && occurrences.get(assertionTag) > 1)
@@ -1076,15 +1041,15 @@ public class SamlResponse {
      *
      * @return true if still valid
      *
-     * @throws ValidationException
+     *
      */
-    public boolean validateTimestamps() throws ValidationException {
-        NodeList timestampNodes = samlResponseDocument.getElementsByTagNameNS("*", "Conditions");
+    public boolean validateTimestamps() {
+        final NodeList timestampNodes = samlResponseDocument.getElementsByTagNameNS("*", "Conditions");
         if (timestampNodes.getLength() != 0) {
             for (int i = 0; i < timestampNodes.getLength(); i++) {
-                NamedNodeMap attrName = timestampNodes.item(i).getAttributes();
-                Node nbAttribute = attrName.getNamedItem("NotBefore");
-                Node naAttribute = attrName.getNamedItem("NotOnOrAfter");
+                final NamedNodeMap attrName = timestampNodes.item(i).getAttributes();
+                final Node nbAttribute = attrName.getNamedItem("NotBefore");
+                final Node naAttribute = attrName.getNamedItem("NotOnOrAfter");
                 // validate NotOnOrAfter
                 if (naAttribute != null) {
                     Instant notOnOrAfterDate = Util.parseDateTime(naAttribute.getNodeValue());
@@ -1114,7 +1079,7 @@ public class SamlResponse {
      * @param url
      *				the url to set as currentUrl
      */
-    public void setDestinationUrl(String url) {
+    public void setDestinationUrl(final String url) {
         currentUrl = url;
     }
 
@@ -1146,7 +1111,7 @@ public class SamlResponse {
      * @param validationException
      *              the validation exception to set
      */
-    protected void setValidationException(Exception validationException) {
+    protected void setValidationException(final Exception validationException) {
         this.validationException = validationException;
     }
 
@@ -1157,22 +1122,22 @@ public class SamlResponse {
      *				Xpath Expression
      *
      * @return the queried node
-     * @throws XPathExpressionException
+     *
      *
      */
-    protected NodeList queryAssertion(String assertionXpath) throws XPathExpressionException {
+    protected NodeList queryAssertion(final String assertionXpath) {
         final String assertionExpr = "/saml:Assertion";
         final String signatureExpr = "ds:Signature/ds:SignedInfo/ds:Reference";
 
         String nameQuery;
-        String signedAssertionQuery = "/samlp:Response" + assertionExpr + "/" + signatureExpr;
+        final String signedAssertionQuery = "/samlp:Response" + assertionExpr + "/" + signatureExpr;
         NodeList nodeList = query(signedAssertionQuery, null);
         if (nodeList.getLength() == 0) {
             // let see if the whole response signed?
-            String signedMessageQuery = "/samlp:Response/" + signatureExpr;
+            final String signedMessageQuery = "/samlp:Response/" + signatureExpr;
             nodeList = query(signedMessageQuery, null);
             if (nodeList.getLength() == 1) {
-                Node responseReferenceNode = nodeList.item(0);
+                final Node responseReferenceNode = nodeList.item(0);
                 String responseId = responseReferenceNode.getAttributes().getNamedItem("URI").getNodeValue();
                 if (responseId != null && !responseId.isEmpty()) {
                     responseId = responseId.substring(1);
@@ -1188,7 +1153,7 @@ public class SamlResponse {
             }
             nameQuery += assertionExpr;
         } else { // there is a signed assertion
-            Node assertionReferenceNode = nodeList.item(0);
+            final Node assertionReferenceNode = nodeList.item(0);
             String assertionId = assertionReferenceNode.getAttributes().getNamedItem("URI").getNodeValue();
             if (assertionId != null && !assertionId.isEmpty()) {
                 assertionId = assertionId.substring(1);
@@ -1213,7 +1178,7 @@ public class SamlResponse {
      *
      * @return DOMNodeList The queried nodes
      */
-    protected NodeList query(String nameQuery, Node context) throws XPathExpressionException {
+    protected NodeList query(final String nameQuery, final Node context) {
         // LOGGER.debug("Executing query " + nameQuery);
         return Util.query(getSAMLResponseDocument(), nameQuery, context);
     }
@@ -1226,29 +1191,23 @@ public class SamlResponse {
      *
      * @return Decrypted Assertion.
      *
-     * @throws XPathExpressionException
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws SettingsException
-     * @throws ValidationException
+     *
      */
-    private Document decryptAssertion(Document dom) throws XPathExpressionException, ParserConfigurationException, SAXException,
-            IOException, SettingsException, ValidationException {
-        PrivateKey key = settings.getSPkey();
+    private Document decryptAssertion(final Document dom) {
+        final PrivateKey key = settings.getSPkey();
 
-        HSM hsm = this.settings.getHsm();
+        final HSM hsm = this.settings.getHsm();
 
         if (hsm == null && key == null) {
             throw new SettingsException("No private key available for decrypt, check settings", SettingsException.PRIVATE_KEY_NOT_FOUND);
         }
 
-        NodeList encryptedDataNodes = Util.query(dom, "/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData");
+        final NodeList encryptedDataNodes = Util.query(dom, "/samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData");
         if (encryptedDataNodes.getLength() == 0) {
             throw new ValidationException("No /samlp:Response/saml:EncryptedAssertion/xenc:EncryptedData element found",
                     ValidationException.MISSING_ENCRYPTED_ELEMENT);
         }
-        Element encryptedData = (Element) encryptedDataNodes.item(0);
+        final Element encryptedData = (Element) encryptedDataNodes.item(0);
 
         if (hsm != null) {
             Util.decryptUsingHsm(encryptedData, hsm);
@@ -1257,20 +1216,20 @@ public class SamlResponse {
         }
 
         // We need to Remove the saml:EncryptedAssertion Node
-        NodeList AssertionDataNodes = Util.query(dom, "/samlp:Response/saml:EncryptedAssertion/saml:Assertion");
+        final NodeList AssertionDataNodes = Util.query(dom, "/samlp:Response/saml:EncryptedAssertion/saml:Assertion");
         if (encryptedDataNodes.getLength() == 0) {
             throw new ValidationException("No /samlp:Response/saml:EncryptedAssertion/saml:Assertion element found",
                     ValidationException.MISSING_ENCRYPTED_ELEMENT);
         }
-        Node assertionNode = AssertionDataNodes.item(0);
+        final Node assertionNode = AssertionDataNodes.item(0);
         assertionNode.getParentNode().getParentNode().replaceChild(assertionNode, assertionNode.getParentNode());
 
         // In order to avoid Signature Validation errors we need to rebuild the dom.
         // https://groups.google.com/forum/#!topic/opensaml-users/gpXvwaZ53NA
-        String xmlStr = Util.convertDocumentToString(dom);
-        Document doc = Util.convertStringToDocument(xmlStr);
+        final String xmlStr = Util.convertDocumentToString(dom);
+
         // LOGGER.debug("Decrypted SAMLResponse --> " + xmlStr);
-        return doc;
+        return Util.convertStringToDocument(xmlStr);
     }
 
     /**
@@ -1304,10 +1263,10 @@ public class SamlResponse {
     /**
      * Validates the audiences.
      *
-     * @throws XPathExpressionException
-     * @throws ValidationException
+     *
+     *
      */
-    protected void validateAudiences() throws XPathExpressionException, ValidationException {
+    protected void validateAudiences() {
         final List<String> validAudiences = getAudiences();
         if (!validAudiences.isEmpty() && !validAudiences.contains(settings.getSpEntityId())) {
             throw new ValidationException(settings.getSpEntityId() + " is not a valid audience for this Response",
@@ -1319,15 +1278,16 @@ public class SamlResponse {
      * Validate the destination.
      *
      * @param element element with the destination attribute
-     * @throws ValidationException
+     *
      */
-    protected void validateDestination(final Element element) throws ValidationException {
+    protected void validateDestination(final Element element) {
         if (element.hasAttribute("Destination")) {
             final String destinationUrl = element.getAttribute("Destination");
             if (destinationUrl != null) {
                 if (destinationUrl.isEmpty()) {
                     throw new ValidationException("The response has an empty Destination value", ValidationException.EMPTY_DESTINATION);
-                } else if (!destinationUrl.equals(currentUrl)) {
+                }
+                if (!destinationUrl.equals(currentUrl)) {
                     throw new ValidationException("The response was received at " + currentUrl + " instead of " + destinationUrl,
                             ValidationException.WRONG_DESTINATION);
                 }
@@ -1358,9 +1318,9 @@ public class SamlResponse {
      * Validates a SPNameQualifier.
      *
      * @param spNameQualifier the SPNameQualifier
-     * @throws ValidationException
+     *
      */
-    protected void validateSpNameQualifier(final String spNameQualifier) throws ValidationException {
+    protected void validateSpNameQualifier(final String spNameQualifier) {
         if (settings.isStrict() && !spNameQualifier.equals(settings.getSpEntityId())) {
             throw new ValidationException("The SPNameQualifier value mismatch the SP entityID value.",
                     ValidationException.SP_NAME_QUALIFIER_NAME_MISMATCH);
@@ -1371,15 +1331,16 @@ public class SamlResponse {
      * Returns the issue instant of this message.
      *
      * @return a new {@link Calendar} instance carrying the issue instant of this message
-     * @throws ValidationException
+     *
      *             if the found IssueInstant attribute is not in the expected
      *             UTC form of ISO-8601 format
      */
-    public Calendar getResponseIssueInstant() throws ValidationException {
+    public Calendar getResponseIssueInstant() {
         final Element rootElement = getSAMLResponseDocument().getDocumentElement();
         final String issueInstantString = rootElement.hasAttribute("IssueInstant") ? rootElement.getAttribute("IssueInstant") : null;
-        if (issueInstantString == null)
+        if (issueInstantString == null) {
             return null;
+        }
         final Calendar result = Calendar.getInstance();
         try {
             result.setTimeInMillis(Util.parseDateTime(issueInstantString).toEpochMilli());

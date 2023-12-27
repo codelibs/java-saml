@@ -42,7 +42,7 @@ public class Organization {
      * @param orgLangAttribute
      * 				The xml lang attribute, describing name and display name
      */
-    public Organization(String orgName, String orgDisplayName, URL orgUrl, String orgLangAttribute) {
+    public Organization(final String orgName, final String orgDisplayName, final URL orgUrl, final String orgLangAttribute) {
         this(orgName, orgDisplayName, orgUrl != null ? orgUrl.toString() : "", orgLangAttribute);
     }
 
@@ -57,7 +57,7 @@ public class Organization {
      * @param orgUrl
      *				URL. Organization URL
      */
-    public Organization(String orgName, String orgDisplayName, URL orgUrl) {
+    public Organization(final String orgName, final String orgDisplayName, final URL orgUrl) {
         this(orgName, orgDisplayName, orgUrl, "en");
     }
 
@@ -73,7 +73,7 @@ public class Organization {
      * @param orgLangAttribute
      * 				The xml lang attribute, describing name and display name
      */
-    public Organization(String orgName, String orgDisplayName, String orgUrl, String orgLangAttribute) {
+    public Organization(final String orgName, final String orgDisplayName, final String orgUrl, final String orgLangAttribute) {
         this.orgName = orgName != null ? orgName : "";
         this.orgDisplayName = orgDisplayName != null ? orgDisplayName : "";
         this.orgUrl = orgUrl != null ? orgUrl : "";
@@ -91,7 +91,7 @@ public class Organization {
      * @param orgUrl
      *				String. Organization URL
      */
-    public Organization(String orgName, String orgDisplayName, String orgUrl) {
+    public Organization(final String orgName, final String orgDisplayName, final String orgUrl) {
         this(orgName, orgDisplayName, orgUrl, "en");
     }
 
@@ -130,7 +130,7 @@ public class Organization {
      *
      * @return boolean true if organizations are equals
      */
-    public final Boolean equalsTo(Organization org) {
+    public final Boolean equalsTo(final Organization org) {
         return orgName.equals(org.getOrgName()) && orgDisplayName.equals(org.getOrgDisplayName()) && orgUrl.equals(org.getOrgUrl())
                 && orgLangAttribute.equals(org.getOrgLangAttribute());
     }

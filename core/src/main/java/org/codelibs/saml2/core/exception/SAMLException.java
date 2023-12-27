@@ -3,7 +3,7 @@ package org.codelibs.saml2.core.exception;
 /**
  * Top-level exception class for the SAML client.
  */
-public class SAMLException extends Exception {
+public class SAMLException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
@@ -13,7 +13,7 @@ public class SAMLException extends Exception {
      * @param message
      *     The human-readable error message associated with this exception.
      */
-    public SAMLException(String message) {
+    public SAMLException(final String message) {
         super(message);
     }
 
@@ -23,7 +23,7 @@ public class SAMLException extends Exception {
      * @param cause
      *     The upstream cause of this exception.
      */
-    public SAMLException(Throwable cause) {
+    public SAMLException(final Throwable cause) {
         super(cause);
     }
 
@@ -37,7 +37,7 @@ public class SAMLException extends Exception {
      * @param cause
      *     The upstream cause associated with this exception.
      */
-    public SAMLException(String message, Throwable cause) {
+    public SAMLException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

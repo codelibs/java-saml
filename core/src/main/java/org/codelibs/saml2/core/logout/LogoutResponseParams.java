@@ -30,13 +30,13 @@ public class LogoutResponseParams {
     /**
      * Creates a logout response with a response status with a top-level
      * {@link Constants#STATUS_SUCCESS} status code.
-     * 
+     *
      * @param inResponseTo
      *              the id of the logout request the response refers to; may be
      *              <code>null</code> if such id cannot be determined (possibly
      *              because the request is malformed)
      */
-    public LogoutResponseParams(String inResponseTo) {
+    public LogoutResponseParams(final String inResponseTo) {
         this(inResponseTo, Constants.STATUS_SUCCESS);
     }
 
@@ -50,7 +50,7 @@ public class LogoutResponseParams {
      * @param statusCode
      *              the top-level status code code to set on the response
      */
-    public LogoutResponseParams(String inResponseTo, String statusCode) {
+    public LogoutResponseParams(final String inResponseTo, final String statusCode) {
         this(inResponseTo, new SamlResponseStatus(statusCode));
     }
 
@@ -63,14 +63,13 @@ public class LogoutResponseParams {
      *              because the request is malformed)
      * @param responseStatus
      *              the response status; should not be <code>null</code>
-     * @throws NullPointerException
-     *               if the specified response status is <code>null</code>
      */
-    public LogoutResponseParams(String inResponseTo, SamlResponseStatus responseStatus) throws NullPointerException {
+    public LogoutResponseParams(final String inResponseTo, final SamlResponseStatus responseStatus) {
         this.inResponseTo = inResponseTo;
         this.responseStatus = responseStatus;
-        if (responseStatus == null)
-            throw new NullPointerException("response status must not be null");
+        if (responseStatus == null) {
+            throw new IllegalArgumentException("response status must not be null");
+        }
     }
 
     /**
@@ -80,14 +79,14 @@ public class LogoutResponseParams {
      * @param source
      *              the source set of logout request input parameters
      */
-    protected LogoutResponseParams(LogoutResponseParams source) {
+    protected LogoutResponseParams(final LogoutResponseParams source) {
         this.inResponseTo = source.getInResponseTo();
         this.responseStatus = source.getResponseStatus();
     }
 
     /**
      * Returns the response status.
-     * 
+     *
      * @return the response status
      */
     public SamlResponseStatus getResponseStatus() {
@@ -96,7 +95,7 @@ public class LogoutResponseParams {
 
     /**
      * Returns the id of the logout request this response refers to.
-     * 
+     *
      * @return the <code>inResponseTo</code>
      */
     public String getInResponseTo() {

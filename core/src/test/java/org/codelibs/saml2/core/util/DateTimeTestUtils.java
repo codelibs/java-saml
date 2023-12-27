@@ -4,8 +4,6 @@ import java.time.Clock;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-import org.codelibs.saml2.core.util.Util;
-
 public class DateTimeTestUtils {
 
     /**

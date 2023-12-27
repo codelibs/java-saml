@@ -33,11 +33,10 @@ public final class HttpRequest {
      * Creates a new HttpRequest.
      *
      * @param requestURL the request URL (up to but not including query parameters)
-     * @throws NullPointerException if requestURL is null
      * @deprecated Not providing a queryString can cause HTTP Redirect binding to fail.
      */
     @Deprecated
-    public HttpRequest(String requestURL) {
+    public HttpRequest(final String requestURL) {
         this(requestURL, EMPTY_PARAMETERS);
     }
 
@@ -47,7 +46,7 @@ public final class HttpRequest {
      * @param requestURL  the request URL (up to but not including query parameters)
      * @param queryString string that is contained in the request URL after the path
      */
-    public HttpRequest(String requestURL, String queryString) {
+    public HttpRequest(final String requestURL, final String queryString) {
         this(requestURL, EMPTY_PARAMETERS, queryString);
     }
 
@@ -56,11 +55,10 @@ public final class HttpRequest {
      *
      * @param requestURL  the request URL (up to but not including query parameters)
      * @param parameters the request query parameters
-     * @throws NullPointerException if any of the parameters is null
      * @deprecated Not providing a queryString can cause HTTP Redirect binding to fail.
      */
     @Deprecated
-    public HttpRequest(String requestURL, Map<String, List<String>> parameters) {
+    public HttpRequest(final String requestURL, final Map<String, List<String>> parameters) {
         this(requestURL, parameters, null);
     }
 
@@ -70,9 +68,8 @@ public final class HttpRequest {
      * @param requestURL  the request URL (up to but not including query parameters)
      * @param parameters the request query parameters
      * @param queryString string that is contained in the request URL after the path
-     * @throws NullPointerException if any of the parameters is null
      */
-    public HttpRequest(String requestURL, Map<String, List<String>> parameters, String queryString) {
+    public HttpRequest(final String requestURL, final Map<String, List<String>> parameters, final String queryString) {
         this.requestURL = checkNotNull(requestURL, "requestURL");
         this.parameters = unmodifiableCopyOf(checkNotNull(parameters, "queryParams"));
         this.queryString = StringUtils.trimToEmpty(queryString);
@@ -82,13 +79,12 @@ public final class HttpRequest {
      * @param name  the query parameter name
      * @param value the query parameter value
      * @return a new HttpRequest with the given query parameter added
-     * @throws NullPointerException if any of the parameters is null
      */
-    public HttpRequest addParameter(String name, String value) {
+    public HttpRequest addParameter(final String name, final String value) {
         checkNotNull(name, "name");
         checkNotNull(value, "value");
 
-        final List<String> oldValues = parameters.containsKey(name) ? parameters.get(name) : new ArrayList<String>();
+        final List<String> oldValues = parameters.containsKey(name) ? parameters.get(name) : new ArrayList<>();
         final List<String> newValues = new ArrayList<>(oldValues);
         newValues.add(value);
         final Map<String, List<String>> params = new HashMap<>(parameters);
@@ -100,9 +96,8 @@ public final class HttpRequest {
     /**
      * @param name  the query parameter name
      * @return a new HttpRequest with the given query parameter removed
-     * @throws NullPointerException if any of the parameters is null
      */
-    public HttpRequest removeParameter(String name) {
+    public HttpRequest removeParameter(final String name) {
         checkNotNull(name, "name");
 
         final Map<String, List<String>> params = new HashMap<>(parameters);
@@ -125,8 +120,8 @@ public final class HttpRequest {
      * @param name the query parameter name
      * @return the first value for the parameter, or null
      */
-    public String getParameter(String name) {
-        List<String> values = getParameters(name);
+    public String getParameter(final String name) {
+        final List<String> values = getParameters(name);
         return values.isEmpty() ? null : values.get(0);
     }
 
@@ -134,8 +129,8 @@ public final class HttpRequest {
      * @param name the query parameter name
      * @return a List containing all values for the parameter
      */
-    public List<String> getParameters(String name) {
-        List<String> values = parameters.get(name);
+    public List<String> getParameters(final String name) {
+        final List<String> values = parameters.get(name);
         return values != null ? values : Collections.<String> emptyList();
     }
 
@@ -154,13 +149,12 @@ public final class HttpRequest {
      * @param name
      * @return the first value for the parameter, or null
      */
-    public String getEncodedParameter(String name) {
-        Matcher matcher = Pattern.compile(Pattern.quote(name) + "=([^&#]+)").matcher(queryString);
+    public String getEncodedParameter(final String name) {
+        final Matcher matcher = Pattern.compile(Pattern.quote(name) + "=([^&#]+)").matcher(queryString);
         if (matcher.find()) {
             return matcher.group(1);
-        } else {
-            return Util.urlEncoder(getParameter(name));
         }
+        return Util.urlEncoder(getParameter(name));
     }
 
     /**
@@ -172,13 +166,13 @@ public final class HttpRequest {
      * @param defaultValue
      * @return the first value for the parameter, or url encoded default value
      */
-    public String getEncodedParameter(String name, String defaultValue) {
-        String value = getEncodedParameter(name);
+    public String getEncodedParameter(final String name, final String defaultValue) {
+        final String value = getEncodedParameter(name);
         return (value != null ? value : Util.urlEncoder(defaultValue));
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -187,7 +181,7 @@ public final class HttpRequest {
             return false;
         }
 
-        HttpRequest that = (HttpRequest) o;
+        final HttpRequest that = (HttpRequest) o;
         return Objects.equals(requestURL, that.requestURL) && Objects.equals(parameters, that.parameters)
                 && Objects.equals(queryString, that.queryString);
     }
@@ -202,9 +196,9 @@ public final class HttpRequest {
         return "HttpRequest{" + "requestURL='" + requestURL + '\'' + ", parameters=" + parameters + ", queryString=" + queryString + '}';
     }
 
-    private static Map<String, List<String>> unmodifiableCopyOf(Map<String, List<String>> orig) {
-        Map<String, List<String>> copy = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : orig.entrySet()) {
+    private static Map<String, List<String>> unmodifiableCopyOf(final Map<String, List<String>> orig) {
+        final Map<String, List<String>> copy = new HashMap<>();
+        for (final Map.Entry<String, List<String>> entry : orig.entrySet()) {
             copy.put(entry.getKey(), unmodifiableList(new ArrayList<>(entry.getValue())));
         }
 

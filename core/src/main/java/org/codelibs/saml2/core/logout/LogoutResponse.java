@@ -1,6 +1,5 @@
 package org.codelibs.saml2.core.logout;
 
-import java.io.IOException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -10,9 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.xml.xpath.XPathExpressionException;
-
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 import org.codelibs.saml2.core.exception.SettingsException;
 import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.http.HttpRequest;
@@ -90,7 +87,7 @@ public class LogoutResponse {
      *              building an outgoing logout response
      *
      */
-    public LogoutResponse(Saml2Settings settings, HttpRequest request) {
+    public LogoutResponse(final Saml2Settings settings, final HttpRequest request) {
         this.settings = settings;
         this.request = request;
 
@@ -116,12 +113,12 @@ public class LogoutResponse {
      *              a set of logout response input parameters that shape the
      *              request to create
      */
-    public LogoutResponse(Saml2Settings settings, LogoutResponseParams params) {
+    public LogoutResponse(final Saml2Settings settings, final LogoutResponseParams params) {
         this.settings = settings;
         this.request = null;
         id = Util.generateUniqueID(settings.getUniqueIDPrefix());
         issueInstant = Calendar.getInstance();
-        StrSubstitutor substitutor = generateSubstitutor(params, settings);
+        final StringSubstitutor substitutor = generateSubstitutor(params, settings);
         this.logoutResponseString = postProcessXml(substitutor.replace(getLogoutResponseTemplate()), params, settings);
     }
 
@@ -131,9 +128,8 @@ public class LogoutResponse {
      * @param deflated
      *				If deflated or not the encoded Logout Response
      *
-     * @throws IOException
      */
-    public String getEncodedLogoutResponse(Boolean deflated) throws IOException {
+    public String getEncodedLogoutResponse(Boolean deflated) {
         String encodedLogoutResponse;
         if (deflated == null) {
             deflated = settings.isCompressResponseEnabled();
@@ -149,9 +145,8 @@ public class LogoutResponse {
     /**
      * @return the base64 encoded, unsigned Logout Response (deflated or not)
      *
-     * @throws IOException
      */
-    public String getEncodedLogoutResponse() throws IOException {
+    public String getEncodedLogoutResponse() {
         return getEncodedLogoutResponse(null);
     }
 
@@ -183,7 +178,7 @@ public class LogoutResponse {
     *
     * @return if the SAML LogoutResponse is or not valid
     */
-    public Boolean isValid(String requestId) {
+    public boolean isValid(final String requestId) {
         validationException = null;
 
         try {
@@ -192,23 +187,23 @@ public class LogoutResponse {
             }
 
             if (this.currentUrl == null || this.currentUrl.isEmpty()) {
-                throw new Exception("The URL of the current host was not established");
+                throw new IllegalArgumentException("The URL of the current host was not established");
             }
 
-            String signature = request.getParameter("Signature");
+            final String signature = request.getParameter("Signature");
 
             if (settings.isStrict()) {
-                Element rootElement = logoutResponseDocument.getDocumentElement();
+                final Element rootElement = logoutResponseDocument.getDocumentElement();
                 rootElement.normalize();
 
-                if (settings.getWantXMLValidation()) {
-                    if (!Util.validateXML(this.logoutResponseDocument, SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0)) {
-                        throw new ValidationException("Invalid SAML Logout Response. Not match the saml-schema-protocol-2.0.xsd",
-                                ValidationException.INVALID_XML_FORMAT);
-                    }
+                if (settings.getWantXMLValidation()
+                        && !Util.validateXML(this.logoutResponseDocument, SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0)) {
+                    throw new ValidationException("Invalid SAML Logout Response. Not match the saml-schema-protocol-2.0.xsd",
+                            ValidationException.INVALID_XML_FORMAT);
                 }
 
-                String responseInResponseTo = rootElement.hasAttribute("InResponseTo") ? rootElement.getAttribute("InResponseTo") : null;
+                final String responseInResponseTo =
+                        rootElement.hasAttribute("InResponseTo") ? rootElement.getAttribute("InResponseTo") : null;
                 if (requestId == null && responseInResponseTo != null && settings.isRejectUnsolicitedResponsesWithInResponseTo()) {
                     throw new ValidationException(
                             "The Response has an InResponseTo attribute: " + responseInResponseTo + " while no InResponseTo was expected",
@@ -224,7 +219,7 @@ public class LogoutResponse {
                 }
 
                 // Check issuer
-                String issuer = getIssuer();
+                final String issuer = getIssuer();
                 if (issuer != null && !issuer.isEmpty() && !issuer.equals(settings.getIdpEntityId())) {
                     throw new ValidationException(String.format("Invalid issuer in the Logout Response. Was '%s', but expected '%s'",
                             issuer, settings.getIdpEntityId()), ValidationException.WRONG_ISSUER);
@@ -232,13 +227,10 @@ public class LogoutResponse {
 
                 // Check destination
                 if (rootElement.hasAttribute("Destination")) {
-                    String destinationUrl = rootElement.getAttribute("Destination");
-                    if (destinationUrl != null) {
-                        if (!destinationUrl.isEmpty() && !destinationUrl.equals(currentUrl)) {
-                            throw new ValidationException(
-                                    "The LogoutResponse was received at " + currentUrl + " instead of " + destinationUrl,
-                                    ValidationException.WRONG_DESTINATION);
-                        }
+                    final String destinationUrl = rootElement.getAttribute("Destination");
+                    if ((destinationUrl != null) && (!destinationUrl.isEmpty() && !destinationUrl.equals(currentUrl))) {
+                        throw new ValidationException("The LogoutResponse was received at " + currentUrl + " instead of " + destinationUrl,
+                                ValidationException.WRONG_DESTINATION);
                     }
                 }
 
@@ -249,19 +241,17 @@ public class LogoutResponse {
             }
 
             if (signature != null && !signature.isEmpty()) {
-                X509Certificate cert = settings.getIdpx509cert();
+                final X509Certificate cert = settings.getIdpx509cert();
 
-                List<X509Certificate> certList = new ArrayList<X509Certificate>();
-                List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
+                final List<X509Certificate> certList = new ArrayList<>();
+                final List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
 
                 if (multipleCertList != null && multipleCertList.size() != 0) {
                     certList.addAll(multipleCertList);
                 }
 
-                if (cert != null) {
-                    if (certList.isEmpty() || !certList.contains(cert)) {
-                        certList.add(0, cert);
-                    }
+                if ((cert != null) && (certList.isEmpty() || !certList.contains(cert))) {
+                    certList.add(0, cert);
                 }
 
                 if (certList.isEmpty()) {
@@ -274,37 +264,37 @@ public class LogoutResponse {
                     signAlg = Constants.RSA_SHA1;
                 }
 
-                Boolean rejectDeprecatedAlg = settings.getRejectDeprecatedAlg();
+                final Boolean rejectDeprecatedAlg = settings.getRejectDeprecatedAlg();
                 if (Util.mustRejectDeprecatedSignatureAlgo(signAlg, rejectDeprecatedAlg)) {
                     return false;
                 }
 
-                String signedQuery = "SAMLResponse=" + request.getEncodedParameter("SAMLResponse");
+                StringBuilder signedQuery = new StringBuilder("SAMLResponse=").append(request.getEncodedParameter("SAMLResponse"));
 
-                String relayState = request.getEncodedParameter("RelayState");
+                final String relayState = request.getEncodedParameter("RelayState");
                 if (relayState != null && !relayState.isEmpty()) {
-                    signedQuery += "&RelayState=" + relayState;
+                    signedQuery.append("&RelayState=").append(relayState);
                 }
 
-                signedQuery += "&SigAlg=" + request.getEncodedParameter("SigAlg", signAlg);
+                signedQuery.append("&SigAlg=").append(request.getEncodedParameter("SigAlg", signAlg));
 
-                if (!Util.validateBinarySignature(signedQuery, Util.base64decoder(signature), certList, signAlg)) {
+                if (!Util.validateBinarySignature(signedQuery.toString(), Util.base64decoder(signature), certList, signAlg)) {
                     throw new ValidationException("Signature validation failed. Logout Response rejected",
                             ValidationException.INVALID_SIGNATURE);
                 }
             }
 
-            LOGGER.debug("LogoutRequest validated --> " + logoutResponseString);
+            LOGGER.debug("LogoutRequest validated --> {}", logoutResponseString);
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             validationException = e;
-            LOGGER.debug("LogoutResponse invalid --> " + logoutResponseString);
-            LOGGER.error(validationException.getMessage());
+            LOGGER.debug("LogoutResponse invalid --> {}", logoutResponseString, e);
+            LOGGER.warn(validationException.getMessage());
             return false;
         }
     }
 
-    public Boolean isValid() {
+    public boolean isValid() {
         return isValid(null);
     }
 
@@ -313,11 +303,10 @@ public class LogoutResponse {
      *
      * @return the issuer of the logout response
      *
-     * @throws XPathExpressionException
      */
-    public String getIssuer() throws XPathExpressionException {
+    public String getIssuer() {
         String issuer = null;
-        NodeList issuers = this.query("/samlp:LogoutResponse/saml:Issuer");
+        final NodeList issuers = this.query("/samlp:LogoutResponse/saml:Issuer");
         if (issuers.getLength() == 1) {
             issuer = issuers.item(0).getTextContent();
         }
@@ -332,11 +321,10 @@ public class LogoutResponse {
      *
      * @return the Status
      *
-     * @throws XPathExpressionException
      */
-    public String getStatus() throws XPathExpressionException {
+    public String getStatus() {
         String statusCode = null;
-        NodeList entries = this.query("/samlp:LogoutResponse/samlp:Status/samlp:StatusCode");
+        final NodeList entries = this.query("/samlp:LogoutResponse/samlp:Status/samlp:StatusCode");
         if (entries.getLength() == 1) {
             statusCode = entries.item(0).getAttributes().getNamedItem("Value").getNodeValue();
         }
@@ -348,10 +336,9 @@ public class LogoutResponse {
      *
      * @return SamlResponseStatus
      *
-     * @throws ValidationException
      */
-    public SamlResponseStatus getSamlResponseStatus() throws ValidationException {
-        String statusXpath = "/samlp:LogoutResponse/samlp:Status";
+    public SamlResponseStatus getSamlResponseStatus() {
+        final String statusXpath = "/samlp:LogoutResponse/samlp:Status";
         return Util.getStatus(statusXpath, this.logoutResponseDocument);
     }
 
@@ -362,9 +349,8 @@ public class LogoutResponse {
        *				Xpath Expression
        *
        * @return DOMNodeList The queried nodes
-     * @throws XPathExpressionException
        */
-    protected NodeList query(String query) throws XPathExpressionException {
+    protected NodeList query(final String query) {
         return Util.query(this.logoutResponseDocument, query, null);
     }
 
@@ -389,11 +375,11 @@ public class LogoutResponse {
      *             used instead)
      */
     @Deprecated
-    public void build(String inResponseTo, SamlResponseStatus responseStatus) {
+    public void build(final String inResponseTo, final SamlResponseStatus responseStatus) {
         id = Util.generateUniqueID(settings.getUniqueIDPrefix());
         issueInstant = Calendar.getInstance();
         final LogoutResponseParams params = new LogoutResponseParams(inResponseTo, responseStatus);
-        StrSubstitutor substitutor = generateSubstitutor(params, settings);
+        final StringSubstitutor substitutor = generateSubstitutor(params, settings);
         this.logoutResponseString = postProcessXml(substitutor.replace(getLogoutResponseTemplate()), params, settings);
     }
 
@@ -417,7 +403,7 @@ public class LogoutResponse {
     *             used instead)
      */
     @Deprecated
-    public void build(String inResponseTo, String statusCode) {
+    public void build(final String inResponseTo, final String statusCode) {
         build(inResponseTo, new SamlResponseStatus(statusCode));
     }
 
@@ -439,7 +425,7 @@ public class LogoutResponse {
      *             used instead)
      */
     @Deprecated
-    public void build(String inResponseTo) {
+    public void build(final String inResponseTo) {
         build(inResponseTo, Constants.STATUS_SUCCESS);
     }
 
@@ -493,18 +479,18 @@ public class LogoutResponse {
      * @param settings
      *              Saml2Settings object. Setting data
      *
-     * @return the StrSubstitutor object of the LogoutResponse
+     * @return the StringSubstitutor object of the LogoutResponse
      */
-    private StrSubstitutor generateSubstitutor(LogoutResponseParams params, Saml2Settings settings) {
-        Map<String, String> valueMap = new HashMap<String, String>();
+    private StringSubstitutor generateSubstitutor(final LogoutResponseParams params, final Saml2Settings settings) {
+        final Map<String, String> valueMap = new HashMap<>();
 
         valueMap.put("id", Util.toXml(id));
 
-        String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
+        final String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
         valueMap.put("issueInstant", issueInstantString);
 
         String destinationStr = "";
-        URL slo = settings.getIdpSingleLogoutServiceResponseUrl();
+        final URL slo = settings.getIdpSingleLogoutServiceResponseUrl();
         if (slo != null) {
             destinationStr = " Destination=\"" + Util.toXml(slo.toString()) + "\"";
         }
@@ -517,19 +503,19 @@ public class LogoutResponse {
         }
         valueMap.put("inResponseStr", inResponseStr);
 
-        StringBuilder statusStr = new StringBuilder("<samlp:StatusCode ");
+        final StringBuilder statusStr = new StringBuilder("<samlp:StatusCode ");
         final SamlResponseStatus responseStatus = params.getResponseStatus();
         if (responseStatus != null) {
-            String statusCode = responseStatus.getStatusCode();
+            final String statusCode = responseStatus.getStatusCode();
             if (statusCode != null) {
                 statusStr.append("Value=\"").append(Util.toXml(statusCode)).append("\"");
-                String subStatusCode = responseStatus.getSubStatusCode();
+                final String subStatusCode = responseStatus.getSubStatusCode();
                 if (subStatusCode != null) {
                     statusStr.append("><samlp:StatusCode Value=\"").append(Util.toXml(subStatusCode)).append("\" /></samlp:StatusCode>");
                 } else {
                     statusStr.append(" />");
                 }
-                String statusMessage = responseStatus.getStatusMessage();
+                final String statusMessage = responseStatus.getStatusMessage();
                 if (statusMessage != null) {
                     statusStr.append("<samlp:StatusMessage>").append(Util.toXml(statusMessage)).append("</samlp:StatusMessage>");
                 }
@@ -539,14 +525,14 @@ public class LogoutResponse {
 
         valueMap.put("issuer", Util.toXml(settings.getSpEntityId()));
 
-        return new StrSubstitutor(valueMap);
+        return new StringSubstitutor(valueMap);
     }
 
     /**
      * @return the LogoutResponse's template
      */
     private static StringBuilder getLogoutResponseTemplate() {
-        StringBuilder template = new StringBuilder();
+        final StringBuilder template = new StringBuilder();
         template.append(
                 "<samlp:LogoutResponse xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ");
         template.append("ID=\"${id}\" ");
@@ -588,7 +574,7 @@ public class LogoutResponse {
      * @param validationException
      *              the validation exception to set
      */
-    protected void setValidationException(Exception validationException) {
+    protected void setValidationException(final Exception validationException) {
         this.validationException = validationException;
     }
 
@@ -596,25 +582,23 @@ public class LogoutResponse {
      * Returns the issue instant of this message.
      *
      * @return a new {@link Calendar} instance carrying the issue instant of this message
-     * @throws ValidationException
-     *             if this logout response was received and parsed and the found IssueInstant
-     *             attribute is not in the expected UTC form of ISO-8601 format
      */
-    public Calendar getIssueInstant() throws ValidationException {
-        if (logoutResponseDocument != null) {
-            final Element rootElement = logoutResponseDocument.getDocumentElement();
-            final String issueInstantString = rootElement.hasAttribute("IssueInstant") ? rootElement.getAttribute("IssueInstant") : null;
-            if (issueInstantString == null)
-                return null;
-            final Calendar result = Calendar.getInstance();
-            try {
-                result.setTimeInMillis(Util.parseDateTime(issueInstantString).toEpochMilli());
-            } catch (final IllegalArgumentException e) {
-                throw new ValidationException("The Response IssueInstant attribute is not in the expected UTC form of ISO-8601 format",
-                        ValidationException.INVALID_ISSUE_INSTANT_FORMAT);
-            }
-            return result;
-        } else
+    public Calendar getIssueInstant() {
+        if (logoutResponseDocument == null) {
             return issueInstant == null ? null : (Calendar) issueInstant.clone();
+        }
+        final Element rootElement = logoutResponseDocument.getDocumentElement();
+        final String issueInstantString = rootElement.hasAttribute("IssueInstant") ? rootElement.getAttribute("IssueInstant") : null;
+        if (issueInstantString == null) {
+            return null;
+        }
+        final Calendar result = Calendar.getInstance();
+        try {
+            result.setTimeInMillis(Util.parseDateTime(issueInstantString).toEpochMilli());
+        } catch (final IllegalArgumentException e) {
+            throw new ValidationException("The Response IssueInstant attribute is not in the expected UTC form of ISO-8601 format",
+                    ValidationException.INVALID_ISSUE_INSTANT_FORMAT);
+        }
+        return result;
     }
 }

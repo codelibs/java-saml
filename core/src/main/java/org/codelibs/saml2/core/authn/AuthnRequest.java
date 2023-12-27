@@ -1,13 +1,12 @@
 package org.codelibs.saml2.core.authn;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 import org.codelibs.saml2.core.model.Organization;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.util.Constants;
@@ -53,7 +52,7 @@ public class AuthnRequest {
      *            OneLogin_Saml2_Settings
      * @see #AuthnRequest(Saml2Settings, AuthnRequestParams)
      */
-    public AuthnRequest(Saml2Settings settings) {
+    public AuthnRequest(final Saml2Settings settings) {
         this(settings, new AuthnRequestParams(false, false, true));
     }
 
@@ -75,7 +74,8 @@ public class AuthnRequest {
      *             instead
      */
     @Deprecated
-    public AuthnRequest(Saml2Settings settings, boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy, String nameIdValueReq) {
+    public AuthnRequest(final Saml2Settings settings, final boolean forceAuthn, final boolean isPassive, final boolean setNameIdPolicy,
+            final String nameIdValueReq) {
         this(settings, new AuthnRequestParams(forceAuthn, isPassive, setNameIdPolicy, nameIdValueReq));
     }
 
@@ -95,7 +95,7 @@ public class AuthnRequest {
      *             instead
      */
     @Deprecated
-    public AuthnRequest(Saml2Settings settings, boolean forceAuthn, boolean isPassive, boolean setNameIdPolicy) {
+    public AuthnRequest(final Saml2Settings settings, final boolean forceAuthn, final boolean isPassive, final boolean setNameIdPolicy) {
         this(settings, forceAuthn, isPassive, setNameIdPolicy, null);
     }
 
@@ -108,12 +108,12 @@ public class AuthnRequest {
      *              a set of authentication request input parameters that shape the
      *              request to create
      */
-    public AuthnRequest(Saml2Settings settings, AuthnRequestParams params) {
+    public AuthnRequest(final Saml2Settings settings, final AuthnRequestParams params) {
         this.id = Util.generateUniqueID(settings.getUniqueIDPrefix());
         issueInstant = Calendar.getInstance();
         this.settings = settings;
 
-        StrSubstitutor substitutor = generateSubstitutor(params, settings);
+        final StringSubstitutor substitutor = generateSubstitutor(params, settings);
         authnRequestString = postProcessXml(substitutor.replace(getAuthnRequestTemplate()), params, settings);
         LOGGER.debug("AuthNRequest --> " + authnRequestString);
     }
@@ -146,9 +146,8 @@ public class AuthnRequest {
      * @param deflated
      *				If deflated or not the encoded AuthnRequest
      *
-     * @throws IOException
      */
-    public String getEncodedAuthnRequest(Boolean deflated) throws IOException {
+    public String getEncodedAuthnRequest(Boolean deflated) {
         String encodedAuthnRequest;
         if (deflated == null) {
             deflated = settings.isCompressRequestEnabled();
@@ -164,9 +163,8 @@ public class AuthnRequest {
     /**
      * @return base64 encoded, unsigned AuthnRequest (deflated or not)
      *
-     * @throws IOException
      */
-    public String getEncodedAuthnRequest() throws IOException {
+    public String getEncodedAuthnRequest() {
         return getEncodedAuthnRequest(null);
     }
 
@@ -187,9 +185,9 @@ public class AuthnRequest {
      *
      * @return the StrSubstitutor object of the AuthnRequest
      */
-    private StrSubstitutor generateSubstitutor(AuthnRequestParams params, Saml2Settings settings) {
+    private StringSubstitutor generateSubstitutor(final AuthnRequestParams params, final Saml2Settings settings) {
 
-        Map<String, String> valueMap = new HashMap<String, String>();
+        final Map<String, String> valueMap = new HashMap<>();
 
         String forceAuthnStr = "";
         if (params.isForceAuthn()) {
@@ -205,16 +203,16 @@ public class AuthnRequest {
         valueMap.put("isPassiveStr", isPassiveStr);
 
         String destinationStr = "";
-        URL sso = settings.getIdpSingleSignOnServiceUrl();
+        final URL sso = settings.getIdpSingleSignOnServiceUrl();
         if (sso != null) {
             destinationStr = " Destination=\"" + Util.toXml(sso.toString()) + "\"";
         }
         valueMap.put("destinationStr", destinationStr);
 
         String subjectStr = "";
-        String nameIdValueReq = params.getNameIdValueReq();
+        final String nameIdValueReq = params.getNameIdValueReq();
         if (nameIdValueReq != null && !nameIdValueReq.isEmpty()) {
-            String nameIDFormat = settings.getSpNameIDFormat();
+            final String nameIDFormat = settings.getSpNameIDFormat();
             subjectStr = "<saml:Subject>";
             subjectStr += "<saml:NameID Format=\"" + Util.toXml(nameIDFormat) + "\">" + Util.toXml(nameIdValueReq) + "</saml:NameID>";
             subjectStr += "<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"></saml:SubjectConfirmation>";
@@ -237,16 +235,16 @@ public class AuthnRequest {
         valueMap.put("nameIDPolicyStr", nameIDPolicyStr);
 
         String providerStr = "";
-        Organization organization = settings.getOrganization();
+        final Organization organization = settings.getOrganization();
         if (organization != null) {
-            String displayName = organization.getOrgDisplayName();
+            final String displayName = organization.getOrgDisplayName();
             if (!displayName.isEmpty()) {
                 providerStr = " ProviderName=\"" + Util.toXml(displayName) + "\"";
             }
         }
         valueMap.put("providerStr", providerStr);
 
-        String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
+        final String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
         valueMap.put("issueInstant", issueInstantString);
         valueMap.put("id", Util.toXml(String.valueOf(id)));
         valueMap.put("assertionConsumerServiceURL", Util.toXml(String.valueOf(settings.getSpAssertionConsumerServiceUrl())));
@@ -254,11 +252,11 @@ public class AuthnRequest {
         valueMap.put("spEntityid", Util.toXml(settings.getSpEntityId()));
 
         String requestedAuthnContextStr = "";
-        List<String> requestedAuthnContexts = settings.getRequestedAuthnContext();
+        final List<String> requestedAuthnContexts = settings.getRequestedAuthnContext();
         if (requestedAuthnContexts != null && !requestedAuthnContexts.isEmpty()) {
-            String requestedAuthnContextCmp = settings.getRequestedAuthnContextComparison();
+            final String requestedAuthnContextCmp = settings.getRequestedAuthnContextComparison();
             requestedAuthnContextStr = "<samlp:RequestedAuthnContext Comparison=\"" + Util.toXml(requestedAuthnContextCmp) + "\">";
-            for (String requestedAuthnContext : requestedAuthnContexts) {
+            for (final String requestedAuthnContext : requestedAuthnContexts) {
                 requestedAuthnContextStr +=
                         "<saml:AuthnContextClassRef>" + Util.toXml(requestedAuthnContext) + "</saml:AuthnContextClassRef>";
             }
@@ -267,14 +265,14 @@ public class AuthnRequest {
 
         valueMap.put("requestedAuthnContextStr", requestedAuthnContextStr);
 
-        return new StrSubstitutor(valueMap);
+        return new StringSubstitutor(valueMap);
     }
 
     /**
      * @return the AuthnRequest's template
      */
     private static StringBuilder getAuthnRequestTemplate() {
-        StringBuilder template = new StringBuilder();
+        final StringBuilder template = new StringBuilder();
         template.append(
                 "<samlp:AuthnRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"${id}\" Version=\"2.0\" IssueInstant=\"${issueInstant}\"${providerStr}${forceAuthnStr}${isPassiveStr}${destinationStr} ProtocolBinding=\"${protocolBinding}\" AssertionConsumerServiceURL=\"${assertionConsumerServiceURL}\">");
         template.append("<saml:Issuer>${spEntityid}</saml:Issuer>");
