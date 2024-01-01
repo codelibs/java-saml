@@ -699,7 +699,6 @@ public class LogoutRequest {
      *
      * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
      *
-     * @
      */
     public static Map<String, String> getNameIdData(final String samlLogoutRequestString, final PrivateKey key) {
         return getNameIdData(samlLogoutRequestString, key, false);
@@ -717,7 +716,6 @@ public class LogoutRequest {
      *
      * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
      *
-     * @
      */
     public static Map<String, String> getNameIdData(final String samlLogoutRequestString, final PrivateKey key, final boolean trimValue) {
         final Document doc = Util.loadXML(samlLogoutRequestString);

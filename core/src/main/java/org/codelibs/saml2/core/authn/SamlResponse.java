@@ -545,7 +545,6 @@ public class SamlResponse {
      *
      * @return string NameQualifier
      *
-     * @
      */
     public String getNameIdNameQualifier() {
         final Map<String, String> nameIdData = getNameIdData();
@@ -562,7 +561,6 @@ public class SamlResponse {
      *
      * @return string SP NameQualifier
      *
-     * @
      */
     public String getNameIdSPNameQualifier() {
         final Map<String, String> nameIdData = getNameIdData();
@@ -820,7 +818,6 @@ public class SamlResponse {
      *
      * @return the SessionNotOnOrAfter value
      *
-     *
      */
     public Instant getSessionNotOnOrAfter() {
         String notOnOrAfter = null;
@@ -839,7 +836,6 @@ public class SamlResponse {
      * send to the SP, to set what specific session must be deleted
      *
      * @return the SessionIndex value
-     *
      *
      */
     public String getSessionIndex() {
@@ -861,7 +857,6 @@ public class SamlResponse {
     /**
      * @return the ID of the assertion in the Response
      *
-     *
      */
     public String getAssertionId() {
         if (!validateNumAssertions()) {
@@ -873,7 +868,6 @@ public class SamlResponse {
 
     /**
      * @return a list of NotOnOrAfter values from SubjectConfirmationData nodes in this Response
-     *
      *
      */
     public List<Instant> getAssertionNotOnOrAfter() {
@@ -913,8 +907,6 @@ public class SamlResponse {
      * - Check that IDs and reference URI are unique and consistent.
      *
      * @return array Signed element tags
-     *
-     *
      *
      */
     public ArrayList<String> processSignedElements() {
@@ -988,9 +980,6 @@ public class SamlResponse {
      *				the elements to be validated
      * @return true if is valid
      *
-     *
-     *
-     *
      */
     public boolean validateSignedElements(final ArrayList<String> signedElements) {
         if (signedElements.size() > 2) {
@@ -1040,7 +1029,6 @@ public class SamlResponse {
      * Verifies that the document is still valid according Conditions Element.
      *
      * @return true if still valid
-     *
      *
      */
     public boolean validateTimestamps() {
@@ -1190,7 +1178,6 @@ public class SamlResponse {
      *            Encrypted assertion
      *
      * @return Decrypted Assertion.
-     *
      *
      */
     private Document decryptAssertion(final Document dom) {
