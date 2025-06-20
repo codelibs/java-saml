@@ -1,10 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs</groupId>
 	<artifactId>java-saml-toolkit</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.0.0</version>
 	<packaging>pom</packaging>
 	<name>java-saml Toolkit Project</name>
 	<description>A Java SAML toolkit</description>
@@ -33,7 +31,8 @@
 		<connection>scm:git:git@github.com:codelibs/java-saml.git</connection>
 		<developerConnection>scm:git:git@github.com:codelibs/java-saml.git</developerConnection>
 		<url>https://github.com/codelibs/java-saml</url>
-	</scm>
+	  <tag>java-saml-toolkit-3.0.0</tag>
+  </scm>
 	<modules>
 		<module>core</module>
 		<module>toolkit</module>
