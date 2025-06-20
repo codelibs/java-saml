@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs</groupId>
 	<artifactId>java-saml-toolkit</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>java-saml Toolkit Project</name>
 	<description>A Java SAML toolkit</description>
@@ -31,7 +31,7 @@
 		<connection>scm:git:git@github.com:codelibs/java-saml.git</connection>
 		<developerConnection>scm:git:git@github.com:codelibs/java-saml.git</developerConnection>
 		<url>https://github.com/codelibs/java-saml</url>
-	  <tag>java-saml-toolkit-3.0.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 	<modules>
 		<module>core</module>
