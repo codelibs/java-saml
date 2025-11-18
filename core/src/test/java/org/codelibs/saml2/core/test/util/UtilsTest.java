@@ -2226,11 +2226,135 @@ public class UtilsTest {
      * Tests the toXml method
      * <p>
      * Case: the input is <code>null</code>.
-     * 
+     *
      * @see org.codelibs.saml2.core.core.util.Util#toXml(String)
      */
     @Test
     public void testToXmlNull() {
         assertNull(Util.toXml(null));
+    }
+
+    /**
+     * Tests that calculateX509Fingerprint with SHA-256 algorithm produces correct fingerprint.
+     * This tests the recommended secure fingerprint calculation method.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.core.util.Util#calculateX509Fingerprint(X509Certificate, String)
+     */
+    @Test
+    public void testCalculateX509FingerprintSHA256() throws Exception {
+        X509Certificate cert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+
+        String fingerprint = Util.calculateX509Fingerprint(cert, "SHA-256");
+        assertNotNull("Fingerprint should not be null", fingerprint);
+        assertFalse("Fingerprint should not be empty", fingerprint.isEmpty());
+
+        // Fingerprint should be in lowercase hex format
+        assertTrue("Fingerprint should be lowercase hex", fingerprint.matches("^[a-f0-9]+$"));
+
+        // SHA-256 produces 64 hex characters (32 bytes)
+        assertEquals("SHA-256 fingerprint should be 64 characters", 64, fingerprint.length());
+    }
+
+    /**
+     * Tests that calculateX509Fingerprint with SHA-384 algorithm produces correct fingerprint.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.core.util.Util#calculateX509Fingerprint(X509Certificate, String)
+     */
+    @Test
+    public void testCalculateX509FingerprintSHA384() throws Exception {
+        X509Certificate cert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+
+        String fingerprint = Util.calculateX509Fingerprint(cert, "SHA-384");
+        assertNotNull("Fingerprint should not be null", fingerprint);
+
+        // SHA-384 produces 96 hex characters (48 bytes)
+        assertEquals("SHA-384 fingerprint should be 96 characters", 96, fingerprint.length());
+    }
+
+    /**
+     * Tests that calculateX509Fingerprint with SHA-512 algorithm produces correct fingerprint.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.core.util.Util#calculateX509Fingerprint(X509Certificate, String)
+     */
+    @Test
+    public void testCalculateX509FingerprintSHA512() throws Exception {
+        X509Certificate cert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+
+        String fingerprint = Util.calculateX509Fingerprint(cert, "SHA-512");
+        assertNotNull("Fingerprint should not be null", fingerprint);
+
+        // SHA-512 produces 128 hex characters (64 bytes)
+        assertEquals("SHA-512 fingerprint should be 128 characters", 128, fingerprint.length());
+    }
+
+    /**
+     * Tests that the deprecated calculateX509Fingerprint(X509Certificate) method
+     * still works but uses SHA-1 (which is now deprecated).
+     * This test verifies backward compatibility.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.core.util.Util#calculateX509Fingerprint(X509Certificate)
+     */
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testCalculateX509FingerprintDeprecatedSHA1() throws Exception {
+        X509Certificate cert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+
+        // This method is deprecated and uses SHA-1
+        String fingerprint = Util.calculateX509Fingerprint(cert);
+        assertNotNull("Fingerprint should not be null", fingerprint);
+
+        // SHA-1 produces 40 hex characters (20 bytes)
+        assertEquals("SHA-1 fingerprint should be 40 characters", 40, fingerprint.length());
+
+        // Verify it's the same as explicitly calling with SHA-1
+        String fingerprintSha1 = Util.calculateX509Fingerprint(cert, "SHA-1");
+        assertEquals("Deprecated method should produce same result as SHA-1", fingerprintSha1, fingerprint);
+    }
+
+    /**
+     * Tests that different algorithms produce different fingerprints for the same certificate.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.core.util.Util#calculateX509Fingerprint(X509Certificate, String)
+     */
+    @Test
+    public void testDifferentAlgorithmsProduceDifferentFingerprints() throws Exception {
+        X509Certificate cert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+
+        String sha1 = Util.calculateX509Fingerprint(cert, "SHA-1");
+        String sha256 = Util.calculateX509Fingerprint(cert, "SHA-256");
+        String sha384 = Util.calculateX509Fingerprint(cert, "SHA-384");
+        String sha512 = Util.calculateX509Fingerprint(cert, "SHA-512");
+
+        // All should be different
+        assertNotEquals("SHA-1 and SHA-256 should differ", sha1, sha256);
+        assertNotEquals("SHA-256 and SHA-384 should differ", sha256, sha384);
+        assertNotEquals("SHA-384 and SHA-512 should differ", sha384, sha512);
+
+        // Different lengths
+        assertEquals(40, sha1.length());
+        assertEquals(64, sha256.length());
+        assertEquals(96, sha384.length());
+        assertEquals(128, sha512.length());
+    }
+
+    /**
+     * Tests that calculateX509Fingerprint is case-insensitive for algorithm names.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.core.util.Util#calculateX509Fingerprint(X509Certificate, String)
+     */
+    @Test
+    public void testCalculateX509FingerprintCaseInsensitiveAlgorithm() throws Exception {
+        X509Certificate cert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+
+        String sha256Upper = Util.calculateX509Fingerprint(cert, "SHA-256");
+        String sha256Lower = Util.calculateX509Fingerprint(cert, "sha256");
+
+        assertEquals("Algorithm name should be case-insensitive", sha256Upper, sha256Lower);
     }
 }
