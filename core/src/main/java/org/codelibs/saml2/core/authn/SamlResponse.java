@@ -290,7 +290,7 @@ public class SamlResponse {
                 // Check the session Expiration
                 Instant sessionExpiration = this.getSessionNotOnOrAfter();
                 if (sessionExpiration != null) {
-                    sessionExpiration = ChronoUnit.SECONDS.addTo(sessionExpiration, Constants.ALOWED_CLOCK_DRIFT);
+                    sessionExpiration = ChronoUnit.SECONDS.addTo(sessionExpiration, settings.getClockDrift());
                     if (Util.isEqualNow(sessionExpiration) || Util.isBeforeNow(sessionExpiration)) {
                         throw new ValidationException(
                                 "The attributes have expired, based on the SessionNotOnOrAfter of the AttributeStatement of this Response",
@@ -398,7 +398,7 @@ public class SamlResponse {
                     }
 
                     Instant noa = Util.parseDateTime(notOnOrAfter.getNodeValue());
-                    noa = ChronoUnit.SECONDS.addTo(noa, Constants.ALOWED_CLOCK_DRIFT);
+                    noa = ChronoUnit.SECONDS.addTo(noa, settings.getClockDrift());
                     if (Util.isEqualNow(noa) || Util.isBeforeNow(noa)) {
                         validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is no longer valid"));
                         continue;
@@ -407,7 +407,7 @@ public class SamlResponse {
                     final Node notBefore = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotBefore");
                     if (notBefore != null) {
                         Instant nb = Util.parseDateTime(notBefore.getNodeValue());
-                        nb = ChronoUnit.SECONDS.addTo(nb, Constants.ALOWED_CLOCK_DRIFT * -1);
+                        nb = ChronoUnit.SECONDS.addTo(nb, settings.getClockDrift() * -1);
                         if (Util.isAfterNow(nb)) {
                             validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData is not yet valid"));
                             continue;
@@ -1041,7 +1041,7 @@ public class SamlResponse {
                 // validate NotOnOrAfter
                 if (naAttribute != null) {
                     Instant notOnOrAfterDate = Util.parseDateTime(naAttribute.getNodeValue());
-                    notOnOrAfterDate = ChronoUnit.SECONDS.addTo(notOnOrAfterDate, Constants.ALOWED_CLOCK_DRIFT);
+                    notOnOrAfterDate = ChronoUnit.SECONDS.addTo(notOnOrAfterDate, settings.getClockDrift());
                     if (Util.isEqualNow(notOnOrAfterDate) || Util.isBeforeNow(notOnOrAfterDate)) {
                         throw new ValidationException("Could not validate timestamp: expired. Check system clock.",
                                 ValidationException.ASSERTION_EXPIRED);
@@ -1050,7 +1050,7 @@ public class SamlResponse {
                 // validate NotBefore
                 if (nbAttribute != null) {
                     Instant notBeforeDate = Util.parseDateTime(nbAttribute.getNodeValue());
-                    notBeforeDate = ChronoUnit.SECONDS.addTo(notBeforeDate, Constants.ALOWED_CLOCK_DRIFT * -1);
+                    notBeforeDate = ChronoUnit.SECONDS.addTo(notBeforeDate, settings.getClockDrift() * -1);
                     if (Util.isAfterNow(notBeforeDate)) {
                         throw new ValidationException("Could not validate timestamp: not yet valid. Check system clock.",
                                 ValidationException.ASSERTION_TOO_EARLY);

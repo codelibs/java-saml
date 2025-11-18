@@ -74,12 +74,13 @@ public class Saml2Settings {
     private List<String> requestedAuthnContext = new ArrayList<>();
     private String requestedAuthnContextComparison = "exact";
     private boolean wantXMLValidation = true;
-    private String signatureAlgorithm = Constants.RSA_SHA1;
-    private String digestAlgorithm = Constants.SHA1;
+    private String signatureAlgorithm = Constants.RSA_SHA256;
+    private String digestAlgorithm = Constants.SHA256;
     private boolean rejectUnsolicitedResponsesWithInResponseTo = false;
     private boolean allowRepeatAttributeName = false;
     private boolean rejectDeprecatedAlg = false;
     private String uniqueIDPrefix = null;
+    private long clockDrift = Constants.ALOWED_CLOCK_DRIFT;
 
     // Compress
     private boolean compressRequest = true;
@@ -234,14 +235,24 @@ public class Saml2Settings {
 
     /**
      * @return the idpCertFingerprint setting value
+     * @deprecated Certificate fingerprint validation is vulnerable to collision attacks.
+     *             Use full X.509 certificate validation via {@link #getIdpx509cert()} instead.
      */
+    @Deprecated
     public final String getIdpCertFingerprint() {
+        if (idpCertFingerprint != null) {
+            LOGGER.warn("SECURITY WARNING: Using certificate fingerprint validation which is vulnerable to collision attacks. "
+                    + "It is strongly recommended to use full X.509 certificate validation instead.");
+        }
         return idpCertFingerprint;
     }
 
     /**
      * @return the idpCertFingerprintAlgorithm setting value
+     * @deprecated Certificate fingerprint validation is vulnerable to collision attacks.
+     *             Use full X.509 certificate validation via {@link #getIdpx509cert()} instead.
      */
+    @Deprecated
     public final String getIdpCertFingerprintAlgorithm() {
         return idpCertFingerprintAlgorithm;
     }
@@ -391,6 +402,23 @@ public class Saml2Settings {
      */
     public boolean isDebugActive() {
         return this.debug;
+    }
+
+    /**
+     * @return the clock drift in seconds
+     */
+    public long getClockDrift() {
+        return this.clockDrift;
+    }
+
+    /**
+     * Set the clock drift value in seconds. This value is added/subtracted to current time
+     * in time condition validations to account for clock synchronization differences.
+     *
+     * @param clockDrift the clock drift value in seconds to be set
+     */
+    public void setClockDrift(final long clockDrift) {
+        this.clockDrift = clockDrift;
     }
 
     /**
@@ -617,8 +645,16 @@ public class Saml2Settings {
      *
      * @param idpCertFingerprint
      *            the idpCertFingerprint value to be set
+     * @deprecated Certificate fingerprint validation is vulnerable to collision attacks.
+     *             Use full X.509 certificate validation via {@link #setIdpx509cert(X509Certificate)} instead.
      */
+    @Deprecated
     protected final void setIdpCertFingerprint(final String idpCertFingerprint) {
+        if (idpCertFingerprint != null) {
+            LOGGER.warn("SECURITY WARNING: Setting certificate fingerprint for validation. "
+                    + "Fingerprint validation is vulnerable to collision attacks. "
+                    + "Use full X.509 certificate validation instead.");
+        }
         this.idpCertFingerprint = idpCertFingerprint;
     }
 
@@ -627,7 +663,10 @@ public class Saml2Settings {
      *
      * @param idpCertFingerprintAlgorithm
      *            the idpCertFingerprintAlgorithm value to be set.
+     * @deprecated Certificate fingerprint validation is vulnerable to collision attacks.
+     *             Use full X.509 certificate validation via {@link #setIdpx509cert(X509Certificate)} instead.
      */
+    @Deprecated
     protected final void setIdpCertFingerprintAlgorithm(final String idpCertFingerprintAlgorithm) {
         this.idpCertFingerprintAlgorithm = idpCertFingerprintAlgorithm;
     }
@@ -1118,7 +1157,10 @@ public class Saml2Settings {
         // Check if must be signed
         final boolean signMetadata = this.getSignMetadata();
         if (signMetadata) {
-            // TODO Extend this in order to be able to read not only SP privateKey/certificate
+            // Note: Currently only SP privateKey/certificate are supported for metadata signing.
+            // Future enhancement: Support signing with custom key/certificate pairs for more flexible
+            // key management scenarios (e.g., separate metadata signing keys, key rotation).
+            // This would require adding new settings parameters and updating the Metadata.signMetadata API.
             try {
                 metadataString = Metadata.signMetadata(metadataString, this.getSPkey(), this.getSPcert(), this.getSignatureAlgorithm(),
                         this.getDigestAlgorithm());
@@ -1173,7 +1215,15 @@ public class Saml2Settings {
                 }
             }
         }
-        // TODO Validate Sign if required with Util.validateMetadataSign
+
+        // Note: Metadata signature validation is not currently implemented.
+        // Future enhancement: Add signature validation for SP metadata to ensure integrity.
+        // Implementation considerations:
+        // - Need to determine which certificate to use for validation (SP cert or dedicated metadata cert)
+        // - Should validation be mandatory or optional based on configuration?
+        // - Use Util.validateMetadataSign() or similar validation method
+        // - Add appropriate error messages to the errors list if validation fails
+        // Security recommendation: Metadata signatures should be validated when received from external sources.
 
         return errors;
     }

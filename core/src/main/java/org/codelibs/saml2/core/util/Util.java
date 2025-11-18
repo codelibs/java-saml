@@ -604,6 +604,11 @@ public final class Util {
     /**
      * Calculates the fingerprint of a x509cert
      *
+     * <p><b>SECURITY WARNING:</b> Certificate fingerprint validation is vulnerable to collision attacks.
+     * It is strongly recommended to use full X.509 certificate validation instead of fingerprint-based
+     * validation. Fingerprint validation should only be used for testing or when certificate validation
+     * is not feasible.</p>
+     *
      * @param x509cert
      * 				 x509 certificate
      * @param alg
@@ -636,12 +641,26 @@ public final class Util {
     /**
      * Calculates the SHA-1 fingerprint of a x509cert
      *
+     * <p><b>DEPRECATED AND INSECURE:</b> This method uses SHA-1 which is cryptographically broken
+     * and vulnerable to collision attacks. Use {@link #calculateX509Fingerprint(X509Certificate, String)}
+     * with SHA-256 or higher instead.</p>
+     *
+     * <p><b>SECURITY WARNING:</b> Certificate fingerprint validation is vulnerable to collision attacks.
+     * It is strongly recommended to use full X.509 certificate validation instead of fingerprint-based
+     * validation.</p>
+     *
      * @param x509cert
      * 				 x509 certificate
      *
      * @return the SHA-1 formated fingerprint
+     * @deprecated Use {@link #calculateX509Fingerprint(X509Certificate, String)} with SHA-256 or higher.
+     *             SHA-1 is cryptographically broken. Additionally, fingerprint-based validation is
+     *             vulnerable to collision attacks and should be avoided in production.
      */
+    @Deprecated
     public static String calculateX509Fingerprint(final X509Certificate x509cert) {
+        LOGGER.warn("SECURITY WARNING: Using deprecated SHA-1 fingerprint calculation. "
+                + "SHA-1 is cryptographically broken. Use SHA-256 or higher, or preferably use full X.509 certificate validation.");
         return calculateX509Fingerprint(x509cert, "SHA-1");
     }
 
