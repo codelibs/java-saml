@@ -3416,11 +3416,12 @@ public class AuthnResponseTest {
     }
 
     /**
-     * Tests that SamlResponse uses custom clock drift from settings
-     * instead of the constant value.
+     * Tests that custom clock drift can be set and retrieved from settings.
+     * SamlResponse validation logic will use this configured value.
      *
      * @throws Exception
-     * @see org.codelibs.saml2.core.authn.SamlResponse#isValid
+     * @see org.codelibs.saml2.core.settings.Saml2Settings#setClockDrift
+     * @see org.codelibs.saml2.core.settings.Saml2Settings#getClockDrift
      */
     @Test
     public void testCustomClockDriftIsUsed() throws Exception {
@@ -3428,14 +3429,14 @@ public class AuthnResponseTest {
 
         // Set a very small clock drift (1 second)
         settings.setClockDrift(1L);
-        assertEquals(1L, settings.getClockDrift());
+        assertEquals("Custom clock drift should be set to 1 second", 1L, settings.getClockDrift());
 
-        // Verify that the settings object has the custom clock drift
-        // The actual validation logic in SamlResponse will use this value
-        final SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(ACS_URL));
+        // Test with different values to ensure the setting is flexible
+        settings.setClockDrift(300L);
+        assertEquals("Clock drift should be updatable to 300 seconds", 300L, settings.getClockDrift());
 
-        // The response object should be created successfully with custom clock drift
-        assertNotNull(samlResponse);
+        settings.setClockDrift(0L);
+        assertEquals("Clock drift should be settable to 0 for strict timing", 0L, settings.getClockDrift());
     }
 
     /**
@@ -3469,7 +3470,7 @@ public class AuthnResponseTest {
      * Tests that the default clock drift is 120 seconds when not explicitly set.
      *
      * @throws Exception
-     * @see org.codelibs.saml2.core.authn.SamlResponse#isValid
+     * @see org.codelibs.saml2.core.settings.Saml2Settings#getClockDrift
      */
     @Test
     public void testDefaultClockDriftValue() throws Exception {
@@ -3479,9 +3480,9 @@ public class AuthnResponseTest {
         assertEquals("Default clock drift should be 120 seconds",
                 120L, settings.getClockDrift());
 
-        // Create a SamlResponse with default clock drift
-        final SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(ACS_URL));
-        assertNotNull(samlResponse);
+        // Verify it matches the constant value
+        assertEquals("Default should match Constants.ALOWED_CLOCK_DRIFT",
+                Constants.ALOWED_CLOCK_DRIFT, settings.getClockDrift());
     }
 
 }

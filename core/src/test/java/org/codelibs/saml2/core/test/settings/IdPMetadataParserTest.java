@@ -319,8 +319,8 @@ public class IdPMetadataParserTest {
         assertEquals(Util.loadCert(Util.getFileAsString("certs/certificate1")), setting2.getIdpx509cert());
         assertEquals(setting2.getSpNameIDFormat(), "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified");
         assertEquals("http://localhost:8080/java-saml-jspsample/metadata.jsp", setting2.getSpEntityId());
-        assertEquals(Constants.RSA_SHA1, setting2.getSignatureAlgorithm());
-        assertEquals(Constants.SHA1, setting2.getDigestAlgorithm());
+        assertEquals(Constants.RSA_SHA256, setting2.getSignatureAlgorithm());
+        assertEquals(Constants.SHA256, setting2.getDigestAlgorithm());
         assertEquals(0, setting2.getContacts().size());
         assertNull(setting2.getOrganization());
         assertEquals(Util.UNIQUE_ID_PREFIX, setting2.getUniqueIDPrefix());
@@ -337,8 +337,8 @@ public class IdPMetadataParserTest {
                 "MIIC9jCCAd6gAwIBAgIQI/B8CLE676pCR2/QaKih9TANBgkqhkiG9w0BAQsFADA3MTUwMwYDVQQDEyxBREZTIFNpZ25pbmcgLSBsb2dpbnRlc3Qub3dlbnNib3JvaGVhbHRoLm9yZzAeFw0xNjEwMjUxNjI4MzhaFw0xNzEwMjUxNjI4MzhaMDcxNTAzBgNVBAMTLEFERlMgU2lnbmluZyAtIGxvZ2ludGVzdC5vd2Vuc2Jvcm9oZWFsdGgub3JnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjikmKRRVD5oK3fxm0xNfDqvWCujZIhtv2zeIwmoRKUAjo6KeUhauII4BHh5DclmbOFD4ruli3sNWGKgqVCX1AFW/p3m3/FtzeumFeZSmyfqeJEeOqAK5jAom/MfXxaQ85QHlGa0BTtdWdCuxhJz5G797o4s1Me/8QOQdmbkkwOHOVXRDW0QxBXvsRB1jPpIO+JvNcWFpvJrELccD0Fws91LH42j2C4gDNR8JLu5LrUGL6zAIq8NM7wfbwoax9n/0tIZKa6lo6szpXGqiMrDBJPpAqC5MSePyp5/SEX6jxwodQUGRgI5bKILQwOWDrkgfsK1MIeHfovtyqnDZj8e9VwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBKbK4qu7WTLYeQW7OcFAeWcT5D7ujo61QtPf+6eY8hpNntN8yF71vGm+5zdOjmw18igxUrf3W7dLk2wAogXK196WX34x9muorwmFK/HqmKuy0kWWzGcNzZHb0o4Md2Ux7QQVoHqD6dUSqUisOBs34ZPgT5R42LepJTGDEZSkvOxUv9V6fY5dYk8UaWbZ7MQAFi1CnOyybq2nVNjpuxWyJ6SsHQYKRhXa7XGurXFB2mlgcjVj9jxW0gO7djkgRD68b6PNpQmJkbKnkCtJg9YsSeOmuUjwgh4DlcIo5jZocKd5bnLbQ9XKJ3YQHRxFoZbP3BXKrfhVV3vqqzRxMwjZmK"));
         assertEquals(setting2.getSpNameIDFormat(), "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress");
         assertEquals("http://localhost:8080/java-saml-jspsample/metadata.jsp", setting2.getSpEntityId());
-        assertEquals(Constants.RSA_SHA1, setting2.getSignatureAlgorithm());
-        assertEquals(Constants.SHA1, setting2.getDigestAlgorithm());
+        assertEquals(Constants.RSA_SHA256, setting2.getSignatureAlgorithm());
+        assertEquals(Constants.SHA256, setting2.getDigestAlgorithm());
         assertEquals(0, setting2.getContacts().size());
         assertNull(setting2.getOrganization());
         assertEquals(Util.UNIQUE_ID_PREFIX, setting2.getUniqueIDPrefix());
