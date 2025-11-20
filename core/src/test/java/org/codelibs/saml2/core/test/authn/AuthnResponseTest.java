@@ -3481,8 +3481,8 @@ public class AuthnResponseTest {
                 120L, settings.getClockDrift());
 
         // Verify it matches the constant value
-        assertEquals("Default should match Constants.ALOWED_CLOCK_DRIFT",
-                Constants.ALOWED_CLOCK_DRIFT, settings.getClockDrift());
+        assertEquals("Default should match Constants.ALLOWED_CLOCK_DRIFT",
+                Constants.ALLOWED_CLOCK_DRIFT, settings.getClockDrift());
     }
 
 }

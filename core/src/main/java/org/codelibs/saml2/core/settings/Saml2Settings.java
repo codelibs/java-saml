@@ -80,7 +80,7 @@ public class Saml2Settings {
     private boolean allowRepeatAttributeName = false;
     private boolean rejectDeprecatedAlg = false;
     private String uniqueIDPrefix = null;
-    private long clockDrift = Constants.ALOWED_CLOCK_DRIFT;
+    private long clockDrift = Constants.ALLOWED_CLOCK_DRIFT;
 
     // Compress
     private boolean compressRequest = true;

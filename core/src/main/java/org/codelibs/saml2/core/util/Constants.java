@@ -11,7 +11,17 @@ public final class Constants {
      * Default is 2 minutes (120 seconds) to balance between clock synchronization tolerance
      * and security against replay attacks.
      */
-    public static final long ALOWED_CLOCK_DRIFT = 120L; // 2 min in seconds
+    public static final long ALLOWED_CLOCK_DRIFT = 120L; // 2 min in seconds
+
+    /**
+     * Value added to the current time in time condition validations.
+     * Default is 2 minutes (120 seconds) to balance between clock synchronization tolerance
+     * and security against replay attacks.
+     *
+     * @deprecated Typo in name. Use {@link #ALLOWED_CLOCK_DRIFT} instead.
+     */
+    @Deprecated
+    public static final long ALOWED_CLOCK_DRIFT = ALLOWED_CLOCK_DRIFT;
 
     // NameID Formats
     public static final String NAMEID_EMAIL_ADDRESS = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
