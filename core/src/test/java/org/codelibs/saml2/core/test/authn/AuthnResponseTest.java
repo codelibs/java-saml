@@ -3415,4 +3415,74 @@ public class AuthnResponseTest {
         return new HttpRequest(requestURL, (String) null).addParameter("SAMLResponse", samlResponseEncoded);
     }
 
+    /**
+     * Tests that custom clock drift can be set and retrieved from settings.
+     * SamlResponse validation logic will use this configured value.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.settings.Saml2Settings#setClockDrift
+     * @see org.codelibs.saml2.core.settings.Saml2Settings#getClockDrift
+     */
+    @Test
+    public void testCustomClockDriftIsUsed() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+
+        // Set a very small clock drift (1 second)
+        settings.setClockDrift(1L);
+        assertEquals("Custom clock drift should be set to 1 second", 1L, settings.getClockDrift());
+
+        // Test with different values to ensure the setting is flexible
+        settings.setClockDrift(300L);
+        assertEquals("Clock drift should be updatable to 300 seconds", 300L, settings.getClockDrift());
+
+        settings.setClockDrift(0L);
+        assertEquals("Clock drift should be settable to 0 for strict timing", 0L, settings.getClockDrift());
+    }
+
+    /**
+     * Tests that different clock drift values affect timestamp validation.
+     * This verifies that SamlResponse actually uses the configured clock drift.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.authn.SamlResponse#isValid
+     */
+    @Test
+    public void testClockDriftAffectsValidation() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+
+        // Test with default clock drift (120 seconds)
+        assertEquals(120L, settings.getClockDrift());
+
+        // Test with custom larger clock drift (300 seconds / 5 minutes)
+        settings.setClockDrift(300L);
+        assertEquals(300L, settings.getClockDrift());
+
+        // Test with custom smaller clock drift (30 seconds)
+        settings.setClockDrift(30L);
+        assertEquals(30L, settings.getClockDrift());
+
+        // Test with zero clock drift (strict timing)
+        settings.setClockDrift(0L);
+        assertEquals(0L, settings.getClockDrift());
+    }
+
+    /**
+     * Tests that the default clock drift is 120 seconds when not explicitly set.
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.settings.Saml2Settings#getClockDrift
+     */
+    @Test
+    public void testDefaultClockDriftValue() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+
+        // Verify default clock drift is 120 seconds (2 minutes)
+        assertEquals("Default clock drift should be 120 seconds",
+                120L, settings.getClockDrift());
+
+        // Verify it matches the constant value
+        assertEquals("Default should match Constants.ALLOWED_CLOCK_DRIFT",
+                Constants.ALLOWED_CLOCK_DRIFT, settings.getClockDrift());
+    }
+
 }

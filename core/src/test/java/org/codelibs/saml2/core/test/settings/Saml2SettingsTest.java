@@ -504,4 +504,91 @@ public class Saml2SettingsTest {
         assertFalse(errors.isEmpty());
         assertTrue(errors.contains("expired_xml"));
     }
+
+    /**
+     * Tests that default signature algorithm is SHA-256 instead of deprecated SHA-1
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getSignatureAlgorithm
+     */
+    @Test
+    public void testDefaultSignatureAlgorithmIsSHA256() {
+        Saml2Settings settings = new Saml2Settings();
+
+        assertEquals("Default signature algorithm should be RSA-SHA256",
+                Constants.RSA_SHA256, settings.getSignatureAlgorithm());
+        assertThat("Default signature algorithm should not be SHA-1",
+                settings.getSignatureAlgorithm(), not(containsString("sha1")));
+    }
+
+    /**
+     * Tests that default digest algorithm is SHA-256 instead of deprecated SHA-1
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getDigestAlgorithm
+     */
+    @Test
+    public void testDefaultDigestAlgorithmIsSHA256() {
+        Saml2Settings settings = new Saml2Settings();
+
+        assertEquals("Default digest algorithm should be SHA256",
+                Constants.SHA256, settings.getDigestAlgorithm());
+        assertThat("Default digest algorithm should not be SHA-1",
+                settings.getDigestAlgorithm(), not(containsString("sha1")));
+    }
+
+    /**
+     * Tests that default clock drift is 120 seconds (2 minutes)
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getClockDrift
+     */
+    @Test
+    public void testDefaultClockDrift() {
+        Saml2Settings settings = new Saml2Settings();
+
+        assertEquals("Default clock drift should be 120 seconds",
+                120L, settings.getClockDrift());
+    }
+
+    /**
+     * Tests the getClockDrift and setClockDrift methods of the Saml2Settings
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getClockDrift
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#setClockDrift
+     */
+    @Test
+    public void testClockDriftGetterSetter() {
+        Saml2Settings settings = new Saml2Settings();
+
+        // Test default value
+        assertEquals(120L, settings.getClockDrift());
+
+        // Test setting custom value
+        settings.setClockDrift(60L);
+        assertEquals(60L, settings.getClockDrift());
+
+        // Test setting to zero
+        settings.setClockDrift(0L);
+        assertEquals(0L, settings.getClockDrift());
+
+        // Test setting larger value
+        settings.setClockDrift(300L);
+        assertEquals(300L, settings.getClockDrift());
+    }
+
+    /**
+     * Tests that clock drift can be configured through SettingsBuilder
+     *
+     * @throws Exception
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getClockDrift
+     */
+    @Test
+    public void testClockDriftConfiguration() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+
+        // Default should be used when not specified in config
+        assertEquals(120L, settings.getClockDrift());
+
+        // Test that it can be changed
+        settings.setClockDrift(180L);
+        assertEquals(180L, settings.getClockDrift());
+    }
 }
