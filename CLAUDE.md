@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Java SAML toolkit (forked from SAML-Toolkits/java-saml, maintained by CodeLibs) implementing SAML 2.0 SP operations. Multi-module Maven project targeting Java 11+.
+Java SAML toolkit (forked from SAML-Toolkits/java-saml, maintained by CodeLibs) implementing SAML 2.0 SP operations. Multi-module Maven project targeting Java 17+.
 
 ## Build Commands
 
@@ -18,7 +18,7 @@ mvn test -Dtest=AuthnRequestTest               # Run single test class
 mvn test -Dtest=AuthnRequestTest#testMethod    # Run single test method
 ```
 
-No code formatter or linter is configured. CI runs `mvn -B package` on Java 11/Ubuntu via GitHub Actions.
+No code formatter or linter is configured. CI runs `mvn -B package` on Java 17/Ubuntu via GitHub Actions.
 
 ## Module Structure
 
