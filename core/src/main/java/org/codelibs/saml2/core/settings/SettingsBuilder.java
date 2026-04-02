@@ -697,7 +697,7 @@ public class SettingsBuilder {
      */
     private List<String> toStringList(final Map<Integer, Object> indexedValues) {
         return indexedValues.values().stream().map(value -> isString(value) ? StringUtils.trimToNull((String) value) : null)
-                .filter(Objects::nonNull).collect(Collectors.toList());
+                .filter(Objects::nonNull).toList();
     }
 
     /**
@@ -812,8 +812,8 @@ public class SettingsBuilder {
             return Boolean.parseBoolean(((String) propValue).trim());
         }
 
-        if (propValue instanceof Boolean) {
-            return (Boolean) propValue;
+        if (propValue instanceof Boolean b) {
+            return b;
         }
         return null;
     }
@@ -835,8 +835,8 @@ public class SettingsBuilder {
             return Arrays.asList(values);
         }
 
-        if (propValue instanceof List) {
-            return (List<String>) propValue;
+        if (propValue instanceof List<?> list) {
+            return (List<String>) list;
         }
         return null;
     }
@@ -861,8 +861,8 @@ public class SettingsBuilder {
             }
         }
 
-        if (propValue instanceof URL) {
-            return (URL) propValue;
+        if (propValue instanceof URL url) {
+            return url;
         }
 
         return null;
@@ -873,8 +873,8 @@ public class SettingsBuilder {
         try {
             if (keyStore.containsAlias(alias)) {
                 key = keyStore.getKey(alias, password.toCharArray());
-                if (key instanceof PrivateKey) {
-                    return (PrivateKey) key;
+                if (key instanceof PrivateKey pk) {
+                    return pk;
                 }
             } else {
                 LOGGER.warn("Entry for alias {} not found in keystore", alias);
@@ -891,8 +891,8 @@ public class SettingsBuilder {
                 final Key key = keyStore.getKey(alias, password.toCharArray());
                 if (key instanceof PrivateKey) {
                     final Certificate cert = keyStore.getCertificate(alias);
-                    if (cert instanceof X509Certificate) {
-                        return (X509Certificate) cert;
+                    if (cert instanceof X509Certificate x509) {
+                        return x509;
                     }
                 }
             } else {
@@ -922,8 +922,8 @@ public class SettingsBuilder {
             }
         }
 
-        if (propValue instanceof X509Certificate) {
-            return (X509Certificate) propValue;
+        if (propValue instanceof X509Certificate cert) {
+            return cert;
         }
 
         return null;
@@ -1018,8 +1018,8 @@ public class SettingsBuilder {
             }
         }
 
-        if (propValue instanceof PrivateKey) {
-            return (PrivateKey) propValue;
+        if (propValue instanceof PrivateKey pk) {
+            return pk;
         }
 
         return null;
@@ -1055,6 +1055,6 @@ public class SettingsBuilder {
      * @param propValue the Object to be verified
      */
     private boolean isString(final Object propValue) {
-        return propValue instanceof String && StringUtils.isNotBlank((String) propValue);
+        return propValue instanceof String s && StringUtils.isNotBlank(s);
     }
 }

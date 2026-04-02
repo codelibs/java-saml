@@ -68,7 +68,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPathFactoryConfigurationException;
+
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -187,33 +187,6 @@ public final class Util {
     }
 
     private static XPathFactory getXPathFactory() {
-        try {
-            /*
-             * Since different environments may return a different XPathFactoryImpl, we should try to initialize the factory
-             * using specific implementation that way the XML is parsed in an expected way.
-             *
-             * We should use the standard XPathFactoryImpl that comes standard with Java.
-             *
-             * NOTE: We could implement a check to see if the "javax.xml.xpath.XPathFactory" System property exists and is set
-             *       to a value, if people have issues with using the specified implementor. This would allow users to always
-             *       override the implementation if they so need to.
-             */
-            return XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI,
-                    "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", java.lang.ClassLoader.getSystemClassLoader());
-        } catch (final XPathFactoryConfigurationException e) {
-            LOGGER.debug("Exception generating XPathFactory instance with default implementation.", e);
-        }
-
-        /*
-         * If the expected XPathFactory did not exist, we fallback to loading the one defined as the default.
-         *
-         * If this is still throwing an error, the developer can set the "javax.xml.xpath.XPathFactory" system property
-         * to specify the default XPathFactoryImpl implementation to use. For example:
-         *
-         * -Djavax.xml.xpath.XPathFactory:http://java.sun.com/jaxp/xpath/dom=net.sf.saxon.xpath.XPathFactoryImpl
-         * -Djavax.xml.xpath.XPathFactory:http://java.sun.com/jaxp/xpath/dom=com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl
-         *
-         */
         return XPathFactory.newInstance();
     }
 

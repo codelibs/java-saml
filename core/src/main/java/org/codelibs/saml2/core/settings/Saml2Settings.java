@@ -1117,11 +1117,11 @@ public class Saml2Settings {
      * @return true if the SP settings are valid
      */
     private boolean checkRequired(final Object value) {
-        if ((value == null) || (value instanceof String && ((String) value).isEmpty())) {
+        if ((value == null) || (value instanceof String s && s.isEmpty())) {
             return false;
         }
 
-        if (value instanceof List && ((List<?>) value).isEmpty()) {
+        if (value instanceof List<?> l && l.isEmpty()) {
             return false;
         }
         return true;

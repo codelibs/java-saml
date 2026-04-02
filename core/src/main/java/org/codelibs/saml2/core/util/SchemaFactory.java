@@ -47,40 +47,35 @@ public abstract class SchemaFactory {
                     final String baseURI) {
                 try {
                     if (namespaceURI != null) {
-                        switch (namespaceURI) {
-                        case "urn:oasis:names:tc:SAML:2.0:assertion":
-                            return getLocalResource("saml-schema-assertion-2.0.xsd");
-                        case "urn:oasis:names:tc:SAML:2.0:ac":
-                            return getLocalResource("saml-schema-authn-context-2.0.xsd");
-                        case "urn:oasis:names:tc:SAML:2.0:metadata":
-                            return getLocalResource("saml-schema-metadata-2.0.xsd");
-                        case "urn:oasis:names:tc:SAML:2.0:protocol":
-                            return getLocalResource("saml-schema-protocol-2.0.xsd");
-                        case "urn:oasis:names:tc:SAML:metadata:attribute":
-                            return getLocalResource("sstc-metadata-attr.xsd");
-                        case "urn:oasis:names:tc:SAML:attribute:ext":
-                            return getLocalResource("sstc-saml-attribute-ext.xsd");
-                        case "urn:oasis:names:tc:SAML:metadata:algsupport":
-                            return getLocalResource("sstc-saml-metadata-algsupport-v1.0.xsd");
-                        case "urn:oasis:names:tc:SAML:metadata:ui":
-                            return getLocalResource("sstc-saml-metadata-ui-v1.0.xsd");
-                        case "http://www.w3.org/2001/04/xmlenc#":
-                            return getLocalResource("xenc-schema.xsd");
-                        case "http://www.w3.org/XML/1998/namespace":
-                            return getLocalResource("xml.xsd");
-                        case "http://www.w3.org/2000/09/xmldsig#":
-                            return getLocalResource("xmldsig-core-schema.xsd");
+                        final LSInput result = switch (namespaceURI) {
+                            case "urn:oasis:names:tc:SAML:2.0:assertion" -> getLocalResource("saml-schema-assertion-2.0.xsd");
+                            case "urn:oasis:names:tc:SAML:2.0:ac" -> getLocalResource("saml-schema-authn-context-2.0.xsd");
+                            case "urn:oasis:names:tc:SAML:2.0:metadata" -> getLocalResource("saml-schema-metadata-2.0.xsd");
+                            case "urn:oasis:names:tc:SAML:2.0:protocol" -> getLocalResource("saml-schema-protocol-2.0.xsd");
+                            case "urn:oasis:names:tc:SAML:metadata:attribute" -> getLocalResource("sstc-metadata-attr.xsd");
+                            case "urn:oasis:names:tc:SAML:attribute:ext" -> getLocalResource("sstc-saml-attribute-ext.xsd");
+                            case "urn:oasis:names:tc:SAML:metadata:algsupport" -> getLocalResource("sstc-saml-metadata-algsupport-v1.0.xsd");
+                            case "urn:oasis:names:tc:SAML:metadata:ui" -> getLocalResource("sstc-saml-metadata-ui-v1.0.xsd");
+                            case "http://www.w3.org/2001/04/xmlenc#" -> getLocalResource("xenc-schema.xsd");
+                            case "http://www.w3.org/XML/1998/namespace" -> getLocalResource("xml.xsd");
+                            case "http://www.w3.org/2000/09/xmldsig#" -> getLocalResource("xmldsig-core-schema.xsd");
+                            default -> null;
+                        };
+                        if (result != null) {
+                            return result;
                         }
                     }
                     if ("saml-schema-authn-context-types-2.0.xsd".equals(systemId)) {
                         return getLocalResource("saml-schema-authn-context-types-2.0.xsd");
                     }
                     if (publicId != null) {
-                        switch (publicId.toUpperCase(Locale.ROOT)) {
-                        case "-//W3C//DTD XMLSCHEMA 200102//EN":
-                            return getLocalResource("XMLSchema.dtd");
-                        case "DATATYPES":
-                            return getLocalResource("datatypes.dtd");
+                        final LSInput result = switch (publicId.toUpperCase(Locale.ROOT)) {
+                            case "-//W3C//DTD XMLSCHEMA 200102//EN" -> getLocalResource("XMLSchema.dtd");
+                            case "DATATYPES" -> getLocalResource("datatypes.dtd");
+                            default -> null;
+                        };
+                        if (result != null) {
+                            return result;
                         }
                     }
                 } catch (final Throwable e) {
