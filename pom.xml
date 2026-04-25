@@ -42,7 +42,7 @@
 		<slf4j.version>1.7.36</slf4j.version>
 		<junit.version>4.13.2</junit.version>
 		<logback.version>1.4.14</logback.version>
-		<corelib.version>0.7.1</corelib.version>
+		<corelib.version>0.6.0</corelib.version>
 		<commons.text.version>1.15.0</commons.text.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
