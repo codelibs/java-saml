@@ -1,6 +1,19 @@
 package org.codelibs.saml2.core.model.hsm;
 
+/**
+ * Abstract base class for Hardware Security Module (HSM) integrations.
+ *
+ * Implementations provide key wrapping, unwrapping, encryption and decryption
+ * operations backed by an HSM such as the Azure Key Vault.
+ */
 public abstract class HSM {
+
+    /**
+     * Default constructor.
+     */
+    protected HSM() {
+    }
+
     /**
      * Sets the client to connect to the Azure Key Vault.
      */

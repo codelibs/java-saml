@@ -13,6 +13,9 @@ import com.azure.security.keyvault.keys.cryptography.CryptographyClientBuilder;
 import com.azure.security.keyvault.keys.cryptography.models.EncryptionAlgorithm;
 import com.azure.security.keyvault.keys.cryptography.models.KeyWrapAlgorithm;
 
+/**
+ * HSM implementation backed by Azure Key Vault for cryptographic operations.
+ */
 public class AzureKeyVault extends HSM {
 
     private final String clientId;

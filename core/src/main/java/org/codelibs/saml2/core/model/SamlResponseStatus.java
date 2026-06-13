@@ -45,6 +45,8 @@ public class SamlResponseStatus {
     }
 
     /**
+     * Returns the status code.
+     *
      * @return string the status code
      */
     public String getStatusCode() {
@@ -62,6 +64,8 @@ public class SamlResponseStatus {
     }
 
     /**
+     * Returns the second-level status code.
+     *
      * @return string the second-level status code
      */
     public String getSubStatusCode() {
@@ -79,6 +83,8 @@ public class SamlResponseStatus {
     }
 
     /**
+     * Returns the status message.
+     *
      * @return string the status message
      */
     public String getStatusMessage() {

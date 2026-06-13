@@ -31,9 +31,18 @@ public abstract class SchemaFactory {
         //not called
     }
 
+    /** URL of the SAML 2.0 metadata schema. */
     public static final URL SAML_SCHEMA_METADATA_2_0 = SchemaFactory.class.getResource("/schemas/saml-schema-metadata-2.0.xsd");
+    /** URL of the SAML 2.0 protocol schema. */
     public static final URL SAML_SCHEMA_PROTOCOL_2_0 = SchemaFactory.class.getResource("/schemas/saml-schema-protocol-2.0.xsd");
 
+    /**
+     * Loads a {@link Schema} from the given URL, resolving referenced schemas and DTDs locally.
+     *
+     * @param schemaUrl the URL of the schema to load
+     * @return the loaded schema
+     * @throws SAXException if the schema cannot be parsed
+     */
     public static Schema loadFromUrl(final URL schemaUrl) throws SAXException {
         final javax.xml.validation.SchemaFactory factory =
                 javax.xml.validation.SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);

@@ -141,6 +141,8 @@ public class AuthnRequest {
     }
 
     /**
+     * Returns the base64 encoded, unsigned AuthnRequest, optionally deflated.
+     *
      * @return the base64 encoded unsigned AuthnRequest (deflated or not)
      *
      * @param deflated
@@ -161,6 +163,8 @@ public class AuthnRequest {
     }
 
     /**
+     * Returns the base64 encoded, unsigned AuthnRequest using the default deflate setting.
+     *
      * @return base64 encoded, unsigned AuthnRequest (deflated or not)
      *
      */
@@ -169,6 +173,8 @@ public class AuthnRequest {
     }
 
     /**
+     * Returns the unsigned plain-text AuthnRequest XML.
+     *
      * @return unsigned plain-text AuthnRequest.
      */
     public String getAuthnRequestXml() {
@@ -281,6 +287,8 @@ public class AuthnRequest {
     }
 
     /**
+     * Returns the generated id of the AuthnRequest message.
+     *
      * @return the generated id of the AuthnRequest message
      */
     public String getId() {

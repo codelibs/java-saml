@@ -118,6 +118,8 @@ public class LogoutRequestParams {
     }
 
     /**
+     * Returns the name ID.
+     *
      * @return the name ID
      */
     public String getNameId() {
@@ -125,6 +127,8 @@ public class LogoutRequestParams {
     }
 
     /**
+     * Returns the name ID format.
+     *
      * @return the name ID format
      */
     public String getNameIdFormat() {
@@ -132,6 +136,8 @@ public class LogoutRequestParams {
     }
 
     /**
+     * Returns the name ID name qualifier.
+     *
      * @return the name ID name qualifier
      */
     public String getNameIdNameQualifier() {
@@ -139,6 +145,8 @@ public class LogoutRequestParams {
     }
 
     /**
+     * Returns the name ID SP name qualifier.
+     *
      * @return the name ID SP name qualifier
      */
     public String getNameIdSPNameQualifier() {
@@ -146,6 +154,8 @@ public class LogoutRequestParams {
     }
 
     /**
+     * Returns the session index.
+     *
      * @return the session index
      */
     public String getSessionIndex() {

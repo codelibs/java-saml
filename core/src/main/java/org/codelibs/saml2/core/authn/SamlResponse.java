@@ -623,7 +623,7 @@ public class SamlResponse {
     /**
      * Returns the ResponseStatus object
      *
-     * @return
+     * @return the response status
      */
     public SamlResponseStatus getResponseStatus() {
         return this.responseStatus;
@@ -848,6 +848,8 @@ public class SamlResponse {
     }
 
     /**
+     * Returns the ID of the Response.
+     *
      * @return the ID of the Response
      */
     public String getId() {
@@ -855,6 +857,8 @@ public class SamlResponse {
     }
 
     /**
+     * Returns the ID of the assertion in the Response.
+     *
      * @return the ID of the assertion in the Response
      *
      */
@@ -867,6 +871,8 @@ public class SamlResponse {
     }
 
     /**
+     * Returns the NotOnOrAfter values of this Response.
+     *
      * @return a list of NotOnOrAfter values from SubjectConfirmationData nodes in this Response
      *
      */
@@ -1220,6 +1226,8 @@ public class SamlResponse {
     }
 
     /**
+     * Returns the SAMLResponse XML.
+     *
      * @return the SAMLResponse XML, If the Assertion of the SAMLResponse was encrypted,
      *         returns the XML with the assertion decrypted
      */
@@ -1234,6 +1242,8 @@ public class SamlResponse {
     }
 
     /**
+     * Returns the SAMLResponse Document.
+     *
      * @return the SAMLResponse Document, If the Assertion of the SAMLResponse was encrypted,
      *         returns the Document with the assertion decrypted
      */

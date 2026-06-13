@@ -23,6 +23,7 @@ import org.codelibs.saml2.core.util.Util;
  */
 public final class HttpRequest {
 
+    /** An immutable empty map used as the default set of request parameters. */
     public static final Map<String, List<String>> EMPTY_PARAMETERS = Collections.<String, List<String>> emptyMap();
 
     private final String requestURL;
@@ -76,6 +77,8 @@ public final class HttpRequest {
     }
 
     /**
+     * Returns a copy of this request with the given query parameter added.
+     *
      * @param name  the query parameter name
      * @param value the query parameter value
      * @return a new HttpRequest with the given query parameter added
@@ -94,6 +97,8 @@ public final class HttpRequest {
     }
 
     /**
+     * Returns a copy of this request with the given query parameter removed.
+     *
      * @param name  the query parameter name
      * @return a new HttpRequest with the given query parameter removed
      */
@@ -117,6 +122,8 @@ public final class HttpRequest {
     }
 
     /**
+     * Returns the first value of the named query parameter.
+     *
      * @param name the query parameter name
      * @return the first value for the parameter, or null
      */
@@ -126,6 +133,8 @@ public final class HttpRequest {
     }
 
     /**
+     * Returns all values of the named query parameter.
+     *
      * @param name the query parameter name
      * @return a List containing all values for the parameter
      */
@@ -135,6 +144,8 @@ public final class HttpRequest {
     }
 
     /**
+     * Returns all query parameters of this request.
+     *
      * @return a map of all query parameters
      */
     public Map<String, List<String>> getParameters() {
@@ -146,7 +157,7 @@ public final class HttpRequest {
      * Prefer to extract the original encoded value directly from queryString since url
      * encoding is not canonical.
      *
-     * @param name
+     * @param name the query parameter name
      * @return the first value for the parameter, or null
      */
     public String getEncodedParameter(final String name) {
@@ -162,8 +173,8 @@ public final class HttpRequest {
      * Prefer to extract the original encoded value directly from queryString since url
      * encoding is not canonical.
      *
-     * @param name
-     * @param defaultValue
+     * @param name the query parameter name
+     * @param defaultValue the default value to return when the parameter is absent
      * @return the first value for the parameter, or url encoded default value
      */
     public String getEncodedParameter(final String name, final String defaultValue) {

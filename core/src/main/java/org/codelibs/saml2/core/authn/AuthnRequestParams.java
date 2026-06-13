@@ -127,6 +127,8 @@ public class AuthnRequestParams {
     }
 
     /**
+     * Returns whether the <code>ForceAuthn</code> attribute should be set.
+     *
      * @return whether the <code>ForceAuthn</code> attribute should be set to
      *         <code>true</code>
      */
@@ -135,6 +137,8 @@ public class AuthnRequestParams {
     }
 
     /**
+     * Returns whether the <code>IsPassive</code> attribute should be set.
+     *
      * @return whether the <code>IsPassive</code> attribute should be set to
      *         <code>true</code>
      */
@@ -143,6 +147,8 @@ public class AuthnRequestParams {
     }
 
     /**
+     * Returns whether a <code>NameIDPolicy</code> should be set.
+     *
      * @return whether a <code>NameIDPolicy</code> should be set
      */
     public boolean isSetNameIdPolicy() {
@@ -150,6 +156,8 @@ public class AuthnRequestParams {
     }
 
     /**
+     * Returns whether the <code>AllowCreate</code> attribute should be set on the <code>NameIDPolicy</code>.
+     *
      * @return whether the <code>AllowCreate</code> attribute should be set to
      *         <code>true</code> on the <code>NameIDPolicy</code> element (only
      *         meaningful if {@link #isSetNameIdPolicy()} is also <code>true</code>)
@@ -159,6 +167,8 @@ public class AuthnRequestParams {
     }
 
     /**
+     * Returns the subject that should be authenticated.
+     *
      * @return the subject that should be authenticated
      */
     public String getNameIdValueReq() {

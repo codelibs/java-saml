@@ -39,6 +39,8 @@ public class AttributeConsumingService {
     }
 
     /**
+     * Adds a requested attribute to this attribute consuming service.
+     *
      * @param attr
      *              RequestedAttribute. The requested attribute to be included
      */
@@ -47,6 +49,8 @@ public class AttributeConsumingService {
     }
 
     /**
+     * Returns the service name.
+     *
      * @return string the service name
      */
     public final String getServiceName() {
@@ -54,6 +58,8 @@ public class AttributeConsumingService {
     }
 
     /**
+     * Returns the service description.
+     *
      * @return string the service description
      */
     public final String getServiceDescription() {
@@ -61,6 +67,8 @@ public class AttributeConsumingService {
     }
 
     /**
+     * Returns the requested attributes.
+     *
      * @return List the requested attributes
      */
     public final List<RequestedAttribute> getRequestedAttributes() {

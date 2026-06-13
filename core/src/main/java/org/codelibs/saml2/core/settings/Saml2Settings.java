@@ -32,6 +32,13 @@ public class Saml2Settings {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Saml2Settings.class);
 
+    /**
+     * Constructs a new {@link Saml2Settings} instance with default values.
+     */
+    public Saml2Settings() {
+        // Default constructor; settings are populated via setter methods.
+    }
+
     // Toolkit settings
     private boolean strict = true;
     private boolean debug = false;
@@ -97,6 +104,8 @@ public class Saml2Settings {
     private boolean spValidationOnly = false;
 
     /**
+     * Returns whether strict mode is enabled.
+     *
      * @return the strict setting value
      */
     public final boolean isStrict() {
@@ -104,6 +113,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider entity ID.
+     *
      * @return the spEntityId setting value
      */
     public final String getSpEntityId() {
@@ -111,6 +122,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider Assertion Consumer Service URL.
+     *
      * @return the spAssertionConsumerServiceUrl
      */
     public final URL getSpAssertionConsumerServiceUrl() {
@@ -118,6 +131,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider Assertion Consumer Service binding.
+     *
      * @return the spAssertionConsumerServiceBinding setting value
      */
     public final String getSpAssertionConsumerServiceBinding() {
@@ -125,6 +140,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider Single Logout Service URL.
+     *
      * @return the spSingleLogoutServiceUrl setting value
      */
     public final URL getSpSingleLogoutServiceUrl() {
@@ -132,6 +149,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider Single Logout Service binding.
+     *
      * @return the spSingleLogoutServiceBinding setting value
      */
     public final String getSpSingleLogoutServiceBinding() {
@@ -139,6 +158,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider NameID format.
+     *
      * @return the spNameIDFormat setting value
      */
     public final String getSpNameIDFormat() {
@@ -146,6 +167,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether repeated attribute names are allowed.
+     *
      * @return the allowRepeatAttributeName setting value
      */
     public boolean isAllowRepeatAttributeName() {
@@ -153,6 +176,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether deprecated algorithms are rejected.
+     *
      * @return the rejectDeprecatedAlg setting value
      */
     public boolean getRejectDeprecatedAlg() {
@@ -160,6 +185,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider X.509 certificate.
+     *
      * @return the spX509cert setting value
      */
     public final X509Certificate getSPcert() {
@@ -167,6 +194,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the new Service Provider X.509 certificate used for certificate rollover.
+     *
      * @return the spX509certNew setting value
      */
     public final X509Certificate getSPcertNew() {
@@ -174,6 +203,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider private key.
+     *
      * @return the spPrivateKey setting value
      */
     public final PrivateKey getSPkey() {
@@ -181,6 +212,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Identity Provider entity ID.
+     *
      * @return the idpEntityId setting value
      */
     public final String getIdpEntityId() {
@@ -188,6 +221,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Identity Provider Single Sign-On Service URL.
+     *
      * @return the idpSingleSignOnServiceUrl setting value
      */
     public final URL getIdpSingleSignOnServiceUrl() {
@@ -195,6 +230,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Identity Provider Single Sign-On Service binding.
+     *
      * @return the idpSingleSignOnServiceBinding setting value
      */
     public final String getIdpSingleSignOnServiceBinding() {
@@ -202,6 +239,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Identity Provider Single Logout Service URL.
+     *
      * @return the idpSingleLogoutServiceUrl setting value
      */
     public final URL getIdpSingleLogoutServiceUrl() {
@@ -209,6 +248,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Identity Provider Single Logout Service response URL, falling back to the request URL if unset.
+     *
      * @return the idpSingleLogoutServiceResponseUrl setting value
      */
     public final URL getIdpSingleLogoutServiceResponseUrl() {
@@ -220,6 +261,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Identity Provider Single Logout Service binding.
+     *
      * @return the idpSingleLogoutServiceBinding setting value
      */
     public final String getIdpSingleLogoutServiceBinding() {
@@ -227,6 +270,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Identity Provider X.509 certificate.
+     *
      * @return the idpx509cert setting value
      */
     public final X509Certificate getIdpx509cert() {
@@ -258,6 +303,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the list of additional Identity Provider X.509 certificates.
+     *
      * @return the idpx509certMulti setting value
      */
     public List<X509Certificate> getIdpx509certMulti() {
@@ -265,6 +312,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether the NameID should be encrypted.
+     *
      * @return the nameIdEncrypted setting value
      */
     public boolean getNameIdEncrypted() {
@@ -272,6 +321,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether authentication requests should be signed.
+     *
      * @return the authnRequestsSigned setting value
      */
     public boolean getAuthnRequestsSigned() {
@@ -279,6 +330,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether logout requests should be signed.
+     *
      * @return the logoutRequestSigned setting value
      */
     public boolean getLogoutRequestSigned() {
@@ -286,6 +339,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether logout responses should be signed.
+     *
      * @return the logoutResponseSigned setting value
      */
     public boolean getLogoutResponseSigned() {
@@ -293,6 +348,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether SAML messages are expected to be signed.
+     *
      * @return the wantMessagesSigned setting value
      */
     public boolean getWantMessagesSigned() {
@@ -300,6 +357,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether SAML assertions are expected to be signed.
+     *
      * @return the wantAssertionsSigned setting value
      */
     public boolean getWantAssertionsSigned() {
@@ -307,6 +366,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether SAML assertions are expected to be encrypted.
+     *
      * @return the wantAssertionsEncrypted setting value
      */
     public boolean getWantAssertionsEncrypted() {
@@ -314,6 +375,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether a NameID is expected in the SAML response.
+     *
      * @return the wantNameId setting value
      */
     public boolean getWantNameId() {
@@ -321,6 +384,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether the NameID is expected to be encrypted.
+     *
      * @return the wantNameIdEncrypted setting value
      */
     public boolean getWantNameIdEncrypted() {
@@ -328,6 +393,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether the Service Provider metadata should be signed.
+     *
      * @return the signMetadata setting value
      */
     public boolean getSignMetadata() {
@@ -335,6 +402,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the requested authentication context values.
+     *
      * @return the requestedAuthnContext setting value
      */
     public List<String> getRequestedAuthnContext() {
@@ -342,6 +411,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the requested authentication context comparison method.
+     *
      * @return the requestedAuthnContextComparison setting value
      */
     public String getRequestedAuthnContextComparison() {
@@ -349,6 +420,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether XML schema validation is performed on SAML messages.
+     *
      * @return the wantXMLValidation setting value
      */
     public boolean getWantXMLValidation() {
@@ -356,6 +429,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the signature algorithm used for signing.
+     *
      * @return the signatureAlgorithm setting value
      */
     public String getSignatureAlgorithm() {
@@ -363,6 +438,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the digest algorithm used for signing.
+     *
      * @return the digestAlgorithm setting value
      */
     public String getDigestAlgorithm() {
@@ -370,6 +447,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider contact information.
+     *
      * @return SP Contact info
      */
     public List<Contact> getContacts() {
@@ -377,6 +456,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Service Provider organization information.
+     *
      * @return SP Organization info
      */
     public Organization getOrganization() {
@@ -384,6 +465,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the prefix used when generating unique IDs.
+     *
      * @return Unique ID prefix
      */
     public String getUniqueIDPrefix() {
@@ -391,6 +474,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the Hardware Security Module configuration.
+     *
      * @return The HSM setting value.
      */
     public HSM getHsm() {
@@ -398,6 +483,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether debug mode is active.
+     *
      * @return if the debug is active or not
      */
     public boolean isDebugActive() {
@@ -405,6 +492,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the allowed clock drift in seconds.
+     *
      * @return the clock drift in seconds
      */
     public long getClockDrift() {
@@ -850,6 +939,11 @@ public class Saml2Settings {
         this.rejectUnsolicitedResponsesWithInResponseTo = rejectUnsolicitedResponsesWithInResponseTo;
     }
 
+    /**
+     * Returns whether unsolicited Responses containing an InResponseTo value are rejected.
+     *
+     * @return the rejectUnsolicitedResponsesWithInResponseTo setting value
+     */
     public boolean isRejectUnsolicitedResponsesWithInResponseTo() {
         return rejectUnsolicitedResponsesWithInResponseTo;
     }
@@ -865,6 +959,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether request compression is enabled.
+     *
      * @return the compressRequest setting value
      */
     public boolean isCompressRequestEnabled() {
@@ -882,6 +978,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether response compression is enabled.
+     *
      * @return the compressResponse setting value
      */
     public boolean isCompressResponseEnabled() {
@@ -1138,6 +1236,8 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns whether only Service Provider settings are validated.
+     *
      * @return the spValidationOnly value
      */
     public boolean getSPValidationOnly() {

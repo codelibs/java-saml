@@ -42,6 +42,8 @@ public class KeyStoreSettings {
     }
 
     /**
+     * Returns the KeyStore.
+     *
      * @return the keyStore
      */
     public final KeyStore getKeyStore() {
@@ -49,6 +51,8 @@ public class KeyStoreSettings {
     }
 
     /**
+     * Returns the SP key entry alias.
+     *
      * @return the spAlias
      */
     public final String getSpAlias() {
@@ -56,6 +60,8 @@ public class KeyStoreSettings {
     }
 
     /**
+     * Returns the SP key entry password.
+     *
      * @return the spKeyPass
      */
     public final String getSpKeyPass() {
