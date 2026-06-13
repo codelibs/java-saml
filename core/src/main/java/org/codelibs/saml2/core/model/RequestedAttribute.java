@@ -57,6 +57,8 @@ public class RequestedAttribute {
     }
 
     /**
+     * Returns the RequestedAttribute name.
+     *
      * @return string the RequestedAttribute name
      */
     public final String getName() {
@@ -64,6 +66,8 @@ public class RequestedAttribute {
     }
 
     /**
+     * Returns the RequestedAttribute friendly name.
+     *
      * @return string the RequestedAttribute fiendlyname
      */
     public final String getFriendlyName() {
@@ -71,6 +75,8 @@ public class RequestedAttribute {
     }
 
     /**
+     * Returns whether the RequestedAttribute is required.
+     *
      * @return boolean the RequestedAttribute isRequired value
      */
     public final Boolean isRequired() {
@@ -78,6 +84,8 @@ public class RequestedAttribute {
     }
 
     /**
+     * Returns the RequestedAttribute name format.
+     *
      * @return string the RequestedAttribute nameformat
      */
     public final String getNameFormat() {
@@ -85,6 +93,8 @@ public class RequestedAttribute {
     }
 
     /**
+     * Returns the RequestedAttribute values.
+     *
      * @return string the RequestedAttribute nameformat
      */
     public final List<String> getAttributeValues() {

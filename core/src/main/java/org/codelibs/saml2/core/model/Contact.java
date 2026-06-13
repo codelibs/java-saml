@@ -86,6 +86,8 @@ public class Contact {
     }
 
     /**
+     * Returns the contact type.
+     *
      * @return string the contact type
      */
     public final String getContactType() {
@@ -93,6 +95,8 @@ public class Contact {
     }
 
     /**
+     * Returns the first contact e-mail address.
+     *
      * @return the contact email
      * @deprecated this returns just the first e-mail address in {@link #getEmailAddresses()}
      */
@@ -102,6 +106,8 @@ public class Contact {
     }
 
     /**
+     * Returns the contact e-mail addresses.
+     *
      * @return a list containing the contact e-mail addresses (never <code>null</code>)
      */
     public final List<String> getEmailAddresses() {
@@ -109,6 +115,8 @@ public class Contact {
     }
 
     /**
+     * Returns the contact given name.
+     *
      * @return the contact given name
      */
     public final String getGivenName() {
@@ -116,6 +124,8 @@ public class Contact {
     }
 
     /**
+     * Returns the contact surname.
+     *
      * @return the contact surname
      */
     public final String getSurName() {
@@ -123,6 +133,8 @@ public class Contact {
     }
 
     /**
+     * Returns the contact company.
+     *
      * @return the contact company
      */
     public final String getCompany() {
@@ -130,6 +142,8 @@ public class Contact {
     }
 
     /**
+     * Returns the contact phone numbers.
+     *
      * @return a list containing the contact phone numbers (never <code>null</code>)
      */
     public final List<String> getTelephoneNumbers() {

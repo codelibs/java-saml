@@ -45,6 +45,12 @@ import org.slf4j.LoggerFactory;
  */
 public class SettingsBuilder {
     /**
+     * Default constructor.
+     */
+    public SettingsBuilder() {
+    }
+
+    /**
      * Private property to construct a logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(SettingsBuilder.class);
@@ -59,92 +65,170 @@ public class SettingsBuilder {
      */
     private Saml2Settings saml2Setting;
 
+    /** Property key for the strict mode flag ({@code onelogin.saml2.strict}). */
     public final static String STRICT_PROPERTY_KEY = "onelogin.saml2.strict";
+    /** Property key for the debug mode flag ({@code onelogin.saml2.debug}). */
     public final static String DEBUG_PROPERTY_KEY = "onelogin.saml2.debug";
 
     // SP
+    /** Property key for the SP entity ID ({@code onelogin.saml2.sp.entityid}). */
     public final static String SP_ENTITYID_PROPERTY_KEY = "onelogin.saml2.sp.entityid";
+    /** Property key for the SP Assertion Consumer Service URL ({@code onelogin.saml2.sp.assertion_consumer_service.url}). */
     public final static String SP_ASSERTION_CONSUMER_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.sp.assertion_consumer_service.url";
+    /** Property key for the SP Assertion Consumer Service binding ({@code onelogin.saml2.sp.assertion_consumer_service.binding}). */
     public final static String SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.sp.assertion_consumer_service.binding";
+    /** Property key for the SP Single Logout Service URL ({@code onelogin.saml2.sp.single_logout_service.url}). */
     public final static String SP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.sp.single_logout_service.url";
+    /** Property key for the SP Single Logout Service binding ({@code onelogin.saml2.sp.single_logout_service.binding}). */
     public final static String SP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.sp.single_logout_service.binding";
+    /** Property key for the SP NameID format ({@code onelogin.saml2.sp.nameidformat}). */
     public final static String SP_NAMEIDFORMAT_PROPERTY_KEY = "onelogin.saml2.sp.nameidformat";
 
+    /** Property key for the SP X.509 certificate ({@code onelogin.saml2.sp.x509cert}). */
     public final static String SP_X509CERT_PROPERTY_KEY = "onelogin.saml2.sp.x509cert";
+    /** Property key for the SP private key ({@code onelogin.saml2.sp.privatekey}). */
     public final static String SP_PRIVATEKEY_PROPERTY_KEY = "onelogin.saml2.sp.privatekey";
+    /** Property key for the SP new X.509 certificate used during certificate rotation ({@code onelogin.saml2.sp.x509certNew}). */
     public final static String SP_X509CERTNEW_PROPERTY_KEY = "onelogin.saml2.sp.x509certNew";
 
+    /** Property key prefix for SP contact entries ({@code onelogin.saml2.sp.contact}). */
     public final static String SP_CONTACT_PROPERTY_KEY_PREFIX = "onelogin.saml2.sp.contact";
+    /** Property key suffix for the SP contact type ({@code contactType}). */
     public final static String SP_CONTACT_CONTACT_TYPE_PROPERTY_KEY_SUFFIX = "contactType";
+    /** Property key suffix for the SP contact company name ({@code company}). */
     public final static String SP_CONTACT_COMPANY_PROPERTY_KEY_SUFFIX = "company";
+    /** Property key suffix for the SP contact given name ({@code given_name}). */
     public final static String SP_CONTACT_GIVEN_NAME_PROPERTY_KEY_SUFFIX = "given_name";
+    /** Property key suffix for the SP contact surname ({@code sur_name}). */
     public final static String SP_CONTACT_SUR_NAME_PROPERTY_KEY_SUFFIX = "sur_name";
+    /** Property key prefix for the SP contact e-mail addresses ({@code email_address}). */
     public final static String SP_CONTACT_EMAIL_ADDRESS_PROPERTY_KEY_PREFIX = "email_address";
+    /** Property key prefix for the SP contact telephone numbers ({@code telephone_number}). */
     public final static String SP_CONTACT_TELEPHONE_NUMBER_PROPERTY_KEY_PREFIX = "telephone_number";
 
     // KeyStore
+    /** Property key for the KeyStore instance holding the SP keys ({@code onelogin.saml2.keystore.store}). */
     public final static String KEYSTORE_KEY = "onelogin.saml2.keystore.store";
+    /** Property key for the KeyStore alias of the SP entry ({@code onelogin.saml2.keystore.alias}). */
     public final static String KEYSTORE_ALIAS = "onelogin.saml2.keystore.alias";
+    /** Property key for the KeyStore key password ({@code onelogin.saml2.keystore.key.password}). */
     public final static String KEYSTORE_KEY_PASSWORD = "onelogin.saml2.keystore.key.password";
 
     // IDP
+    /** Property key for the IdP entity ID ({@code onelogin.saml2.idp.entityid}). */
     public final static String IDP_ENTITYID_PROPERTY_KEY = "onelogin.saml2.idp.entityid";
+    /** Property key for the IdP Single Sign-On Service URL ({@code onelogin.saml2.idp.single_sign_on_service.url}). */
     public final static String IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.url";
+    /** Property key for the IdP Single Sign-On Service binding ({@code onelogin.saml2.idp.single_sign_on_service.binding}). */
     public final static String IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.binding";
+    /** Property key for the IdP Single Logout Service URL ({@code onelogin.saml2.idp.single_logout_service.url}). */
     public final static String IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_logout_service.url";
+    /** Property key for the IdP Single Logout Service response URL ({@code onelogin.saml2.idp.single_logout_service.response.url}). */
     public final static String IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY =
             "onelogin.saml2.idp.single_logout_service.response.url";
+    /** Property key for the IdP Single Logout Service binding ({@code onelogin.saml2.idp.single_logout_service.binding}). */
     public final static String IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.idp.single_logout_service.binding";
 
+    /** Property key for the IdP X.509 certificate ({@code onelogin.saml2.idp.x509cert}). */
     public final static String IDP_X509CERT_PROPERTY_KEY = "onelogin.saml2.idp.x509cert";
+    /** Property key prefix for multiple IdP X.509 certificates ({@code onelogin.saml2.idp.x509certMulti}). */
     public final static String IDP_X509CERTMULTI_PROPERTY_KEY = "onelogin.saml2.idp.x509certMulti";
+    /** Property key for the IdP certificate fingerprint ({@code onelogin.saml2.idp.certfingerprint}). */
     public final static String CERTFINGERPRINT_PROPERTY_KEY = "onelogin.saml2.idp.certfingerprint";
+    /** Property key for the IdP certificate fingerprint algorithm ({@code onelogin.saml2.idp.certfingerprint_algorithm}). */
     public final static String CERTFINGERPRINT_ALGORITHM_PROPERTY_KEY = "onelogin.saml2.idp.certfingerprint_algorithm";
 
     // Security
+    /** Property key controlling whether the NameID is encrypted ({@code onelogin.saml2.security.nameid_encrypted}). */
     public final static String SECURITY_NAMEID_ENCRYPTED = "onelogin.saml2.security.nameid_encrypted";
+    /** Property key controlling whether AuthnRequests are signed ({@code onelogin.saml2.security.authnrequest_signed}). */
     public final static String SECURITY_AUTHREQUEST_SIGNED = "onelogin.saml2.security.authnrequest_signed";
+    /** Property key controlling whether LogoutRequests are signed ({@code onelogin.saml2.security.logoutrequest_signed}). */
     public final static String SECURITY_LOGOUTREQUEST_SIGNED = "onelogin.saml2.security.logoutrequest_signed";
+    /** Property key controlling whether LogoutResponses are signed ({@code onelogin.saml2.security.logoutresponse_signed}). */
     public final static String SECURITY_LOGOUTRESPONSE_SIGNED = "onelogin.saml2.security.logoutresponse_signed";
+    /** Property key controlling whether received messages must be signed ({@code onelogin.saml2.security.want_messages_signed}). */
     public final static String SECURITY_WANT_MESSAGES_SIGNED = "onelogin.saml2.security.want_messages_signed";
+    /** Property key controlling whether received assertions must be signed ({@code onelogin.saml2.security.want_assertions_signed}). */
     public final static String SECURITY_WANT_ASSERTIONS_SIGNED = "onelogin.saml2.security.want_assertions_signed";
+    /** Property key controlling whether received assertions must be encrypted ({@code onelogin.saml2.security.want_assertions_encrypted}). */
     public final static String SECURITY_WANT_ASSERTIONS_ENCRYPTED = "onelogin.saml2.security.want_assertions_encrypted";
+    /** Property key controlling whether a NameID is required in responses ({@code onelogin.saml2.security.want_nameid}). */
     public final static String SECURITY_WANT_NAMEID = "onelogin.saml2.security.want_nameid";
+    /** Property key controlling whether the received NameID must be encrypted ({@code onelogin.saml2.security.want_nameid_encrypted}). */
     public final static String SECURITY_WANT_NAMEID_ENCRYPTED = "onelogin.saml2.security.want_nameid_encrypted";
+    /** Property key controlling whether the SP metadata is signed ({@code onelogin.saml2.security.sign_metadata}). */
     public final static String SECURITY_SIGN_METADATA = "onelogin.saml2.security.sign_metadata";
+    /** Property key for the requested authentication context(s) ({@code onelogin.saml2.security.requested_authncontext}). */
     public final static String SECURITY_REQUESTED_AUTHNCONTEXT = "onelogin.saml2.security.requested_authncontext";
+    /** Property key for the requested authentication context comparison ({@code onelogin.saml2.security.requested_authncontextcomparison}). */
     public final static String SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON = "onelogin.saml2.security.requested_authncontextcomparison";
+    /** Property key controlling whether XML schema validation is performed ({@code onelogin.saml2.security.want_xml_validation}). */
     public final static String SECURITY_WANT_XML_VALIDATION = "onelogin.saml2.security.want_xml_validation";
+    /** Property key for the signature algorithm used when signing ({@code onelogin.saml2.security.signature_algorithm}). */
     public final static String SECURITY_SIGNATURE_ALGORITHM = "onelogin.saml2.security.signature_algorithm";
+    /** Property key for the digest algorithm used when signing ({@code onelogin.saml2.security.digest_algorithm}). */
     public final static String SECURITY_DIGEST_ALGORITHM = "onelogin.saml2.security.digest_algorithm";
+    /** Property key controlling whether unsolicited responses with an InResponseTo attribute are rejected ({@code onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto}). */
     public final static String SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO =
             "onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto";
+    /** Property key controlling whether duplicated attribute names are allowed ({@code onelogin.saml2.security.allow_duplicated_attribute_name}). */
     public final static String SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY =
             "onelogin.saml2.security.allow_duplicated_attribute_name";
+    /** Property key controlling whether deprecated cryptographic algorithms are rejected ({@code onelogin.saml2.security.reject_deprecated_alg}). */
     public final static String SECURITY_REJECT_DEPRECATED_ALGORITHM = "onelogin.saml2.security.reject_deprecated_alg";
 
     // Compress
+    /** Property key controlling whether outgoing requests are compressed ({@code onelogin.saml2.compress.request}). */
     public final static String COMPRESS_REQUEST = "onelogin.saml2.compress.request";
+    /** Property key controlling whether outgoing responses are compressed ({@code onelogin.saml2.compress.response}). */
     public final static String COMPRESS_RESPONSE = "onelogin.saml2.compress.response";
 
     // Parsing
+    /** Property key controlling whether NameID values are trimmed during parsing ({@code onelogin.saml2.parsing.trim_name_ids}). */
     public final static String PARSING_TRIM_NAME_IDS = "onelogin.saml2.parsing.trim_name_ids";
+    /** Property key controlling whether attribute values are trimmed during parsing ({@code onelogin.saml2.parsing.trim_attribute_values}). */
     public final static String PARSING_TRIM_ATTRIBUTE_VALUES = "onelogin.saml2.parsing.trim_attribute_values";
 
     // Misc
+    /**
+     * Property key for the legacy technical contact given name ({@code onelogin.saml2.contacts.technical.given_name}).
+     *
+     * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
+     */
     @Deprecated
     public final static String CONTACT_TECHNICAL_GIVEN_NAME = "onelogin.saml2.contacts.technical.given_name";
+    /**
+     * Property key for the legacy technical contact e-mail address ({@code onelogin.saml2.contacts.technical.email_address}).
+     *
+     * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
+     */
     @Deprecated
     public final static String CONTACT_TECHNICAL_EMAIL_ADDRESS = "onelogin.saml2.contacts.technical.email_address";
+    /**
+     * Property key for the legacy support contact given name ({@code onelogin.saml2.contacts.support.given_name}).
+     *
+     * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
+     */
     @Deprecated
     public final static String CONTACT_SUPPORT_GIVEN_NAME = "onelogin.saml2.contacts.support.given_name";
+    /**
+     * Property key for the legacy support contact e-mail address ({@code onelogin.saml2.contacts.support.email_address}).
+     *
+     * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
+     */
     @Deprecated
     public final static String CONTACT_SUPPORT_EMAIL_ADDRESS = "onelogin.saml2.contacts.support.email_address";
 
+    /** Property key for the organization name ({@code onelogin.saml2.organization.name}). */
     public final static String ORGANIZATION_NAME = "onelogin.saml2.organization.name";
+    /** Property key for the organization display name ({@code onelogin.saml2.organization.displayname}). */
     public final static String ORGANIZATION_DISPLAYNAME = "onelogin.saml2.organization.displayname";
+    /** Property key for the organization URL ({@code onelogin.saml2.organization.url}). */
     public final static String ORGANIZATION_URL = "onelogin.saml2.organization.url";
+    /** Property key for the organization language ({@code onelogin.saml2.organization.lang}). */
     public final static String ORGANIZATION_LANG = "onelogin.saml2.organization.lang";
+    /** Property key for the prefix used to generate unique IDs ({@code onelogin.saml2.unique_id_prefix}). */
     public final static String UNIQUE_ID_PREFIX_PROPERTY_KEY = "onelogin.saml2.unique_id_prefix";
 
     /**
@@ -868,6 +952,15 @@ public class SettingsBuilder {
         return null;
     }
 
+    /**
+     * Retrieves the PrivateKey associated with the given alias from the provided KeyStore.
+     *
+     * @param keyStore the KeyStore to read the private key from
+     * @param alias the alias of the entry whose private key is returned
+     * @param password the password used to access the key entry
+     *
+     * @return the PrivateKey for the alias, or {@code null} if it cannot be loaded
+     */
     protected PrivateKey getPrivateKeyFromKeyStore(final KeyStore keyStore, final String alias, final String password) {
         Key key;
         try {
@@ -885,6 +978,15 @@ public class SettingsBuilder {
         return null;
     }
 
+    /**
+     * Retrieves the X509Certificate associated with the given alias from the provided KeyStore.
+     *
+     * @param keyStore the KeyStore to read the certificate from
+     * @param alias the alias of the entry whose certificate is returned
+     * @param password the password used to access the key entry
+     *
+     * @return the X509Certificate for the alias, or {@code null} if it cannot be loaded
+     */
     protected X509Certificate getCertificateFromKeyStore(final KeyStore keyStore, final String alias, final String password) {
         try {
             if (keyStore.containsAlias(alias)) {

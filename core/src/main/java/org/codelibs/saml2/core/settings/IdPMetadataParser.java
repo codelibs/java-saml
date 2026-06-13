@@ -33,6 +33,12 @@ public class IdPMetadataParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(IdPMetadataParser.class);
 
     /**
+     * Default constructor.
+     */
+    public IdPMetadataParser() {
+    }
+
+    /**
      * Get IdP Metadata Info from XML Document
      *
      * @param xmlDocument

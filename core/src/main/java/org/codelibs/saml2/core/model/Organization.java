@@ -96,6 +96,8 @@ public class Organization {
     }
 
     /**
+     * Returns the organization name.
+     *
      * @return string the organization name
      */
     public final String getOrgName() {
@@ -103,6 +105,8 @@ public class Organization {
     }
 
     /**
+     * Returns the organization display name.
+     *
      * @return string the organization display name
      */
     public final String getOrgDisplayName() {
@@ -110,6 +114,8 @@ public class Organization {
     }
 
     /**
+     * Returns the organization URL.
+     *
      * @return string the organization URL
      */
     public final String getOrgUrl() {
@@ -117,6 +123,8 @@ public class Organization {
     }
 
     /**
+     * Returns the organization lang attribute.
+     *
      * @return string the lang attribute
      */
     public final String getOrgLangAttribute() {

@@ -1083,6 +1083,8 @@ public class Auth {
     }
 
     /**
+     * Returns the URL of the IdP Single Sign On Service.
+     *
      * @return The url of the Single Sign On Service
      */
     public String getSSOurl() {
@@ -1090,6 +1092,8 @@ public class Auth {
     }
 
     /**
+     * Returns the URL of the IdP Single Logout Service.
+     *
      * @return The url of the Single Logout Service
      */
     public String getSLOurl() {
@@ -1097,6 +1101,8 @@ public class Auth {
     }
 
     /**
+     * Returns the URL of the IdP Single Logout Service response endpoint.
+     *
      * @return The url of the Single Logout Service Response.
      */
     public String getSLOResponseUrl() {
@@ -1298,6 +1304,8 @@ public class Auth {
     }
 
     /**
+     * Returns whether the user has been authenticated.
+     *
      * @return the authenticated
      */
     public final boolean isAuthenticated() {
@@ -1305,6 +1313,8 @@ public class Auth {
     }
 
     /**
+     * Returns the list of the names of the SAML attributes.
+     *
      * @return the list of the names of the SAML attributes.
      */
     public final List<String> getAttributesName() {
@@ -1312,6 +1322,8 @@ public class Auth {
     }
 
     /**
+     * Returns the set of SAML attributes.
+     *
      * @return the set of SAML attributes.
      */
     public final Map<String, List<String>> getAttributes() {
@@ -1319,6 +1331,8 @@ public class Auth {
     }
 
     /**
+     * Returns the value of the SAML attribute with the given name.
+     *
      * @param name Name of the attribute
      *
      * @return the attribute value
@@ -1328,6 +1342,8 @@ public class Auth {
     }
 
     /**
+     * Returns the NameID of the assertion.
+     *
      * @return the nameID of the assertion
      */
     public final String getNameId() {
@@ -1335,6 +1351,8 @@ public class Auth {
     }
 
     /**
+     * Returns the NameID Format of the assertion.
+     *
      * @return the nameID Format of the assertion
      */
     public final String getNameIdFormat() {
@@ -1342,6 +1360,8 @@ public class Auth {
     }
 
     /**
+     * Returns the NameQualifier of the assertion.
+     *
      * @return the NameQualifier of the assertion
      */
     public final String getNameIdNameQualifier() {
@@ -1349,6 +1369,8 @@ public class Auth {
     }
 
     /**
+     * Returns the SPNameQualifier of the assertion.
+     *
      * @return the SPNameQualifier of the assertion
      */
     public final String getNameIdSPNameQualifier() {
@@ -1356,6 +1378,8 @@ public class Auth {
     }
 
     /**
+     * Returns the SessionIndex of the assertion.
+     *
      * @return the SessionIndex of the assertion
      */
     public final String getSessionIndex() {
@@ -1363,6 +1387,8 @@ public class Auth {
     }
 
     /**
+     * Returns the SessionNotOnOrAfter of the assertion.
+     *
      * @return the SessionNotOnOrAfter of the assertion
      */
     public final Instant getSessionExpiration() {
@@ -1370,6 +1396,8 @@ public class Auth {
     }
 
     /**
+     * Returns the ID of the last message processed.
+     *
      * @return The ID of the last message processed
      */
     public String getLastMessageId() {
@@ -1386,6 +1414,8 @@ public class Auth {
     }
 
     /**
+     * Returns the ID of the last assertion processed.
+     *
      * @return The ID of the last assertion processed
      */
     public String getLastAssertionId() {
@@ -1393,6 +1423,8 @@ public class Auth {
     }
 
     /**
+     * Returns the NotOnOrAfter values of the last assertion processed.
+     *
      * @return The NotOnOrAfter values of the last assertion processed
      */
     public List<Instant> getLastAssertionNotOnOrAfter() {
@@ -1400,6 +1432,8 @@ public class Auth {
     }
 
     /**
+     * Returns the errors from the last operation.
+     *
      * @return an array with the errors, the array is empty when the validation was
      *         successful
      */
@@ -1408,6 +1442,8 @@ public class Auth {
     }
 
     /**
+     * Returns the reason for the last error.
+     *
      * @return the reason for the last error
      */
     public String getLastErrorReason() {
@@ -1415,6 +1451,8 @@ public class Auth {
     }
 
     /**
+     * Returns the exception for the last error.
+     *
      * @return the exception for the last error
      */
     public Exception getLastValidationException() {
@@ -1422,6 +1460,8 @@ public class Auth {
     }
 
     /**
+     * Returns the id of the last request generated (AuthnRequest or LogoutRequest).
+     *
      * @return the id of the last request generated (AuthnRequest or LogoutRequest),
      *         null if none
      */
@@ -1440,6 +1480,8 @@ public class Auth {
     }
 
     /**
+     * Returns the settings used by this Auth instance.
+     *
      * @return the Saml2Settings object. The Settings data.
      */
     public Saml2Settings getSettings() {
@@ -1447,6 +1489,8 @@ public class Auth {
     }
 
     /**
+     * Returns whether debug mode is active.
+     *
      * @return if debug mode is active
      */
     public Boolean isDebugActive() {

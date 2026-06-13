@@ -10,9 +10,19 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * SAX error handler that accumulates parsing errors, fatal errors and warnings
+ * encountered while parsing an XML document.
+ */
 public class XMLErrorAccumulatorHandler extends DefaultHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(XMLErrorAccumulatorHandler.class);
     private final List<SAXParseException> errors = new ArrayList<>();
+
+    /**
+     * Default constructor.
+     */
+    public XMLErrorAccumulatorHandler() {
+    }
 
     @Override
     public void error(final SAXParseException e) throws SAXException {
@@ -38,10 +48,20 @@ public class XMLErrorAccumulatorHandler extends DefaultHandler {
         }
     }
 
+    /**
+     * Returns the accumulated parsing exceptions.
+     *
+     * @return an unmodifiable list of the accumulated parsing exceptions
+     */
     public List<SAXParseException> getErrorXML() {
         return Collections.unmodifiableList(errors);
     }
 
+    /**
+     * Indicates whether any parsing error, fatal error or warning was accumulated.
+     *
+     * @return {@code true} if at least one issue was accumulated, {@code false} otherwise
+     */
     public boolean hasError() {
         return !errors.isEmpty();
     }

@@ -61,6 +61,8 @@ public class ServletUtils {
     }
 
     /**
+     * Returns the server name of the current request.
+     *
      * @param request
      * 				HttpServletRequest object to be processed
      *

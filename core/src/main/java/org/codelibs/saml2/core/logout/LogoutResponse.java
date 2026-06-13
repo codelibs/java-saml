@@ -123,6 +123,8 @@ public class LogoutResponse {
     }
 
     /**
+     * Returns the base64 encoded unsigned Logout Response.
+     *
      * @return the base64 encoded unsigned Logout Response (deflated or not)
      *
      * @param deflated
@@ -143,6 +145,8 @@ public class LogoutResponse {
     }
 
     /**
+     * Returns the base64 encoded, unsigned Logout Response.
+     *
      * @return the base64 encoded, unsigned Logout Response (deflated or not)
      *
      */
@@ -151,6 +155,8 @@ public class LogoutResponse {
     }
 
     /**
+     * Returns the plain XML Logout Response.
+     *
      * @return the plain XML Logout Response
      */
     public String getLogoutResponseXml() {
@@ -158,6 +164,8 @@ public class LogoutResponse {
     }
 
     /**
+     * Returns the ID of the Response.
+     *
      * @return the ID of the Response
      */
     public String getId() {
@@ -294,6 +302,11 @@ public class LogoutResponse {
         }
     }
 
+    /**
+     * Determines if the SAML LogoutResponse is valid, without checking a request ID.
+     *
+     * @return true if the LogoutResponse is valid
+     */
     public boolean isValid() {
         return isValid(null);
     }

@@ -118,8 +118,11 @@ public final class Util {
     private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneOffset.UTC);
+    /** Default prefix used when generating unique IDs. */
     public static final String UNIQUE_ID_PREFIX = "ONELOGIN_";
+    /** XPath expression that locates the Signature of a Response element. */
     public static final String RESPONSE_SIGNATURE_XPATH = "/samlp:Response/ds:Signature";
+    /** XPath expression that locates the Signature of an Assertion element. */
     public static final String ASSERTION_SIGNATURE_XPATH = "/samlp:Response/saml:Assertion/ds:Signature";
     /** Indicates if JAXP 1.5 support has been detected. */
     private static final boolean JAXP_15_SUPPORTED = isJaxp15Supported();
@@ -143,7 +146,7 @@ public final class Util {
      * If for whatever reason this method cannot determine if JAXP 1.5 properties are supported it will indicate the
      * options are supported. This way we don't accidentally disable configuration options.
      *
-     * @return
+     * @return true if JAXP 1.5 properties are supported (or could not be determined)
      */
     public static boolean isJaxp15Supported() {
         boolean supported = true;
@@ -1094,6 +1097,13 @@ public final class Util {
         return signatureData;
     }
 
+    /**
+     * Determines whether a signature using a deprecated algorithm must be rejected.
+     *
+     * @param signAlg             the signature algorithm found on the Signature element
+     * @param rejectDeprecatedAlg whether deprecated algorithms should be rejected
+     * @return true if the deprecated algorithm must be rejected, false otherwise
+     */
     public static boolean mustRejectDeprecatedSignatureAlgo(final String signAlg, final boolean rejectDeprecatedAlg) {
         if (DEPRECATED_ALGOS.contains(signAlg)) {
             final String errorMsg = "Found a deprecated algorithm " + signAlg + " related to the Signature element,";
@@ -1604,6 +1614,8 @@ public final class Util {
     /**
      * Get Status from a Response
      *
+     * @param statusXpath
+     *            The XPath expression used to locate the Status element
      * @param dom
      *            The Response as XML
      *
@@ -1851,6 +1863,8 @@ public final class Util {
     }
 
     /**
+     * Returns the current time as a unix timestamp.
+     *
      * @return the unix timestamp that matches the current time.
      */
     public static Long getCurrentTimeStamp() {

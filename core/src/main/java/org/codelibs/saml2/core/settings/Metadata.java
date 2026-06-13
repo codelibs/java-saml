@@ -380,6 +380,8 @@ public class Metadata {
     }
 
     /**
+     * Returns the metadata as a string.
+     *
      * @return the metadata
      */
     public final String getMetadataString() {

@@ -283,6 +283,8 @@ public class LogoutRequest {
     }
 
     /**
+     * Returns the base64 encoded unsigned Logout Request.
+     *
      * @return the base64 encoded unsigned Logout Request (deflated or not)
      *
      * @param deflated
@@ -303,6 +305,8 @@ public class LogoutRequest {
     }
 
     /**
+     * Returns the base64 encoded unsigned Logout Request.
+     *
      * @return the base64 encoded unsigned Logout Request (deflated or not)
      *
      */
@@ -311,6 +315,8 @@ public class LogoutRequest {
     }
 
     /**
+     * Returns the plain XML Logout Request.
+     *
      * @return the plain XML Logout Request
      */
     public String getLogoutRequestXml() {
@@ -994,6 +1000,8 @@ public class LogoutRequest {
     }
 
     /**
+     * Returns the ID of the Logout Request.
+     *
      * @return the ID of the Logout Request
      */
     public String getId() {
