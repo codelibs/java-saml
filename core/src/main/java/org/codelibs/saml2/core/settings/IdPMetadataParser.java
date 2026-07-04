@@ -3,10 +3,12 @@ package org.codelibs.saml2.core.settings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.codelibs.saml2.core.exception.SAMLSevereException;
+import org.codelibs.saml2.core.exception.SAMLSignatureException;
 import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.util.Constants;
 import org.codelibs.saml2.core.util.Util;
@@ -24,6 +26,17 @@ import org.xml.sax.InputSource;
  *
  * This class does not validate in any way the URL that is introduced,
  * make sure to validate it properly before use it in a get_metadata method.
+ *
+ * <p><b>Security note on {@code trustedSigningCert} overloads:</b> the overloads of
+ * {@code parseXML}/{@code parseFileXML}/{@code parseRemoteXML} that accept a trailing
+ * {@link X509Certificate} verify that the fetched metadata document is signed by that
+ * certificate before parsing it. That certificate MUST be provisioned out-of-band
+ * (e.g. from pinned configuration or a local keystore) and MUST NOT be extracted from
+ * the very same metadata document being validated. Extracting the trust anchor from the
+ * document under validation only protects against transport-level corruption; it does
+ * nothing to detect a MITM attacker or a compromised source serving a self-consistent
+ * forged document, since the attacker would simply embed their own certificate alongside
+ * their own signature.
  */
 public class IdPMetadataParser {
 
@@ -154,6 +167,42 @@ public class IdPMetadataParser {
     }
 
     /**
+     * Get IdP Metadata Info from XML Document, verifying beforehand that the document is signed
+     * by the given trusted certificate.
+     *
+     * <p><b>Security note:</b> {@code trustedSigningCert} MUST be provisioned out-of-band (e.g.
+     * pinned configuration or a local keystore entry), NOT extracted from the same metadata
+     * document being validated here. Using a certificate embedded in the document under
+     * validation only detects transport corruption, not a MITM attacker or a compromised source
+     * serving a self-consistent forged document (which would simply embed its own certificate
+     * alongside its own signature).
+     *
+     * @param xmlDocument
+     *            XML document hat contains IdP metadata
+     * @param entityId
+     *            Entity Id of the desired IdP, if no entity Id is provided and the XML metadata contains more than one IDPSSODescriptor, the first is returned
+     * @param desiredNameIdFormat
+     *            If available on IdP metadata, use that nameIdFormat
+     * @param desiredSSOBinding
+     *            Parse specific binding SSO endpoint.
+     * @param desiredSLOBinding
+     *            Parse specific binding SLO endpoint.
+     * @param trustedSigningCert
+     *            the out-of-band trusted certificate the metadata document must be signed with; if {@code null} no signature check is performed
+     *
+     * @return Mapped values with metadata info in Saml2Settings format
+     *
+     * @throws SAMLSignatureException if {@code trustedSigningCert} is not {@code null} and the metadata document signature does not validate against it
+     */
+    public static Map<String, Object> parseXML(final Document xmlDocument, final String entityId, final String desiredNameIdFormat,
+            final String desiredSSOBinding, final String desiredSLOBinding, final X509Certificate trustedSigningCert) {
+        if (trustedSigningCert != null && !Util.validateMetadataSign(xmlDocument, trustedSigningCert, null, null)) {
+            throw new SAMLSignatureException("Metadata signature validation failed (entityId=" + entityId + ")");
+        }
+        return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding);
+    }
+
+    /**
      * Get IdP Metadata Info from XML Document
      *
      * @param xmlDocument
@@ -215,6 +264,75 @@ public class IdPMetadataParser {
     }
 
     /**
+     * Get IdP Metadata Info from XML file, verifying beforehand that the document is signed by
+     * the given trusted certificate.
+     *
+     * <p><b>Security note:</b> {@code trustedSigningCert} MUST be provisioned out-of-band (e.g.
+     * pinned configuration or a local keystore entry), NOT extracted from the same metadata
+     * document being validated here. See {@link #parseXML(Document, String, String, String, String, X509Certificate)}
+     * for details.
+     *
+     * @param xmlFileName
+     *            Filename of the XML filename that contains IdP metadata
+     * @param entityId
+     *            Entity Id of the desired IdP, if no entity Id is provided and the XML metadata contains more than one IDPSSODescriptor, the first is returned
+     * @param desiredNameIdFormat
+     *            If available on IdP metadata, use that nameIdFormat
+     * @param desiredSSOBinding
+     *            Parse specific binding SSO endpoint.
+     * @param desiredSLOBinding
+     *            Parse specific binding SLO endpoint.
+     * @param trustedSigningCert
+     *            the out-of-band trusted certificate the metadata document must be signed with; if {@code null} no signature check is performed
+     *
+     * @return Mapped values with metadata info in Saml2Settings format
+     *
+     * @throws SAMLSignatureException if {@code trustedSigningCert} is not {@code null} and the metadata document signature does not validate against it
+     */
+    public static Map<String, Object> parseFileXML(final String xmlFileName, final String entityId, final String desiredNameIdFormat,
+            final String desiredSSOBinding, final String desiredSLOBinding, final X509Certificate trustedSigningCert) {
+        final ClassLoader classLoader = IdPMetadataParser.class.getClassLoader();
+        try (InputStream inputStream = classLoader.getResourceAsStream(xmlFileName)) {
+            if (inputStream != null) {
+                final Document xmlDocument = Util.parseXML(new InputSource(inputStream));
+                return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding, trustedSigningCert);
+            }
+        } catch (final SAMLSignatureException e) {
+            throw e;
+        } catch (final Exception e) {
+            final String errorMsg = "XML file'" + xmlFileName + "' cannot be loaded." + e.getMessage();
+            throw new SAMLSevereException(errorMsg, SAMLSevereException.SETTINGS_FILE_NOT_FOUND, e);
+        }
+        throw new SAMLSevereException("XML file '" + xmlFileName + "' not found in the classpath",
+                SAMLSevereException.SETTINGS_FILE_NOT_FOUND);
+    }
+
+    /**
+     * Get IdP Metadata Info from XML file, verifying beforehand that the document is signed by
+     * the given trusted certificate. Shorthand for
+     * {@link #parseFileXML(String, String, String, String, String, X509Certificate)} with
+     * {@code entityId=null}, {@code desiredNameIdFormat=null} and both bindings set to
+     * {@link Constants#BINDING_HTTP_REDIRECT}.
+     *
+     * <p><b>Security note:</b> {@code trustedSigningCert} MUST be provisioned out-of-band, NOT
+     * extracted from the same metadata document being validated here. See
+     * {@link #parseXML(Document, String, String, String, String, X509Certificate)} for details.
+     *
+     * @param xmlFileName
+     *            Filename of the XML filename that contains IdP metadata
+     * @param trustedSigningCert
+     *            the out-of-band trusted certificate the metadata document must be signed with; if {@code null} no signature check is performed
+     *
+     * @return Mapped values with metadata info in Saml2Settings format
+     *
+     * @throws SAMLSignatureException if {@code trustedSigningCert} is not {@code null} and the metadata document signature does not validate against it
+     */
+    public static Map<String, Object> parseFileXML(final String xmlFileName, final X509Certificate trustedSigningCert) {
+        return parseFileXML(xmlFileName, null, null, Constants.BINDING_HTTP_REDIRECT, Constants.BINDING_HTTP_REDIRECT,
+                trustedSigningCert);
+    }
+
+    /**
      * Get IdP Metadata Info from XML file
      *
      * @param xmlFileName
@@ -239,7 +357,7 @@ public class IdPMetadataParser {
      *
      */
     public static Map<String, Object> parseFileXML(final String xmlFileName) {
-        return parseFileXML(xmlFileName, null);
+        return parseFileXML(xmlFileName, (String) null);
     }
 
     /**
@@ -270,6 +388,66 @@ public class IdPMetadataParser {
     }
 
     /**
+     * Get IdP Metadata Info from XML file, verifying beforehand that the document is signed by
+     * the given trusted certificate.
+     *
+     * <p><b>Security note:</b> {@code trustedSigningCert} MUST be provisioned out-of-band (e.g.
+     * pinned configuration or a local keystore entry), NOT extracted from the same metadata
+     * document being validated here. See {@link #parseXML(Document, String, String, String, String, X509Certificate)}
+     * for details.
+     *
+     * @param xmlURL
+     *            URL to the XML document that contains IdP metadata
+     * @param entityId
+     *            Entity Id of the desired IdP, if no entity Id is provided and the XML metadata contains more than one IDPSSODescriptor, the first is returned
+     * @param desiredNameIdFormat
+     *            If available on IdP metadata, use that nameIdFormat
+     * @param desiredSSOBinding
+     *            Parse specific binding SSO endpoint.
+     * @param desiredSLOBinding
+     *            Parse specific binding SLO endpoint.
+     * @param trustedSigningCert
+     *            the out-of-band trusted certificate the metadata document must be signed with; if {@code null} no signature check is performed
+     *
+     * @return Mapped values with metadata info in Saml2Settings format
+     *
+     * @throws SAMLSignatureException if {@code trustedSigningCert} is not {@code null} and the metadata document signature does not validate against it
+     */
+    public static Map<String, Object> parseRemoteXML(final URL xmlURL, final String entityId, final String desiredNameIdFormat,
+            final String desiredSSOBinding, final String desiredSLOBinding, final X509Certificate trustedSigningCert) {
+        try (InputStream is = xmlURL.openStream()) {
+            final Document xmlDocument = Util.parseXML(new InputSource(is));
+            return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding, trustedSigningCert);
+        } catch (IOException e) {
+            throw new XMLParsingException("Failed to parse a remote XML: " + xmlURL, e);
+        }
+    }
+
+    /**
+     * Get IdP Metadata Info from XML file, verifying beforehand that the document is signed by
+     * the given trusted certificate. Shorthand for
+     * {@link #parseRemoteXML(URL, String, String, String, String, X509Certificate)} with
+     * {@code entityId=null}, {@code desiredNameIdFormat=null} and both bindings set to
+     * {@link Constants#BINDING_HTTP_REDIRECT}.
+     *
+     * <p><b>Security note:</b> {@code trustedSigningCert} MUST be provisioned out-of-band, NOT
+     * extracted from the same metadata document being validated here. See
+     * {@link #parseXML(Document, String, String, String, String, X509Certificate)} for details.
+     *
+     * @param xmlURL
+     *            URL to the XML document that contains IdP metadata
+     * @param trustedSigningCert
+     *            the out-of-band trusted certificate the metadata document must be signed with; if {@code null} no signature check is performed
+     *
+     * @return Mapped values with metadata info in Saml2Settings format
+     *
+     * @throws SAMLSignatureException if {@code trustedSigningCert} is not {@code null} and the metadata document signature does not validate against it
+     */
+    public static Map<String, Object> parseRemoteXML(final URL xmlURL, final X509Certificate trustedSigningCert) {
+        return parseRemoteXML(xmlURL, null, null, Constants.BINDING_HTTP_REDIRECT, Constants.BINDING_HTTP_REDIRECT, trustedSigningCert);
+    }
+
+    /**
      * Get IdP Metadata Info from XML file
      *
      * @param xmlURL
@@ -294,7 +472,7 @@ public class IdPMetadataParser {
      *
      */
     public static Map<String, Object> parseRemoteXML(final URL xmlURL) {
-        return parseRemoteXML(xmlURL, null);
+        return parseRemoteXML(xmlURL, (String) null);
     }
 
     /**

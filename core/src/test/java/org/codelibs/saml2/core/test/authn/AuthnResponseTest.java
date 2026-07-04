@@ -16,8 +16,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,11 +30,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.codelibs.saml2.core.authn.SamlResponse;
+import org.codelibs.saml2.core.exception.SAMLException;
 import org.codelibs.saml2.core.exception.SAMLSevereException;
 import org.codelibs.saml2.core.exception.SettingsException;
 import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.model.SamlResponseStatus;
+import org.codelibs.saml2.core.replay.InMemoryReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.codelibs.saml2.core.util.Constants;
@@ -163,6 +167,33 @@ public class AuthnResponseTest {
 
         expectedEx.expect(SettingsException.class);
         expectedEx.expectMessage("No private key available for decrypt, check settings");
+        new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+    }
+
+    /**
+     * Tests the constructor of SamlResponse
+     * Case: EncryptedAssertion whose decryption fails because the configured SP
+     * private key does not match the key the assertion was encrypted with.
+     * Util.decryptElement() swallows the underlying decryption exception, so
+     * decryptAssertion() must detect the missing decrypted saml:Assertion node
+     * and raise a typed ValidationException(MISSING_ENCRYPTED_ELEMENT) instead
+     * of letting a NullPointerException escape the constructor.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.SamlResponse#decryptAssertion
+     */
+    @Test
+    public void testEncryptedAssertionWrongKeyThrowsValidationException() throws Exception {
+        // config.different.properties carries a SP private key that does NOT match
+        // the key used to encrypt data/responses/valid_encrypted_assertion.xml.base64
+        // (see UtilsTest#testDecryptElementAssertionWrongKey which uses the same key
+        // and proves decryption of this exact fixture fails).
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.different.properties").build();
+        String samlResponseEncoded = Util.getFileAsString("data/responses/valid_encrypted_assertion.xml.base64");
+
+        expectedEx.expect(ValidationException.class);
+        expectedEx.expectMessage("No /samlp:Response/saml:EncryptedAssertion/saml:Assertion element found");
         new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
     }
 
@@ -501,6 +532,74 @@ public class AuthnResponseTest {
         samlResponseEncoded = Util.getFileAsString("data/responses/invalids/no_nameid.xml.base64");
         samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
         assertTrue(samlResponse.getNameIdData().isEmpty());
+    }
+
+    /**
+     * Tests the getNameIdData method of SamlResponse with an allow-list of key transport algorithms.
+     * <p>
+     * Case: by default (no allow-list configured) decryption of a RSA_1_5-encrypted NameID is
+     * unaffected, matching the historical permissive behavior.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.SamlResponse#getNameIdData
+     */
+    @Test
+    public void testGetNameIdDataDefaultAllowsAllKeyTransportAlgorithms() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        assertNull(settings.getAllowedKeyTransportAlgorithms());
+
+        String samlResponseEncoded = Util.getFileAsString("data/responses/response_encrypted_nameid.xml.base64");
+        SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+        String nameIdDataStr = samlResponse.getNameIdData().toString();
+        assertThat(nameIdDataStr, containsString("Value=2de11defd199f8d5bb63f9b7deb265ba5c675c10"));
+    }
+
+    /**
+     * Tests the getNameIdData method of SamlResponse with an allow-list of key transport algorithms.
+     * <p>
+     * Case: the fixture is encrypted with RSA_1_5, but the allow-list only contains RSA_OAEP_MGF1P, so
+     * the NameID decryption must be rejected - surfacing as the same generic failure as any other
+     * decryption problem (e.g. a wrong key), not a new distinct exception type.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.SamlResponse#getNameIdData
+     */
+    @Test
+    public void testGetNameIdDataRejectsDisallowedKeyTransportAlgorithm() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setAllowedKeyTransportAlgorithms(new HashSet<>(Arrays.asList(Constants.RSA_OAEP_MGF1P)));
+
+        String samlResponseEncoded = Util.getFileAsString("data/responses/response_encrypted_nameid.xml.base64");
+        SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+
+        expectedEx.expect(SAMLException.class);
+        expectedEx.expectMessage("Not able to decrypt the EncryptedID and get a NameID");
+        samlResponse.getNameIdData();
+    }
+
+    /**
+     * Tests the decryptAssertion method of SamlResponse with an allow-list of key transport algorithms.
+     * <p>
+     * Case: the fixture is encrypted with RSA_1_5, but the allow-list only contains RSA_OAEP_MGF1P, so
+     * decryption of the EncryptedAssertion must be rejected the same way a wrong key would be - a
+     * generic ValidationException(MISSING_ENCRYPTED_ELEMENT), not a new distinct exception type.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.SamlResponse#decryptAssertion
+     */
+    @Test
+    public void testDecryptAssertionRejectsDisallowedKeyTransportAlgorithm() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setAllowedKeyTransportAlgorithms(new HashSet<>(Arrays.asList(Constants.RSA_OAEP_MGF1P)));
+
+        String samlResponseEncoded = Util.getFileAsString("data/responses/valid_encrypted_assertion.xml.base64");
+
+        expectedEx.expect(ValidationException.class);
+        expectedEx.expectMessage("No /samlp:Response/saml:EncryptedAssertion/saml:Assertion element found");
+        new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
     }
 
     /**
@@ -1542,6 +1641,36 @@ public class AuthnResponseTest {
 
     /**
      * Tests the validateTimestamps method of SamlResponse
+     * Case: Encrypted assertion whose (decrypted) Conditions element has expired.
+     * The raw pre-decryption document has no Conditions element at all (it is inside
+     * the ciphertext, see saml:Conditions NotOnOrAfter="2055-06-07T20:17:08Z" in
+     * data/responses/valid_encrypted_assertion.xml.base64), so validateTimestamps()
+     * must inspect getSAMLResponseDocument() (the decrypted document) instead of the
+     * raw samlResponseDocument. Moving "now" past that NotOnOrAfter proves the
+     * encrypted Conditions are actually being checked: before the fix this method
+     * always returned true regardless of the clock, because the raw document has no
+     * Conditions element to find.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.SamlResponse#validateTimestamps
+     */
+    @Test
+    public void testValidateTimestampsEncryptedAssertionExpired() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        String samlResponseEncoded = Util.getFileAsString("data/responses/valid_encrypted_assertion.xml.base64");
+        SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+
+        // Move "now" past the decrypted assertion's Conditions/@NotOnOrAfter (2055-06-07T20:17:08Z).
+        DateTimeTestUtils.setFixedDateTime("2056-01-01T00:00:00Z");
+
+        expectedEx.expect(ValidationException.class);
+        expectedEx.expectMessage("Could not validate timestamp: expired. Check system clock.");
+        samlResponse.validateTimestamps();
+    }
+
+    /**
+     * Tests the validateTimestamps method of SamlResponse
      *
      * @throws ValidationException
      * @throws SettingsException
@@ -2418,6 +2547,54 @@ public class AuthnResponseTest {
 
         assertFalse(samlResponse.isValid("invalidRequestId"));
         assertThat(samlResponse.getError(), containsString("The InResponseTo of the Response"));
+    }
+
+    /**
+     * Tests the isValid method of SamlResponse
+     * Case: a ReplayCache is configured and the same Assertion is validated twice
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.SamlResponse#isValid
+     */
+    @Test
+    public void testIsInValidReplayedAssertionWithCache() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setStrict(true);
+        settings.setReplayCache(new InMemoryReplayCache());
+        String samlResponseEncoded = Util.getFileAsString("data/responses/valid_response.xml.base64");
+
+        SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+        assertTrue(samlResponse.isValid());
+
+        SamlResponse replayedResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+        assertFalse(replayedResponse.isValid());
+        assertTrue(replayedResponse.getValidationException() instanceof ValidationException);
+        assertEquals(ValidationException.ASSERTION_REPLAYED,
+                ((ValidationException) replayedResponse.getValidationException()).getErrorCode());
+    }
+
+    /**
+     * Tests the isValid method of SamlResponse
+     * Case: no ReplayCache is configured (default) - validating the same Assertion
+     * multiple times must keep succeeding, proving default behavior is unchanged.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.authn.SamlResponse#isValid
+     */
+    @Test
+    public void testIsValidReplayedAssertionWithoutCacheIsUnaffected() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setStrict(true);
+        assertNull(settings.getReplayCache());
+        String samlResponseEncoded = Util.getFileAsString("data/responses/valid_response.xml.base64");
+
+        SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+        assertTrue(samlResponse.isValid());
+
+        SamlResponse sameResponseAgain = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+        assertTrue(sameResponseAgain.isValid());
     }
 
     @Test

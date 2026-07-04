@@ -568,7 +568,11 @@ if (!errors.isEmpty()) {
 
     String relayState = request.getParameter("RelayState");
 
-    if (relayState != null && relayState != ServletUtils.getSelfRoutedURLNoQuery(request)) {
+    // SECURITY WARNING: RelayState is attacker-controlled (it comes from an HTTP parameter).
+    // Redirecting to it verbatim is an open-redirect vulnerability. Validate it against an
+    // application-controlled allowlist, or restrict it to a known-safe relative path, before
+    // calling sendRedirect.
+    if (relayState != null && !relayState.equals(ServletUtils.getSelfRoutedURLNoQuery(request))) {
         response.sendRedirect(request.getParameter("RelayState"));
     } else {
         if (attributes.isEmpty()) {

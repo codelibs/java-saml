@@ -24,6 +24,7 @@ import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.logout.LogoutResponse;
 import org.codelibs.saml2.core.logout.LogoutResponseParams;
 import org.codelibs.saml2.core.model.SamlResponseStatus;
+import org.codelibs.saml2.core.replay.InMemoryReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.codelibs.saml2.core.test.NaiveUrlEncoder;
@@ -698,6 +699,59 @@ public class LogoutResponseTest {
         settings.setStrict(false);
         logoutResponse = new LogoutResponse(settings, httpRequest);
         assertTrue(logoutResponse.isValid());
+    }
+
+    /**
+     * Tests the isValid method of LogoutResponse
+     * Case: a ReplayCache is configured and the same LogoutResponse is validated twice
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.logout.LogoutResponse#isValid
+     */
+    @Test
+    public void testIsInValidReplayedWithCache() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        settings.setStrict(true);
+        settings.setReplayCache(new InMemoryReplayCache());
+        String samlResponseEncoded = Util.getFileAsString("data/logout_responses/logout_response_deflated.xml.base64");
+        String requestURL = "http://stuff.com/endpoints/endpoints/sls.php";
+        HttpRequest httpRequest = newHttpRequest(requestURL, samlResponseEncoded);
+
+        LogoutResponse logoutResponse = new LogoutResponse(settings, httpRequest);
+        assertTrue(logoutResponse.isValid());
+
+        LogoutResponse replayedResponse = new LogoutResponse(settings, httpRequest);
+        assertFalse(replayedResponse.isValid());
+        assertTrue(replayedResponse.getValidationException() instanceof ValidationException);
+        assertEquals(ValidationException.MESSAGE_REPLAYED,
+                ((ValidationException) replayedResponse.getValidationException()).getErrorCode());
+    }
+
+    /**
+     * Tests the isValid method of LogoutResponse
+     * Case: no ReplayCache is configured (default) - validating the same
+     * LogoutResponse multiple times must keep succeeding, proving default
+     * behavior is unchanged.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.logout.LogoutResponse#isValid
+     */
+    @Test
+    public void testIsValidReplayedWithoutCacheIsUnaffected() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        settings.setStrict(true);
+        assertNull(settings.getReplayCache());
+        String samlResponseEncoded = Util.getFileAsString("data/logout_responses/logout_response_deflated.xml.base64");
+        String requestURL = "http://stuff.com/endpoints/endpoints/sls.php";
+        HttpRequest httpRequest = newHttpRequest(requestURL, samlResponseEncoded);
+
+        LogoutResponse logoutResponse = new LogoutResponse(settings, httpRequest);
+        assertTrue(logoutResponse.isValid());
+
+        LogoutResponse sameResponseAgain = new LogoutResponse(settings, httpRequest);
+        assertTrue(sameResponseAgain.isValid());
     }
 
     @Test

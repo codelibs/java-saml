@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.saml2.core.model.Contact;
 import org.codelibs.saml2.core.model.Organization;
 import org.codelibs.saml2.core.model.hsm.HSM;
+import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.util.Constants;
 import org.codelibs.saml2.core.util.SchemaFactory;
 import org.codelibs.saml2.core.util.Util;
@@ -54,6 +55,7 @@ public class Saml2Settings {
     private X509Certificate spX509certNew = null;
     private PrivateKey spPrivateKey = null;
     private HSM hsm = null;
+    private ReplayCache replayCache = null;
 
     // IdP
     private String idpEntityId = "";
@@ -83,6 +85,8 @@ public class Saml2Settings {
     private boolean wantXMLValidation = true;
     private String signatureAlgorithm = Constants.RSA_SHA256;
     private String digestAlgorithm = Constants.SHA256;
+    private String nameIdEncryptionAlgorithm = Constants.RSA_1_5;
+    private Set<String> allowedKeyTransportAlgorithms = null;
     private boolean rejectUnsolicitedResponsesWithInResponseTo = false;
     private boolean allowRepeatAttributeName = false;
     private boolean rejectDeprecatedAlg = false;
@@ -321,6 +325,15 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the key transport (key wrapping) algorithm used to encrypt the NameID.
+     *
+     * @return the nameIdEncryptionAlgorithm setting value
+     */
+    public String getNameIdEncryptionAlgorithm() {
+        return nameIdEncryptionAlgorithm;
+    }
+
+    /**
      * Returns whether authentication requests should be signed.
      *
      * @return the authnRequestsSigned setting value
@@ -447,6 +460,17 @@ public class Saml2Settings {
     }
 
     /**
+     * Returns the allow-list of key transport (key wrapping) algorithm URIs accepted when
+     * decrypting an inbound {@code xenc:EncryptedKey}.
+     *
+     * @return the allowedKeyTransportAlgorithms setting value, or {@code null} if every
+     *         algorithm is accepted (permissive default)
+     */
+    public Set<String> getAllowedKeyTransportAlgorithms() {
+        return allowedKeyTransportAlgorithms;
+    }
+
+    /**
      * Returns the Service Provider contact information.
      *
      * @return SP Contact info
@@ -480,6 +504,17 @@ public class Saml2Settings {
      */
     public HSM getHsm() {
         return this.hsm;
+    }
+
+    /**
+     * Returns the configured replay cache used to detect replayed SAML assertions
+     * and logout messages.
+     *
+     * @return the ReplayCache setting value, or {@code null} if replay checking is
+     *         not configured (the default).
+     */
+    public ReplayCache getReplayCache() {
+        return this.replayCache;
     }
 
     /**
@@ -537,6 +572,16 @@ public class Saml2Settings {
      */
     public void setHsm(final HSM hsm) {
         this.hsm = hsm;
+    }
+
+    /**
+     * Sets the replay cache used to detect replayed SAML assertions and logout
+     * messages. When {@code null} (the default), no replay checking is performed.
+     *
+     * @param replayCache The ReplayCache object to be set.
+     */
+    public void setReplayCache(final ReplayCache replayCache) {
+        this.replayCache = replayCache;
     }
 
     /**
@@ -922,6 +967,29 @@ public class Saml2Settings {
     }
 
     /**
+     * Set the nameIdEncryptionAlgorithm setting value
+     *
+     * @param nameIdEncryptionAlgorithm
+     *            the nameIdEncryptionAlgorithm value to be set. The key transport (key wrapping)
+     *            algorithm used when encrypting the NameID.
+     */
+    public void setNameIdEncryptionAlgorithm(final String nameIdEncryptionAlgorithm) {
+        this.nameIdEncryptionAlgorithm = nameIdEncryptionAlgorithm;
+    }
+
+    /**
+     * Set the allowedKeyTransportAlgorithms setting value
+     *
+     * @param allowedKeyTransportAlgorithms
+     *            the allow-list of key transport (key wrapping) algorithm URIs accepted when
+     *            decrypting an inbound {@code xenc:EncryptedKey}. {@code null} accepts every
+     *            algorithm (permissive default).
+     */
+    public void setAllowedKeyTransportAlgorithms(final Set<String> allowedKeyTransportAlgorithms) {
+        this.allowedKeyTransportAlgorithms = allowedKeyTransportAlgorithms;
+    }
+
+    /**
      * Controls if unsolicited Responses are rejected if they contain an InResponseTo value.
      *
      * If false using a validate method {@link org.codelibs.saml2.core.authn.SamlResponse#isValid(String)} with a null argument will
@@ -1072,6 +1140,31 @@ public class Saml2Settings {
         }
 
         return errors;
+    }
+
+    /**
+     * Returns a list of non-fatal security warnings about the current configuration. Unlike
+     * {@link #checkSettings()}, these are not configuration errors, but weak or insecure
+     * settings that should be reviewed before running in production.
+     *
+     * @return the list of security warning codes found on the settings data
+     */
+    public List<String> getSecurityWarnings() {
+        final List<String> warnings = new ArrayList<>();
+        if (!strict) {
+            warnings.add("strict_mode_disabled");
+        }
+        if (idpCertFingerprint != null && !"sha256".equalsIgnoreCase(idpCertFingerprintAlgorithm)
+                && !"sha384".equalsIgnoreCase(idpCertFingerprintAlgorithm) && !"sha512".equalsIgnoreCase(idpCertFingerprintAlgorithm)) {
+            warnings.add("weak_fingerprint_algorithm");
+        }
+        if (!rejectDeprecatedAlg) {
+            warnings.add("deprecated_signature_algorithms_not_rejected");
+        }
+        if (!wantAssertionsSigned && !wantMessagesSigned) {
+            warnings.add("assertions_and_messages_not_required_signed");
+        }
+        return warnings;
     }
 
     /**
@@ -1275,12 +1368,52 @@ public class Saml2Settings {
     /**
      * Validates an XML SP Metadata.
      *
+     * <p>This overload never performs metadata signature validation; it is preserved
+     * unchanged for backward compatibility. Use {@link #validateMetadata(String, X509Certificate)}
+     * or {@link #validateMetadata(String, X509Certificate, String, String, boolean)} to additionally
+     * validate the metadata signature.
+     *
      * @param metadataString Metadata's XML that will be validate
      *
      * @return Array The list of found errors
      *
      */
-    public static List<String> validateMetadata(String metadataString) {
+    public static List<String> validateMetadata(final String metadataString) {
+        return validateMetadata(metadataString, null, null, null, false);
+    }
+
+    /**
+     * Validates an XML SP Metadata, additionally checking that it is signed by the given certificate.
+     *
+     * @param metadataString Metadata's XML that will be validate
+     * @param cert the certificate whose public key is used to validate the metadata's signature
+     *
+     * @return Array The list of found errors
+     *
+     */
+    public static List<String> validateMetadata(final String metadataString, final X509Certificate cert) {
+        return validateMetadata(metadataString, cert, null, null, false);
+    }
+
+    /**
+     * Validates an XML SP Metadata, additionally checking that it is signed either by the given
+     * certificate or by a certificate matching the given fingerprint.
+     *
+     * <p>Signature validation is opt-in: it is only performed when {@code cert} is non-null or
+     * {@code fingerprint} is non-null/non-empty. When neither is provided this method behaves
+     * exactly like {@link #validateMetadata(String)}.
+     *
+     * @param metadataString Metadata's XML that will be validate
+     * @param cert the certificate whose public key is used to validate the metadata's signature, or {@code null}
+     * @param fingerprint the fingerprint of the certificate used to validate the metadata's signature, or {@code null}
+     * @param alg the fingerprint algorithm
+     * @param rejectDeprecatedAlg whether to reject signatures using deprecated algorithms
+     *
+     * @return Array The list of found errors
+     *
+     */
+    public static List<String> validateMetadata(String metadataString, final X509Certificate cert, final String fingerprint,
+            final String alg, final boolean rejectDeprecatedAlg) {
 
         metadataString = metadataString.replace("<?xml version=\"1.0\"?>", "");
 
@@ -1316,14 +1449,11 @@ public class Saml2Settings {
             }
         }
 
-        // Note: Metadata signature validation is not currently implemented.
-        // Future enhancement: Add signature validation for SP metadata to ensure integrity.
-        // Implementation considerations:
-        // - Need to determine which certificate to use for validation (SP cert or dedicated metadata cert)
-        // - Should validation be mandatory or optional based on configuration?
-        // - Use Util.validateMetadataSign() or similar validation method
-        // - Add appropriate error messages to the errors list if validation fails
-        // Security recommendation: Metadata signatures should be validated when received from external sources.
+        if (cert != null || (fingerprint != null && !fingerprint.isEmpty())) {
+            if (!Util.validateMetadataSign(metadataDocument, cert, fingerprint, alg, rejectDeprecatedAlg)) {
+                errors.add("metadata_signature_invalid");
+            }
+        }
 
         return errors;
     }

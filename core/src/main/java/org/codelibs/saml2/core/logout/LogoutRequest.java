@@ -6,6 +6,7 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.codelibs.saml2.core.exception.SettingsException;
 import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.http.HttpRequest;
+import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.util.Constants;
 import org.codelibs.saml2.core.util.SchemaFactory;
@@ -389,7 +391,8 @@ public class LogoutRequest {
             }
         }
 
-        final String nameIdStr = Util.generateNameId(nameId, spNameQualifier, nameIdFormat, nameQualifier, cert);
+        final String nameIdStr =
+                Util.generateNameId(nameId, spNameQualifier, nameIdFormat, nameQualifier, cert, settings.getNameIdEncryptionAlgorithm());
         valueMap.put("nameIdStr", nameIdStr);
 
         String sessionIndexStr = "";
@@ -470,7 +473,7 @@ public class LogoutRequest {
                     }
                 }
 
-                getNameId(logoutRequestDocument, settings.getSPkey(), settings.isTrimNameIds());
+                getNameId(logoutRequestDocument, settings.getSPkey(), settings.isTrimNameIds(), settings.getAllowedKeyTransportAlgorithms());
 
                 // Check the issuer
                 final String issuer = getIssuer(logoutRequestDocument, settings.isTrimNameIds());
@@ -527,6 +530,16 @@ public class LogoutRequest {
                 if (!Util.validateBinarySignature(signedQuery.toString(), Util.base64decoder(signature), certList, signAlg)) {
                     throw new ValidationException("Signature validation failed. Logout Request rejected",
                             ValidationException.INVALID_SIGNATURE);
+                }
+            }
+
+            final ReplayCache replayCache = settings.getReplayCache();
+            if (replayCache != null) {
+                final String messageId = getId();
+                final Instant expiresAt = Instant.now().plusSeconds(settings.getClockDrift() + 300);
+                if (replayCache.registerAndCheck(messageId, expiresAt)) {
+                    throw new ValidationException("The LogoutRequest was already processed (replay detected): " + messageId,
+                            ValidationException.MESSAGE_REPLAYED);
                 }
             }
 
@@ -642,6 +655,28 @@ public class LogoutRequest {
      */
     public static Map<String, String> getNameIdData(final Document samlLogoutRequestDocument, final PrivateKey key,
             final boolean trimValue) {
+        return getNameIdData(samlLogoutRequestDocument, key, trimValue, null);
+    }
+
+    /**
+     * Gets the NameID Data from the the Logout Request Document, optionally restricting the accepted
+     * key transport (key wrapping) algorithm of an encrypted NameID to an allow-list.
+     *
+     * @param samlLogoutRequestDocument
+     *              A DOMDocument object loaded from the SAML Logout Request.
+     * @param key
+     *              The SP key to decrypt the NameID if encrypted
+     * @param trimValue
+     *              whether the extracted Name ID value should be trimmed
+     * @param allowedKeyTransportAlgorithms
+     *              The set of allowed key transport algorithm URIs. If {@code null} or empty, every
+     *              algorithm is accepted, preserving the historical permissive behavior.
+     *
+     * @return the Name ID Data (Value, Format, NameQualifier, SPNameQualifier)
+     *
+     */
+    public static Map<String, String> getNameIdData(final Document samlLogoutRequestDocument, final PrivateKey key,
+            final boolean trimValue, final Collection<String> allowedKeyTransportAlgorithms) {
         try {
             final NodeList encryptedIDNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:EncryptedID");
             NodeList nameIdNodes;
@@ -653,7 +688,7 @@ public class LogoutRequest {
                 }
 
                 final Element encryptedData = (Element) encryptedIDNodes.item(0);
-                Util.decryptElement(encryptedData, key);
+                Util.decryptElement(encryptedData, key, allowedKeyTransportAlgorithms);
                 nameIdNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:NameID");
 
                 if (nameIdNodes == null || nameIdNodes.getLength() != 1) {
@@ -760,7 +795,32 @@ public class LogoutRequest {
      *
      */
     public static String getNameId(final Document samlLogoutRequestDocument, final PrivateKey key, final boolean trimValue) {
-        final Map<String, String> nameIdData = getNameIdData(samlLogoutRequestDocument, key, trimValue);
+        return getNameId(samlLogoutRequestDocument, key, trimValue, null);
+    }
+
+    /**
+     * Gets the NameID value provided from the SAML Logout Request Document, optionally restricting the
+     * accepted key transport (key wrapping) algorithm of an encrypted NameID to an allow-list.
+     *
+     * @param samlLogoutRequestDocument
+     *              A DOMDocument object loaded from the SAML Logout Request.
+     *
+     * @param key
+     *              The SP key to decrypt the NameID if encrypted
+     *
+     * @param trimValue
+     *              whether the extracted Name ID value should be trimmed
+     *
+     * @param allowedKeyTransportAlgorithms
+     *              The set of allowed key transport algorithm URIs. If {@code null} or empty, every
+     *              algorithm is accepted, preserving the historical permissive behavior.
+     *
+     * @return the Name ID value
+     *
+     */
+    public static String getNameId(final Document samlLogoutRequestDocument, final PrivateKey key, final boolean trimValue,
+            final Collection<String> allowedKeyTransportAlgorithms) {
+        final Map<String, String> nameIdData = getNameIdData(samlLogoutRequestDocument, key, trimValue, allowedKeyTransportAlgorithms);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("LogoutRequest has NameID --> {}", nameIdData.get("Value"));
         }

@@ -1,12 +1,16 @@
 package org.codelibs.saml2.core.test.settings;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
+import org.codelibs.saml2.core.exception.SAMLSignatureException;
 import org.codelibs.saml2.core.settings.IdPMetadataParser;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
@@ -180,6 +184,66 @@ public class IdPMetadataParserTest {
         assertEquals(Util.loadCert((String) idpInfo.get(SettingsBuilder.IDP_X509CERT_PROPERTY_KEY)), Util.loadCert(
                 "MIIDGTCCAoKgAwIBAgIBATANBgkqhkiG9w0BAQUFADBnMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEVMBMGA1UEBwwMU2FudGEgTW9uaWNhMREwDwYDVQQKDAhPbmVMb2dpbjEZMBcGA1UEAwwQYXBwLm9uZWxvZ2luLmNvbTAeFw0xMzA2MDUxNzE2MjBaFw0xODA2MDUxNzE2MjBaMGcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRUwEwYDVQQHDAxTYW50YSBNb25pY2ExETAPBgNVBAoMCE9uZUxvZ2luMRkwFwYDVQQDDBBhcHAub25lbG9naW4uY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsalDL15zSKeEGy9c0Hao7+G02x6k/MlZuCwEvkPKUcl9QF/q0584lta735hmiZSuWOFQDNQ4VT53VevjAhOtzLJOsa8wcZ+SA1s3j4bNcpUIAHltb4Az6NC7U2/LatfnwscOazEJnVsfL4aaBdpIHBFQ6Ed0StD0AfB6Ci0hURwIDAQABo4HUMIHRMAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFHm3fLi+Q1zMc3guMyHy5AHdQvdgMIGRBgNVHSMEgYkwgYaAFHm3fLi+Q1zMc3guMyHy5AHdQvdgoWukaTBnMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEVMBMGA1UEBwwMU2FudGEgTW9uaWNhMREwDwYDVQQKDAhPbmVMb2dpbjEZMBcGA1UEAwwQYXBwLm9uZWxvZ2luLmNvbYIBATAOBgNVHQ8BAf8EBAMCBPAwDQYJKoZIhvcNAQEFBQADgYEANZvzlB1Aq84AdOvsn2XKxBB/PmNZLqnM1VWRPaNcvjafx7eHd5qayXFNQz+bOLujENmgAm5padbydG89SeefpOGcY2TMsVt0RUzxTnN3Zq5G6Ja2fAKOEX01ejdoPPMmStqqSw8k1wPUU8uLYJG5wmjf0rCb8RVaeAwMc+wcEIA="));
         assertEquals("urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress", idpInfo.get(SettingsBuilder.SP_NAMEIDFORMAT_PROPERTY_KEY));
+    }
+
+    /**
+     * Tests the parseXML(Document, String, String, String, String, X509Certificate) overload.
+     * Case Valid: the metadata is signed with the certificate passed in as the trusted signing cert.
+     *
+     * @see org.codelibs.saml2.core.core.settings.IdPMetadataParser#parseXML(Document, String, String, String, String, X509Certificate)
+     */
+    @Test
+    public void testParseXMLWithTrustedSigningCertValid() throws Exception {
+        X509Certificate correctCert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+        Document signedMetadataDocument = Util
+                .parseXML(new InputSource(getClass().getClassLoader().getResourceAsStream("data/metadata/signed_metadata_settings1.xml")));
+
+        Map<String, Object> idpInfo = IdPMetadataParser.parseXML(signedMetadataDocument, null, null, Constants.BINDING_HTTP_REDIRECT,
+                Constants.BINDING_HTTP_REDIRECT, correctCert);
+        assertNotNull(idpInfo);
+    }
+
+    /**
+     * Tests the parseXML(Document, String, String, String, String, X509Certificate) overload.
+     * Case Invalid: the metadata is signed with a certificate different from the trusted signing cert
+     * passed in, so a SAMLSignatureException must be thrown.
+     *
+     * @see org.codelibs.saml2.core.core.settings.IdPMetadataParser#parseXML(Document, String, String, String, String, X509Certificate)
+     */
+    @Test
+    public void testParseXMLWithTrustedSigningCertInvalid() throws Exception {
+        X509Certificate wrongCert = Util.loadCert(Util.getFileAsString("certs/certificate1"));
+        Document signedMetadataDocument = Util
+                .parseXML(new InputSource(getClass().getClassLoader().getResourceAsStream("data/metadata/signed_metadata_settings1.xml")));
+
+        try {
+            IdPMetadataParser.parseXML(signedMetadataDocument, null, null, Constants.BINDING_HTTP_REDIRECT, Constants.BINDING_HTTP_REDIRECT,
+                    wrongCert);
+            fail("Expected a SAMLSignatureException to be thrown");
+        } catch (SAMLSignatureException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Tests the parseFileXML(String, X509Certificate) shorthand overload.
+     * Case Valid/Invalid: valid with the correct trusted cert, throws with a wrong cert.
+     *
+     * @see org.codelibs.saml2.core.core.settings.IdPMetadataParser#parseFileXML(String, X509Certificate)
+     */
+    @Test
+    public void testParseFileXMLWithTrustedSigningCert() throws Exception {
+        X509Certificate correctCert = Util.loadCert(Util.getFileAsString("data/customPath/certs/sp.crt"));
+        Map<String, Object> idpInfo = IdPMetadataParser.parseFileXML("data/metadata/signed_metadata_settings1.xml", correctCert);
+        assertNotNull(idpInfo);
+
+        X509Certificate wrongCert = Util.loadCert(Util.getFileAsString("certs/certificate1"));
+        try {
+            IdPMetadataParser.parseFileXML("data/metadata/signed_metadata_settings1.xml", wrongCert);
+            fail("Expected a SAMLSignatureException to be thrown");
+        } catch (SAMLSignatureException e) {
+            // expected
+        }
     }
 
     @Test

@@ -108,6 +108,10 @@ public class ValidationException extends SAMLException {
     public static final int MISSING_ENCRYPTED_ELEMENT = 48;
     /** Error code indicating an invalid IssueInstant format. */
     public static final int INVALID_ISSUE_INSTANT_FORMAT = 49;
+    /** Error code indicating the assertion was already processed (replay detected). */
+    public static final int ASSERTION_REPLAYED = 50;
+    /** Error code indicating the logout message was already processed (replay detected). */
+    public static final int MESSAGE_REPLAYED = 51;
 
     /** The error code associated with this validation failure. */
     private final int errorCode;

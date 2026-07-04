@@ -2,6 +2,7 @@ package org.codelibs.saml2.core.logout;
 
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import org.codelibs.saml2.core.exception.SettingsException;
 import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.model.SamlResponseStatus;
+import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.util.Constants;
 import org.codelibs.saml2.core.util.SchemaFactory;
@@ -289,6 +291,16 @@ public class LogoutResponse {
                 if (!Util.validateBinarySignature(signedQuery.toString(), Util.base64decoder(signature), certList, signAlg)) {
                     throw new ValidationException("Signature validation failed. Logout Response rejected",
                             ValidationException.INVALID_SIGNATURE);
+                }
+            }
+
+            final ReplayCache replayCache = settings.getReplayCache();
+            if (replayCache != null) {
+                final String messageId = getId();
+                final Instant expiresAt = Instant.now().plusSeconds(settings.getClockDrift() + 300);
+                if (replayCache.registerAndCheck(messageId, expiresAt)) {
+                    throw new ValidationException("The LogoutResponse was already processed (replay detected): " + messageId,
+                            ValidationException.MESSAGE_REPLAYED);
                 }
             }
 

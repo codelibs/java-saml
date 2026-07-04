@@ -9,8 +9,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codelibs.saml2.core.exception.SAMLSevereException;
 import org.codelibs.saml2.core.model.hsm.AzureKeyVault;
@@ -506,6 +509,58 @@ public class Saml2SettingsTest {
     }
 
     /**
+     * Tests the validateMetadata(String, X509Certificate) overload of the Saml2Settings
+     * Case Valid: metadata signed with the certificate that is passed in for validation
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#validateMetadata(String, X509Certificate)
+     */
+    @Test
+    public void testValidateMetadataSignatureValid() throws Exception {
+        String certString = Util.getFileAsString("data/customPath/certs/sp.crt");
+        X509Certificate cert = Util.loadCert(certString);
+        String signedMetadataStr = Util.getFileAsString("data/metadata/signed_metadata_settings1.xml");
+
+        List<String> errors = Saml2Settings.validateMetadata(signedMetadataStr, cert);
+        assertFalse(errors.contains("metadata_signature_invalid"));
+    }
+
+    /**
+     * Tests the validateMetadata(String, X509Certificate) overload of the Saml2Settings
+     * Case Invalid: metadata signed with a different certificate than the one passed in for validation
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#validateMetadata(String, X509Certificate)
+     */
+    @Test
+    public void testValidateMetadataSignatureInvalid() throws Exception {
+        X509Certificate wrongCert = Util.loadCert(Util.getFileAsString("certs/certificate1"));
+        String signedMetadataStr = Util.getFileAsString("data/metadata/signed_metadata_settings1.xml");
+
+        List<String> errors = Saml2Settings.validateMetadata(signedMetadataStr, wrongCert);
+        assertTrue(errors.contains("metadata_signature_invalid"));
+    }
+
+    /**
+     * Tests that the single-argument validateMetadata(String) overload never performs signature
+     * validation and remains unchanged when fed unsigned metadata.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#validateMetadata(String)
+     */
+    @Test
+    public void testValidateMetadataValidUnsignedSingleArgUnchanged() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.all.properties").build();
+        String metadataStr = settings.getSPMetadata();
+
+        List<String> errors = Saml2Settings.validateMetadata(metadataStr);
+        assertTrue(errors.isEmpty());
+    }
+
+    /**
      * Tests that default signature algorithm is SHA-256 instead of deprecated SHA-1
      *
      * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getSignatureAlgorithm
@@ -590,5 +645,44 @@ public class Saml2SettingsTest {
         // Test that it can be changed
         settings.setClockDrift(180L);
         assertEquals(180L, settings.getClockDrift());
+    }
+
+    /**
+     * Tests the getSecurityWarnings method of the Saml2Settings
+     * Case: weak security posture, all warnings expected
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getSecurityWarnings
+     */
+    @Test
+    public void testGetSecurityWarningsWeakPosture() throws Exception {
+        Map<String, Object> samlData = new HashMap<>();
+        samlData.put(SettingsBuilder.STRICT_PROPERTY_KEY, false);
+        samlData.put(SettingsBuilder.CERTFINGERPRINT_PROPERTY_KEY, "afe71c28ef740bc87425be13a2263d37971da1f9");
+        Saml2Settings settings = new SettingsBuilder().fromValues(samlData).build();
+
+        List<String> warnings = settings.getSecurityWarnings();
+        assertThat(warnings, hasItem("strict_mode_disabled"));
+        assertThat(warnings, hasItem("weak_fingerprint_algorithm"));
+        assertThat(warnings, hasItem("deprecated_signature_algorithms_not_rejected"));
+        assertThat(warnings, hasItem("assertions_and_messages_not_required_signed"));
+    }
+
+    /**
+     * Tests the getSecurityWarnings method of the Saml2Settings
+     * Case: hardened security posture, no warnings expected
+     *
+     * @see org.codelibs.saml2.core.core.settings.Saml2Settings#getSecurityWarnings
+     */
+    @Test
+    public void testGetSecurityWarningsHardenedPosture() {
+        Saml2Settings settings = new Saml2Settings();
+        settings.setStrict(true);
+        settings.setRejectDeprecatedAlg(true);
+        settings.setWantAssertionsSigned(true);
+
+        List<String> warnings = settings.getSecurityWarnings();
+        assertTrue(warnings.isEmpty());
     }
 }
