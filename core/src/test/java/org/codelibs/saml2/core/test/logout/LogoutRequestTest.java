@@ -17,18 +17,22 @@ import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.codelibs.saml2.core.exception.SAMLException;
 import org.codelibs.saml2.core.exception.SAMLSevereException;
 import org.codelibs.saml2.core.exception.SettingsException;
 import org.codelibs.saml2.core.exception.ValidationException;
 import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.logout.LogoutRequest;
 import org.codelibs.saml2.core.logout.LogoutRequestParams;
+import org.codelibs.saml2.core.replay.InMemoryReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.codelibs.saml2.core.test.NaiveUrlEncoder;
@@ -341,6 +345,36 @@ public class LogoutRequestTest {
         assertThat(nameIdDataStr, containsString("Format=" + Constants.NAMEID_PERSISTENT));
         assertThat(nameIdDataStr, containsString("NameQualifier=" + settings.getIdpEntityId()));
         assertThat(nameIdDataStr, containsString("SPNameQualifier=" + settings.getSpEntityId()));
+    }
+
+    /**
+     * Tests the getNameIdData method of LogoutRequest with an allow-list of key transport algorithms.
+     * <p>
+     * Case: the fixture is encrypted with RSA_1_5. An allow-list containing RSA_1_5 still decrypts
+     * successfully (equivalent to the permissive default), while an OAEP-only allow-list rejects it
+     * the same way a wrong private key would - a generic "Not able to decrypt" failure, not a new
+     * distinct exception type.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.logout.LogoutRequest#getNameIdData
+     */
+    @Test
+    public void testGetNameIdDataWithAllowedKeyTransportAlgorithms() throws Exception {
+        String keyString = Util.getFileAsString("data/customPath/certs/sp.pem");
+        PrivateKey key = Util.loadPrivateKey(keyString);
+        String logoutRequestStr = Util.getFileAsString("data/logout_requests/logout_request_encrypted_nameid.xml");
+
+        // decryptElement mutates the DOM in place, so each attempt needs its own fresh Document.
+        Set<String> allowedKeyTransportAlgorithms = new HashSet<>(Arrays.asList(Constants.RSA_1_5));
+        String nameIdDataStr =
+                LogoutRequest.getNameIdData(Util.loadXML(logoutRequestStr), key, false, allowedKeyTransportAlgorithms).toString();
+        assertThat(nameIdDataStr, containsString("Value=ONELOGIN_9c86c4542ab9d6fce07f2f7fd335287b9b3cdf69"));
+
+        Set<String> oaepOnly = new HashSet<>(Arrays.asList(Constants.RSA_OAEP_MGF1P));
+        expectedEx.expect(SAMLException.class);
+        expectedEx.expectMessage("Not able to decrypt the EncryptedID and get a NameID");
+        LogoutRequest.getNameIdData(Util.loadXML(logoutRequestStr), key, false, oaepOnly);
     }
 
     /**
@@ -975,6 +1009,76 @@ public class LogoutRequestTest {
         logoutRequest = new LogoutRequest(settings, httpRequest);
         assertFalse(logoutRequest.isValid());
         assertEquals("In order to validate the sign on the Logout Request, the x509cert of the IdP is required", logoutRequest.getError());
+    }
+
+    /**
+     * Tests the isValid method of LogoutRequest
+     * Case: a ReplayCache is configured and the same LogoutRequest is validated twice
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.logout.LogoutRequest#isValid
+     */
+    @Test
+    public void testIsInValidReplayedWithCache() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setStrict(true);
+        settings.setWantMessagesSigned(true);
+        settings.setReplayCache(new InMemoryReplayCache());
+
+        final String requestURL = "https://pitbulk.no-ip.org/newonelogin/demo1/index.php?sls";
+        String samlRequestEncoded =
+                "lVLBitswEP0Vo7tjWbJkSyReFkIhsN1tm6WHvQTZHmdFbUmVZLqfXzlpIS10oZdhGM17b96MtkHNk5MP9myX+AW+LxBi9jZPJsjLyw4t3kirgg7SqBmCjL083n98kGSDpfM22t5O6AbyPkKFAD5qa1B22O/QSWA+EFWPjCtaM6gBugrXHCo6Ut6UgvTV2DSkBoKyr+BDQu5QIkrwEBY4mBCViamEyyrHNCf4ueSScMnIC8r2yY02Kl5QrzG6IIvC6dgt07eNsbl2G+vPhYEf1sBkz9oUA8y2LLQZ4G3jXt1dmALKHm18Mk/+fozgk5YQNMciJ+UzKWV11Wq3q3l5mcq3/9YKenYTrL3FGkihB1fMENWgoloVt8Ut0ZX1Me3xsM+On9bk86ImPep1kv+xdKuBsg/Wzyq+f6u1ood8vLTK6JUJGkxE7WnsSDcQRirOKMc97TtWCgqU1ZyJBvM+RZbSrv/l5mrg6sbJI4T1kId1ye0JhoaQgYg+XT1dnilMSZO4uko1jPSYVF0luqQjrmR/4X8X//jC7U8=";
+        String relayState = "_1037fbc88ec82ce8e770b2bed1119747bb812a07e6";
+        String sigAlg = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+        String signature =
+                "j/qDRTzgQw3cMDkkSkBOShqxi3t9qJxYnrADqwAECnJ3Y+iYgT33C0l/Vy3+ooQkFRyObYJqg9o7iIcMdgV6CXxpa6itVIUAI2VJewsMjzvJ4OdpePeSx7+/umVPKCfMvffsELlqo/UgxsyRZh8NMLej0ojCB7bUfIMKsiU7e0c=";
+
+        HttpRequest httpRequest = new HttpRequest(requestURL, (String) null).addParameter("SAMLRequest", samlRequestEncoded)
+                .addParameter("RelayState", relayState).addParameter("SigAlg", sigAlg).addParameter("Signature", signature);
+
+        LogoutRequest logoutRequest = new LogoutRequest(settings, httpRequest);
+        assertTrue(logoutRequest.isValid());
+
+        LogoutRequest replayedRequest = new LogoutRequest(settings, httpRequest);
+        assertFalse(replayedRequest.isValid());
+        assertTrue(replayedRequest.getValidationException() instanceof ValidationException);
+        assertEquals(ValidationException.MESSAGE_REPLAYED, ((ValidationException) replayedRequest.getValidationException()).getErrorCode());
+    }
+
+    /**
+     * Tests the isValid method of LogoutRequest
+     * Case: no ReplayCache is configured (default) - validating the same
+     * LogoutRequest multiple times must keep succeeding, proving default
+     * behavior is unchanged.
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.logout.LogoutRequest#isValid
+     */
+    @Test
+    public void testIsValidReplayedWithoutCacheIsUnaffected() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setStrict(true);
+        settings.setWantMessagesSigned(true);
+        assertNull(settings.getReplayCache());
+
+        final String requestURL = "https://pitbulk.no-ip.org/newonelogin/demo1/index.php?sls";
+        String samlRequestEncoded =
+                "lVLBitswEP0Vo7tjWbJkSyReFkIhsN1tm6WHvQTZHmdFbUmVZLqfXzlpIS10oZdhGM17b96MtkHNk5MP9myX+AW+LxBi9jZPJsjLyw4t3kirgg7SqBmCjL083n98kGSDpfM22t5O6AbyPkKFAD5qa1B22O/QSWA+EFWPjCtaM6gBugrXHCo6Ut6UgvTV2DSkBoKyr+BDQu5QIkrwEBY4mBCViamEyyrHNCf4ueSScMnIC8r2yY02Kl5QrzG6IIvC6dgt07eNsbl2G+vPhYEf1sBkz9oUA8y2LLQZ4G3jXt1dmALKHm18Mk/+fozgk5YQNMciJ+UzKWV11Wq3q3l5mcq3/9YKenYTrL3FGkihB1fMENWgoloVt8Ut0ZX1Me3xsM+On9bk86ImPep1kv+xdKuBsg/Wzyq+f6u1ood8vLTK6JUJGkxE7WnsSDcQRirOKMc97TtWCgqU1ZyJBvM+RZbSrv/l5mrg6sbJI4T1kId1ye0JhoaQgYg+XT1dnilMSZO4uko1jPSYVF0luqQjrmR/4X8X//jC7U8=";
+        String relayState = "_1037fbc88ec82ce8e770b2bed1119747bb812a07e6";
+        String sigAlg = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+        String signature =
+                "j/qDRTzgQw3cMDkkSkBOShqxi3t9qJxYnrADqwAECnJ3Y+iYgT33C0l/Vy3+ooQkFRyObYJqg9o7iIcMdgV6CXxpa6itVIUAI2VJewsMjzvJ4OdpePeSx7+/umVPKCfMvffsELlqo/UgxsyRZh8NMLej0ojCB7bUfIMKsiU7e0c=";
+
+        HttpRequest httpRequest = new HttpRequest(requestURL, (String) null).addParameter("SAMLRequest", samlRequestEncoded)
+                .addParameter("RelayState", relayState).addParameter("SigAlg", sigAlg).addParameter("Signature", signature);
+
+        LogoutRequest logoutRequest = new LogoutRequest(settings, httpRequest);
+        assertTrue(logoutRequest.isValid());
+
+        LogoutRequest sameRequestAgain = new LogoutRequest(settings, httpRequest);
+        assertTrue(sameRequestAgain.isValid());
     }
 
     /**

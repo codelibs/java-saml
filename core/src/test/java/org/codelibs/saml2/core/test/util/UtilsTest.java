@@ -30,8 +30,12 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -1477,6 +1481,83 @@ public class UtilsTest {
     }
 
     /**
+     * Tests the decryptElement method with an allow-list of key transport algorithms.
+     * Case: the fixture is encrypted with RSA_1_5 and the allow-list contains RSA_1_5, so
+     * decryption proceeds as if no allow-list had been provided.
+     *
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws GeneralSecurityException
+     * @throws XPathExpressionException
+     *
+     * @see org.codelibs.saml2.core.core.util.Util#decryptElement
+     */
+    @Test
+    public void testDecryptElementNameIdWithAllowedKeyTransportAlgorithm()
+            throws URISyntaxException, IOException, GeneralSecurityException, XPathExpressionException {
+        String keyString = Util.getFileAsString("data/customPath/certs/sp.pem");
+        PrivateKey key = Util.loadPrivateKey(keyString);
+
+        String responseNameIdEnc = Util.base64decodedInflated(Util.getFileAsString("data/responses/response_encrypted_nameid.xml.base64"));
+        Document responseNameIdEncDoc = Util.loadXML(responseNameIdEnc);
+        NodeList EncryptedNameIdNodes = Util.query(responseNameIdEncDoc, ".//saml:EncryptedID");
+        NodeList EncryptedDataNodes = Util.query(responseNameIdEncDoc, "./xenc:EncryptedData", EncryptedNameIdNodes.item(0));
+        Element encryptedData = (Element) EncryptedDataNodes.item(0);
+        assertEquals("xenc:EncryptedData", encryptedData.getNodeName());
+
+        Set<String> allowedKeyTransportAlgorithms = new HashSet<>(Arrays.asList(Constants.RSA_1_5));
+        Util.decryptElement(encryptedData, key, allowedKeyTransportAlgorithms);
+        assertEquals("saml:NameID", EncryptedNameIdNodes.item(0).getFirstChild().getNodeName());
+    }
+
+    /**
+     * Tests the decryptElement method with an allow-list of key transport algorithms.
+     * Case: the fixture is encrypted with RSA_1_5 but the allow-list only contains
+     * RSA_OAEP_MGF1P, so decryption must be rejected the same way a wrong key would be:
+     * no exception is thrown, the element is simply left encrypted.
+     *
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws GeneralSecurityException
+     * @throws XPathExpressionException
+     *
+     * @see org.codelibs.saml2.core.core.util.Util#decryptElement
+     */
+    @Test
+    public void testDecryptElementNameIdWithDisallowedKeyTransportAlgorithm()
+            throws URISyntaxException, IOException, GeneralSecurityException, XPathExpressionException {
+        String keyString = Util.getFileAsString("data/customPath/certs/sp.pem");
+        PrivateKey key = Util.loadPrivateKey(keyString);
+
+        String responseNameIdEnc = Util.base64decodedInflated(Util.getFileAsString("data/responses/response_encrypted_nameid.xml.base64"));
+        Document responseNameIdEncDoc = Util.loadXML(responseNameIdEnc);
+        NodeList EncryptedNameIdNodes = Util.query(responseNameIdEncDoc, ".//saml:EncryptedID");
+        NodeList EncryptedDataNodes = Util.query(responseNameIdEncDoc, "./xenc:EncryptedData", EncryptedNameIdNodes.item(0));
+        Element encryptedData = (Element) EncryptedDataNodes.item(0);
+        assertEquals("xenc:EncryptedData", encryptedData.getNodeName());
+
+        Set<String> allowedKeyTransportAlgorithms = new HashSet<>(Arrays.asList(Constants.RSA_OAEP_MGF1P));
+        Util.decryptElement(encryptedData, key, allowedKeyTransportAlgorithms);
+        assertNotEquals("saml:NameID", EncryptedNameIdNodes.item(0).getFirstChild().getNodeName());
+        assertEquals("xenc:EncryptedData", EncryptedNameIdNodes.item(0).getFirstChild().getNodeName());
+    }
+
+    /**
+     * Tests the isKeyTransportAlgorithmAllowed method
+     *
+     * @see org.codelibs.saml2.core.core.util.Util#isKeyTransportAlgorithmAllowed
+     */
+    @Test
+    public void testIsKeyTransportAlgorithmAllowed() {
+        assertTrue(Util.isKeyTransportAlgorithmAllowed(Constants.RSA_1_5, null));
+        assertTrue(Util.isKeyTransportAlgorithmAllowed(Constants.RSA_1_5, Collections.emptySet()));
+
+        Set<String> allowedKeyTransportAlgorithms = new HashSet<>(Arrays.asList(Constants.RSA_OAEP_MGF1P));
+        assertTrue(Util.isKeyTransportAlgorithmAllowed(Constants.RSA_OAEP_MGF1P, allowedKeyTransportAlgorithms));
+        assertFalse(Util.isKeyTransportAlgorithmAllowed(Constants.RSA_1_5, allowedKeyTransportAlgorithms));
+    }
+
+    /**
      * Tests the copyDocument method
      *
      * @throws IOException
@@ -1938,11 +2019,46 @@ public class UtilsTest {
     }
 
     /**
+     * Tests the generateNameId method with an explicit key transport algorithm.
+     * Case: default (5-arg overload) still uses RSA_1_5; explicit RSA_OAEP_MGF1P is honored.
+     *
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws CertificateException
+     *
+     * @see org.codelibs.saml2.core.core.util.Util#generateNameId
+     */
+    @Test
+    public void testGenerateNameIdWithKeyTransportAlgorithm() throws URISyntaxException, IOException, CertificateException {
+        String nameIdValue = "ONELOGIN_ce998811003f4e60f8b07a311dc641621379cfde";
+        String entityId = "http://stuff.com/endpoints/metadata.php";
+        String nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
+
+        String certString = Util.getFileAsString("data/customPath/certs/sp.crt");
+        X509Certificate cert = Util.loadCert(certString);
+
+        // Existing 5-arg overload keeps the default RSA_1_5 key transport algorithm.
+        String nameIdDefault = Util.generateNameId(nameIdValue, entityId, nameIDFormat, cert);
+        assertThat(nameIdDefault, containsString(Constants.RSA_1_5));
+        assertThat(nameIdDefault, not(containsString(Constants.RSA_OAEP_MGF1P)));
+
+        // New 6-arg overload with a null algorithm behaves exactly like the default.
+        String nameIdNullAlg = Util.generateNameId(nameIdValue, entityId, nameIDFormat, null, cert, null);
+        assertThat(nameIdNullAlg, containsString(Constants.RSA_1_5));
+
+        // New 6-arg overload honors an explicit key transport algorithm.
+        String nameIdOaep = Util.generateNameId(nameIdValue, entityId, nameIDFormat, null, cert, Constants.RSA_OAEP_MGF1P);
+        assertThat(nameIdOaep, containsString("<saml:EncryptedID><xenc:EncryptedData"));
+        assertThat(nameIdOaep, containsString(Constants.RSA_OAEP_MGF1P));
+        assertThat(nameIdOaep, not(containsString(Constants.RSA_1_5)));
+    }
+
+    /**
      * Tests the generateNameId method
      *
-     * @throws IOException 
-     * @throws URISyntaxException 
-     * @throws CertificateException 
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws CertificateException
      *
      * @see org.codelibs.saml2.core.core.util.Util#generateNameId
      */

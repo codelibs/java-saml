@@ -22,6 +22,7 @@ import org.codelibs.saml2.core.http.HttpRequest;
 import org.codelibs.saml2.core.model.SamlResponseStatus;
 import org.codelibs.saml2.core.model.SubjectConfirmationIssue;
 import org.codelibs.saml2.core.model.hsm.HSM;
+import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.util.Constants;
 import org.codelibs.saml2.core.util.SchemaFactory;
@@ -342,6 +343,21 @@ public class SamlResponse {
                 throw new ValidationException("Signature validation failed. SAML Response rejected", ValidationException.INVALID_SIGNATURE);
             }
 
+            final ReplayCache replayCache = settings.getReplayCache();
+            if (replayCache != null) {
+                final String assertionId = getAssertionId();
+                Instant expiresAt = getSessionNotOnOrAfter();
+                if (expiresAt == null) {
+                    final List<Instant> notOnOrAfters = getAssertionNotOnOrAfter();
+                    expiresAt = notOnOrAfters.isEmpty() ? Instant.now().plusSeconds(settings.getClockDrift() + 300)
+                            : java.util.Collections.min(notOnOrAfters);
+                }
+                if (replayCache.registerAndCheck(assertionId, expiresAt)) {
+                    throw new ValidationException("The Assertion was already processed (replay detected): " + assertionId,
+                            ValidationException.ASSERTION_REPLAYED);
+                }
+            }
+
             LOGGER.debug("SAMLResponse validated --> {}", samlResponseString);
             return true;
         } catch (final Exception e) {
@@ -459,7 +475,7 @@ public class SamlResponse {
                                 SettingsException.PRIVATE_KEY_NOT_FOUND);
                     }
 
-                    Util.decryptElement(encryptedData, key);
+                    Util.decryptElement(encryptedData, key, settings.getAllowedKeyTransportAlgorithms());
                 }
                 nameIdNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID/saml:NameID|/saml:Subject/saml:NameID");
 
@@ -1038,7 +1054,7 @@ public class SamlResponse {
      *
      */
     public boolean validateTimestamps() {
-        final NodeList timestampNodes = samlResponseDocument.getElementsByTagNameNS("*", "Conditions");
+        final NodeList timestampNodes = getSAMLResponseDocument().getElementsByTagNameNS("*", "Conditions");
         if (timestampNodes.getLength() != 0) {
             for (int i = 0; i < timestampNodes.getLength(); i++) {
                 final NamedNodeMap attrName = timestampNodes.item(i).getAttributes();
@@ -1203,14 +1219,14 @@ public class SamlResponse {
         final Element encryptedData = (Element) encryptedDataNodes.item(0);
 
         if (hsm != null) {
-            Util.decryptUsingHsm(encryptedData, hsm);
+            Util.decryptUsingHsm(encryptedData, hsm, settings.getAllowedKeyTransportAlgorithms());
         } else {
-            Util.decryptElement(encryptedData, key);
+            Util.decryptElement(encryptedData, key, settings.getAllowedKeyTransportAlgorithms());
         }
 
         // We need to Remove the saml:EncryptedAssertion Node
         final NodeList AssertionDataNodes = Util.query(dom, "/samlp:Response/saml:EncryptedAssertion/saml:Assertion");
-        if (encryptedDataNodes.getLength() == 0) {
+        if (AssertionDataNodes.getLength() == 0) {
             throw new ValidationException("No /samlp:Response/saml:EncryptedAssertion/saml:Assertion element found",
                     ValidationException.MISSING_ENCRYPTED_ELEMENT);
         }

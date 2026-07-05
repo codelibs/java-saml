@@ -26,6 +26,7 @@ import org.codelibs.saml2.core.logout.LogoutResponse;
 import org.codelibs.saml2.core.logout.LogoutResponseParams;
 import org.codelibs.saml2.core.model.KeyStoreSettings;
 import org.codelibs.saml2.core.model.SamlResponseStatus;
+import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.codelibs.saml2.core.util.Constants;
@@ -291,6 +292,16 @@ public class Auth {
      */
     public void setStrict(final Boolean value) {
         settings.setStrict(value);
+    }
+
+    /**
+     * Sets the replay cache used to detect replayed SAML assertions and logout
+     * messages. When not set (the default), no replay checking is performed.
+     *
+     * @param cache the ReplayCache to be set
+     */
+    public void setReplayCache(final ReplayCache cache) {
+        settings.setReplayCache(cache);
     }
 
     /**

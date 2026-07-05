@@ -65,6 +65,10 @@
 
 			String relayState = request.getParameter("RelayState");
 
+			// SECURITY WARNING: RelayState is attacker-controlled (it comes from an HTTP parameter).
+			// Redirecting to it verbatim is an open-redirect vulnerability. Validate it against an
+			// application-controlled allowlist, or restrict it to a known-safe relative path, before
+			// calling sendRedirect.
 			if (relayState != null && !relayState.isEmpty() && !relayState.equals(ServletUtils.getSelfRoutedURLNoQuery(request)) &&
 				!relayState.contains("/dologin.jsp")) { // We don't want to be redirected to login.jsp neither
 				response.sendRedirect(request.getParameter("RelayState"));

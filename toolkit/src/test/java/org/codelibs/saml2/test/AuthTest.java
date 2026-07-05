@@ -51,6 +51,8 @@ import org.codelibs.saml2.core.logout.LogoutResponse;
 import org.codelibs.saml2.core.logout.LogoutResponseParams;
 import org.codelibs.saml2.core.model.KeyStoreSettings;
 import org.codelibs.saml2.core.model.SamlResponseStatus;
+import org.codelibs.saml2.core.replay.InMemoryReplayCache;
+import org.codelibs.saml2.core.replay.ReplayCache;
 import org.codelibs.saml2.core.settings.Saml2Settings;
 import org.codelibs.saml2.core.settings.SettingsBuilder;
 import org.codelibs.saml2.core.util.Constants;
@@ -357,6 +359,26 @@ public class AuthTest {
 
         auth.setStrict(true);
         assertTrue(auth.getSettings().isStrict());
+    }
+
+    /**
+     * Tests the setReplayCache method of Auth
+     *
+     * @throws SettingsException
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws Error
+     *
+     * @see org.codelibs.saml2.core.core.toolkit.Auth#setReplayCache
+     */
+    @Test
+    public void testSetReplayCache() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
+        Auth auth = new Auth();
+        assertNull(auth.getSettings().getReplayCache());
+
+        ReplayCache cache = new InMemoryReplayCache();
+        auth.setReplayCache(cache);
+        assertSame(cache, auth.getSettings().getReplayCache());
     }
 
     /**

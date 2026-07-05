@@ -37,6 +37,7 @@ import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1242,11 +1243,36 @@ public final class Util {
      * 				 The private key to decrypt.
      */
     public static void decryptElement(final Element encryptedDataElement, final PrivateKey inputKey) {
+        decryptElement(encryptedDataElement, inputKey, null);
+    }
+
+    /**
+     * Decrypt an encrypted element, optionally restricting the accepted key transport
+     * (key wrapping) algorithm of the inbound {@code xenc:EncryptedKey} to an allow-list.
+     *
+     * @param encryptedDataElement
+     * 				 The encrypted element.
+     * @param inputKey
+     * 				 The private key to decrypt.
+     * @param allowedKeyTransportAlgorithms
+     * 				 The set of allowed key transport algorithm URIs. If {@code null} or empty, every
+     * 				 algorithm is accepted, preserving the historical permissive behavior.
+     */
+    public static void decryptElement(final Element encryptedDataElement, final PrivateKey inputKey,
+            final Collection<String> allowedKeyTransportAlgorithms) {
         try {
             final XMLCipher xmlCipher = XMLCipher.getInstance();
             xmlCipher.init(XMLCipher.DECRYPT_MODE, null);
 
             validateEncryptedData(encryptedDataElement);
+
+            final String keyTransportAlgorithm = findKeyTransportAlgorithm(encryptedDataElement);
+            if (keyTransportAlgorithm != null && !isKeyTransportAlgorithmAllowed(keyTransportAlgorithm, allowedKeyTransportAlgorithms)) {
+                // Do not throw a distinct exception: an algorithm rejection must be indistinguishable
+                // from any other decryption failure (e.g. a wrong key) to avoid a new side channel.
+                LOGGER.warn("Failed to decrypt an element.");
+                return;
+            }
 
             xmlCipher.setKEK(inputKey);
             xmlCipher.doFinal(encryptedDataElement.getOwnerDocument(), encryptedDataElement, false);
@@ -1263,6 +1289,22 @@ public final class Util {
      *
      */
     public static void decryptUsingHsm(final Element encryptedDataElement, final HSM hsm) {
+        decryptUsingHsm(encryptedDataElement, hsm, null);
+    }
+
+    /**
+     * Decrypts the encrypted element using an HSM, optionally restricting the accepted key
+     * transport (key wrapping) algorithm of the inbound {@code xenc:EncryptedKey} to an allow-list.
+     *
+     * @param encryptedDataElement The encrypted element.
+     * @param hsm The HSM object.
+     * @param allowedKeyTransportAlgorithms
+     * 				 The set of allowed key transport algorithm URIs. If {@code null} or empty, every
+     * 				 algorithm is accepted, preserving the historical permissive behavior.
+     *
+     */
+    public static void decryptUsingHsm(final Element encryptedDataElement, final HSM hsm,
+            final Collection<String> allowedKeyTransportAlgorithms) {
         try {
             validateEncryptedData(encryptedDataElement);
 
@@ -1274,9 +1316,18 @@ public final class Util {
             final NodeList encryptedKeyNodes =
                     ((Element) encryptedDataElement.getParentNode()).getElementsByTagNameNS(Constants.NS_XENC, "EncryptedKey");
             final EncryptedKey encryptedKey = xmlCipher.loadEncryptedKey((Element) encryptedKeyNodes.item(0));
+
+            final String keyTransportAlgorithm = encryptedKey.getEncryptionMethod().getAlgorithm();
+            if (keyTransportAlgorithm != null && !isKeyTransportAlgorithmAllowed(keyTransportAlgorithm, allowedKeyTransportAlgorithms)) {
+                // Do not throw a distinct exception: an algorithm rejection must be indistinguishable
+                // from any other decryption failure (e.g. a wrong key) to avoid a new side channel.
+                LOGGER.warn("Failed to decrypt an element using HSM.");
+                return;
+            }
+
             final byte[] encryptedBytes = base64decoder(encryptedKey.getCipherData().getCipherValue().getValue());
 
-            final byte[] decryptedKey = hsm.unwrapKey(encryptedKey.getEncryptionMethod().getAlgorithm(), encryptedBytes);
+            final byte[] decryptedKey = hsm.unwrapKey(keyTransportAlgorithm, encryptedBytes);
 
             final SecretKey encryptionKey = new SecretKeySpec(decryptedKey, 0, decryptedKey.length, "AES");
 
@@ -1286,6 +1337,57 @@ public final class Util {
         } catch (final Exception e) {
             LOGGER.warn("Failed to decrypt an element using HSM.", e);
         }
+    }
+
+    /**
+     * Locates the key transport (key wrapping) algorithm URI declared on the {@code xenc:EncryptedKey}
+     * associated with the given encrypted data element, looking first inside the element itself
+     * (e.g. inside its {@code KeyInfo}) and, if not found there, inside its parent node - mirroring
+     * how {@link #decryptUsingHsm(Element, HSM, Collection)} locates the {@code EncryptedKey}.
+     *
+     * @param encryptedDataElement The encrypted element.
+     *
+     * @return the key transport algorithm URI, or {@code null} if it could not be determined.
+     */
+    private static String findKeyTransportAlgorithm(final Element encryptedDataElement) {
+        try {
+            NodeList encryptedKeyNodes = encryptedDataElement.getElementsByTagNameNS(Constants.NS_XENC, "EncryptedKey");
+            if (encryptedKeyNodes.getLength() == 0 && encryptedDataElement.getParentNode() instanceof Element) {
+                encryptedKeyNodes =
+                        ((Element) encryptedDataElement.getParentNode()).getElementsByTagNameNS(Constants.NS_XENC, "EncryptedKey");
+            }
+            if (encryptedKeyNodes.getLength() > 0) {
+                final Element encryptedKeyElem = (Element) encryptedKeyNodes.item(0);
+                final NodeList encryptionMethodNodes = encryptedKeyElem.getElementsByTagNameNS(Constants.NS_XENC, "EncryptionMethod");
+                if (encryptionMethodNodes.getLength() > 0) {
+                    final String alg = ((Element) encryptionMethodNodes.item(0)).getAttribute("Algorithm");
+                    if (alg != null && !alg.isEmpty()) {
+                        return alg;
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            // Best effort only; if the algorithm cannot be determined, the caller proceeds permissively.
+        }
+        return null;
+    }
+
+    /**
+     * Checks whether a key transport (key wrapping) algorithm URI is allowed by an optional allow-list.
+     *
+     * @param algorithmUri
+     * 				 The key transport algorithm URI to check.
+     * @param allowedAlgorithms
+     * 				 The set of allowed key transport algorithm URIs. If {@code null} or empty, every
+     * 				 algorithm is considered allowed (permissive default).
+     *
+     * @return {@code true} if the algorithm is allowed, {@code false} otherwise.
+     */
+    public static boolean isKeyTransportAlgorithmAllowed(final String algorithmUri, final Collection<String> allowedAlgorithms) {
+        if (allowedAlgorithms == null || allowedAlgorithms.isEmpty()) {
+            return true;
+        }
+        return algorithmUri != null && allowedAlgorithms.contains(algorithmUri);
     }
 
     /**
@@ -1668,6 +1770,30 @@ public final class Util {
      */
     public static String generateNameId(final String value, final String spnq, final String format, final String nq,
             final X509Certificate cert) {
+        return generateNameId(value, spnq, format, nq, cert, null);
+    }
+
+    /**
+     * Generates a nameID.
+     *
+     * @param value
+     * 				 The value
+     * @param spnq
+     * 				 SP Name Qualifier
+     * @param format
+     * 				 SP Format
+     * @param nq
+     * 				 Name Qualifier
+     * @param cert
+     * 				 IdP Public certificate to encrypt the nameID
+     * @param keyTransportAlgorithm
+     * 				 The key transport (key wrapping) algorithm URI used to encrypt the symmetric key.
+     * 				 If {@code null} or empty, {@link Constants#RSA_1_5} is used, preserving the historical default.
+     *
+     * @return Xml contained in the document.
+     */
+    public static String generateNameId(final String value, final String spnq, final String format, final String nq,
+            final X509Certificate cert, final String keyTransportAlgorithm) {
         String res = null;
         try {
             final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -1697,7 +1823,9 @@ public final class Util {
                 xmlCipher.init(XMLCipher.ENCRYPT_MODE, symmetricKey);
 
                 // cipher for encrypt the symmetric key
-                final XMLCipher keyCipher = XMLCipher.getInstance(Constants.RSA_1_5);
+                final String keyTransportAlg =
+                        (keyTransportAlgorithm != null && !keyTransportAlgorithm.isEmpty()) ? keyTransportAlgorithm : Constants.RSA_1_5;
+                final XMLCipher keyCipher = XMLCipher.getInstance(keyTransportAlg);
                 keyCipher.init(XMLCipher.WRAP_MODE, cert.getPublicKey());
 
                 // encrypt the symmetric key

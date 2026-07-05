@@ -15,12 +15,14 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -169,6 +171,10 @@ public class SettingsBuilder {
     public final static String SECURITY_SIGNATURE_ALGORITHM = "onelogin.saml2.security.signature_algorithm";
     /** Property key for the digest algorithm used when signing ({@code onelogin.saml2.security.digest_algorithm}). */
     public final static String SECURITY_DIGEST_ALGORITHM = "onelogin.saml2.security.digest_algorithm";
+    /** Property key for the key transport algorithm used to encrypt the NameID ({@code onelogin.saml2.security.nameid_encryption_algorithm}). */
+    public final static String SECURITY_NAMEID_ENCRYPTION_ALGORITHM = "onelogin.saml2.security.nameid_encryption_algorithm";
+    /** Property key for the comma-separated allow-list of key transport algorithms accepted on decrypt ({@code onelogin.saml2.security.allowed_key_transport_algorithms}). */
+    public final static String SECURITY_ALLOWED_KEY_TRANSPORT_ALGORITHMS = "onelogin.saml2.security.allowed_key_transport_algorithms";
     /** Property key controlling whether unsolicited responses with an InResponseTo attribute are rejected ({@code onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto}). */
     public final static String SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO =
             "onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto";
@@ -379,6 +385,12 @@ public class SettingsBuilder {
             saml2Setting.setUniqueIDPrefix(Util.UNIQUE_ID_PREFIX);
         }
 
+        if (LOGGER.isWarnEnabled()) {
+            for (final String warning : saml2Setting.getSecurityWarnings()) {
+                LOGGER.warn("SAML security warning: {}", warning);
+            }
+        }
+
         return saml2Setting;
     }
 
@@ -514,6 +526,22 @@ public class SettingsBuilder {
         final String digestAlgorithm = loadStringProperty(SECURITY_DIGEST_ALGORITHM);
         if (digestAlgorithm != null && !digestAlgorithm.isEmpty()) {
             saml2Setting.setDigestAlgorithm(digestAlgorithm);
+        }
+
+        final String nameIdEncryptionAlgorithm = loadStringProperty(SECURITY_NAMEID_ENCRYPTION_ALGORITHM);
+        if (nameIdEncryptionAlgorithm != null && !nameIdEncryptionAlgorithm.isEmpty()) {
+            saml2Setting.setNameIdEncryptionAlgorithm(nameIdEncryptionAlgorithm);
+        }
+
+        final List<String> allowedKeyTransportAlgorithms = loadListProperty(SECURITY_ALLOWED_KEY_TRANSPORT_ALGORITHMS);
+        if (allowedKeyTransportAlgorithms != null) {
+            final Set<String> allowedKeyTransportAlgorithmsSet = new HashSet<>();
+            for (final String allowedKeyTransportAlgorithm : allowedKeyTransportAlgorithms) {
+                if (allowedKeyTransportAlgorithm != null && !allowedKeyTransportAlgorithm.trim().isEmpty()) {
+                    allowedKeyTransportAlgorithmsSet.add(allowedKeyTransportAlgorithm.trim());
+                }
+            }
+            saml2Setting.setAllowedKeyTransportAlgorithms(allowedKeyTransportAlgorithmsSet);
         }
 
         final Boolean rejectUnsolicitedResponsesWithInResponseTo =

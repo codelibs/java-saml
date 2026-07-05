@@ -17,4 +17,13 @@ public class SAMLSignatureException extends SAMLException {
         super(e);
     }
 
+    /**
+     * Constructs a new {@code SAMLSignatureException} with the given message.
+     *
+     * @param message the detail message
+     */
+    public SAMLSignatureException(final String message) {
+        super(message);
+    }
+
 }
