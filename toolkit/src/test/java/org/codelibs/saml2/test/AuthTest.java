@@ -118,7 +118,7 @@ public class AuthTest {
      * @throws IOException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructor() throws IOException, SettingsException, SAMLSevereException {
@@ -139,7 +139,7 @@ public class AuthTest {
      * @throws IOException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructorWithFilename() throws IOException, SettingsException, SAMLSevereException {
@@ -163,7 +163,7 @@ public class AuthTest {
      * @throws KeyStoreException 
      * @throws UnrecoverableKeyException 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructorWithFilenameAndKeyStore() throws IOException, SettingsException, SAMLSevereException,
@@ -188,7 +188,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructorWithReqRes() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -217,7 +217,7 @@ public class AuthTest {
      * @throws CertificateException 
      * @throws NoSuchAlgorithmException 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructorWithReqResAndKeyStore() throws IOException, SettingsException, URISyntaxException, SAMLSevereException,
@@ -244,7 +244,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructorWithFilenameReqRes() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -270,7 +270,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructorWithSettingsReqRes() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -294,7 +294,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth
+     * @see org.codelibs.saml2.Auth
      */
     @Test
     public void testConstructorInvalidSettings() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -318,7 +318,7 @@ public class AuthTest {
      * @throws IOException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getSettings
+     * @see org.codelibs.saml2.Auth#getSettings
      */
     @Test
     public void testGetSettings() throws IOException, SettingsException, SAMLSevereException {
@@ -348,7 +348,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setStrict
+     * @see org.codelibs.saml2.Auth#setStrict
      */
     @Test
     public void testSetStrict() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -369,7 +369,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setReplayCache
+     * @see org.codelibs.saml2.Auth#setReplayCache
      */
     @Test
     public void testSetReplayCache() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -389,7 +389,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#isDebugActive
+     * @see org.codelibs.saml2.Auth#isDebugActive
      */
     @Test
     public void testIsDebugActive() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -417,7 +417,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getSSOurl
+     * @see org.codelibs.saml2.Auth#getSSOurl
      */
     @Test
     public void testGetSSOurl() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -440,7 +440,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getSLOurl
+     * @see org.codelibs.saml2.Auth#getSLOurl
      */
     @Test
     public void testGetSLOurl() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -463,7 +463,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getSLOResponseUrl
+     * @see org.codelibs.saml2.Auth#getSLOResponseUrl
      */
     @Test
     public void testGetSLOResponseUrl() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -486,7 +486,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getSLOResponseUrl
+     * @see org.codelibs.saml2.Auth#getSLOResponseUrl
      */
     @Test
     public void testGetSLOResponseUrlNull() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -506,7 +506,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processResponse
+     * @see org.codelibs.saml2.Auth#processResponse
      */
     @Test
     public void testProcessNoResponse() throws Exception {
@@ -535,10 +535,10 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processResponse
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getAttributes
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getAttribute
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getAttributesName
+     * @see org.codelibs.saml2.Auth#processResponse
+     * @see org.codelibs.saml2.Auth#getAttributes
+     * @see org.codelibs.saml2.Auth#getAttribute
+     * @see org.codelibs.saml2.Auth#getAttributesName
      */
     @Test
     public void testProcessResponse() throws Exception {
@@ -598,7 +598,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessResponseStatusResponder() throws Exception {
@@ -632,7 +632,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLONoMessage() throws Exception {
@@ -662,7 +662,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLORequestKeepSession() throws Exception {
@@ -692,7 +692,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLORequestRemoveSession() throws Exception {
@@ -721,7 +721,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLORequestStay() throws Exception {
@@ -750,7 +750,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLORequestStayFalse() throws Exception {
@@ -782,7 +782,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLORequestStayTrue() throws Exception {
@@ -812,7 +812,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLORequestSignRes() throws Exception {
@@ -848,7 +848,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLORequestInvalid() throws Exception {
@@ -879,7 +879,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLOResponseKeepSession() throws Exception {
@@ -906,7 +906,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLOResponseRemoveSession() throws Exception {
@@ -933,7 +933,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLOResponseWrongRequestId() throws Exception {
@@ -964,7 +964,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#processSLO
+     * @see org.codelibs.saml2.Auth#processSLO
      */
     @Test
     public void testProcessSLOResponseStatusResponder() throws Exception {
@@ -992,9 +992,9 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#isAuthenticated
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getErrors
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getLastErrorReason
+     * @see org.codelibs.saml2.Auth#isAuthenticated
+     * @see org.codelibs.saml2.Auth#getErrors
+     * @see org.codelibs.saml2.Auth#getLastErrorReason
      */
     @Test
     public void testIsAuthenticated() throws Exception {
@@ -1049,7 +1049,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getNameId
+     * @see org.codelibs.saml2.Auth#getNameId
      */
     @Test
     public void testGetNameID() throws Exception {
@@ -1091,7 +1091,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getNameIdFormat
+     * @see org.codelibs.saml2.Auth#getNameIdFormat
      */
     @Test
     public void testGetNameIdFormat() throws Exception {
@@ -1132,7 +1132,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getNameIdNameQualifier
+     * @see org.codelibs.saml2.Auth#getNameIdNameQualifier
      */
     @Test
     public void testGetNameIdNameQualifier() throws Exception {
@@ -1163,7 +1163,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getNameIdSPNameQualifier
+     * @see org.codelibs.saml2.Auth#getNameIdSPNameQualifier
      */
     @Test
     public void testGetNameIdSPNameQualifier() throws Exception {
@@ -1194,7 +1194,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.authn.SamlResponse#getNameId
+     * @see org.codelibs.saml2.core.authn.SamlResponse#getNameId
      */
     @Test
     public void testGetNameIDEncWithNoKey() throws Exception {
@@ -1216,7 +1216,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.authn.SamlResponse#getAttributes
+     * @see org.codelibs.saml2.core.authn.SamlResponse#getAttributes
      */
     @Test
     public void testOnlyRetrieveAssertionWithIDThatMatchesSignatureReference() throws Exception {
@@ -1239,7 +1239,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getSessionIndex
+     * @see org.codelibs.saml2.Auth#getSessionIndex
      */
     @Test
     public void testGetSessionIndex() throws Exception {
@@ -1286,7 +1286,7 @@ public class AuthTest {
      *
      * @throws Exception
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getSessionExpiration
+     * @see org.codelibs.saml2.Auth#getSessionExpiration
      */
     @Test
     public void testGetSessionExpiration() throws Exception {
@@ -1321,7 +1321,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLogin() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1350,7 +1350,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLoginWithRelayState() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1380,7 +1380,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLoginWithoutRelayState() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1411,7 +1411,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLoginWithExtraParameters() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1442,7 +1442,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLoginStay() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1476,7 +1476,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLoginSubject() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1527,7 +1527,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLoginSignedFail() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1556,7 +1556,7 @@ public class AuthTest {
      * @throws URISyntaxException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#login
+     * @see org.codelibs.saml2.Auth#login
      */
     @Test
     public void testLoginSigned() throws IOException, SettingsException, URISyntaxException, SAMLSevereException {
@@ -1592,7 +1592,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#logout
+     * @see org.codelibs.saml2.Auth#logout
      */
     @Test
     public void testLogout() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -1622,7 +1622,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#logout
+     * @see org.codelibs.saml2.Auth#logout
      */
     @Test
     public void testLogoutWithExtraParameters() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -1652,7 +1652,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#logout
+     * @see org.codelibs.saml2.Auth#logout
      */
     @Test
     public void testLogoutWithRelayState() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -1683,7 +1683,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#logout
+     * @see org.codelibs.saml2.Auth#logout
      */
     @Test
     public void testLogoutWithoutRelayState() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -1715,7 +1715,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#logout
+     * @see org.codelibs.saml2.Auth#logout
      */
     @Test
     public void testLogoutStay() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -1749,7 +1749,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#logout
+     * @see org.codelibs.saml2.Auth#logout
      */
     @Test
     public void testLogoutSignedFail() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -1778,7 +1778,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#logout
+     * @see org.codelibs.saml2.Auth#logout
      */
     @Test
     public void testLogoutSigned() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -1814,7 +1814,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildRequestSignature
+     * @see org.codelibs.saml2.Auth#buildRequestSignature
      */
     @Test
     public void testBuildRequestSignatureInvalidSP() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -1838,7 +1838,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildRequestSignature
+     * @see org.codelibs.saml2.Auth#buildRequestSignature
      */
     @Test
     public void testBuildRequestSignatureRsaSha1() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -1865,7 +1865,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildRequestSignature
+     * @see org.codelibs.saml2.Auth#buildRequestSignature
      */
     @Test(expected = IllegalArgumentException.class)
     public void testBuildRequestSignatureDsaSha1() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -1886,7 +1886,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildRequestSignature
+     * @see org.codelibs.saml2.Auth#buildRequestSignature
      */
     @Test
     public void testBuildRequestSignatureRsaSha256() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -1910,7 +1910,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildRequestSignature
+     * @see org.codelibs.saml2.Auth#buildRequestSignature
      */
     @Test
     public void testBuildRequestSignatureRsaSha384() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -1934,7 +1934,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildRequestSignature
+     * @see org.codelibs.saml2.Auth#buildRequestSignature
      */
     @Test
     public void testBuildRequestSignatureRsaSha512() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -1958,7 +1958,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildResponseSignature
+     * @see org.codelibs.saml2.Auth#buildResponseSignature
      */
     @Test
     public void testBuildResponseSignatureRsaSha1() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -1985,7 +1985,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildResponseSignature
+     * @see org.codelibs.saml2.Auth#buildResponseSignature
      */
     @Test(expected = IllegalArgumentException.class)
     public void testBuildResponseSignatureDsaSha1() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -2006,7 +2006,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildResponseSignature
+     * @see org.codelibs.saml2.Auth#buildResponseSignature
      */
     @Test
     public void testBuildResponseSignatureRsaSha256() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -2030,7 +2030,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildResponseSignature
+     * @see org.codelibs.saml2.Auth#buildResponseSignature
      */
     @Test
     public void testBuildResponseSignatureRsaSha384() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -2054,7 +2054,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildResponseSignature
+     * @see org.codelibs.saml2.Auth#buildResponseSignature
      */
     @Test
     public void testBuildResponseSignatureRsaSha512() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -2077,7 +2077,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#buildSignature
+     * @see org.codelibs.saml2.Auth#buildSignature
      */
     @Test
     public void testBuildSignature() throws URISyntaxException, IOException, SettingsException, SAMLSevereException {
@@ -2148,7 +2148,7 @@ public class AuthTest {
      * @throws SettingsException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getLastRequestXML
+     * @see org.codelibs.saml2.Auth#getLastRequestXML
      */
     @Test
     public void testGetLastAuthNRequest() throws IOException, SettingsException, SAMLSevereException {
@@ -2175,7 +2175,7 @@ public class AuthTest {
      * @throws XMLSecurityException
      * @throws Error
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getLastRequestXML
+     * @see org.codelibs.saml2.Auth#getLastRequestXML
      */
     @Test
     public void testGetLastLogoutRequestSent() throws IOException, SettingsException, XMLSecurityException, SAMLSevereException {
@@ -2199,7 +2199,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getLastRequestXML
+     * @see org.codelibs.saml2.Auth#getLastRequestXML
      */
     @Test
     public void testGetLastLogoutRequestReceived() throws Exception {
@@ -2222,7 +2222,7 @@ public class AuthTest {
      *
      * @throws Exception
      * 
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getLastResponseXML
+     * @see org.codelibs.saml2.Auth#getLastResponseXML
      */
     @Test
     public void testGetLastSAMLResponse() throws Exception {
@@ -2253,7 +2253,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getLastResponseXML
+     * @see org.codelibs.saml2.Auth#getLastResponseXML
      */
     @Test
     public void testGetLastLogoutResponseSent() throws Exception {
@@ -2277,7 +2277,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#getLastResponseXML
+     * @see org.codelibs.saml2.Auth#getLastResponseXML
      */
     @Test
     public void testGetLastLogoutResponseReceived() throws Exception {
@@ -2302,7 +2302,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setAuthnRequestFactory(org.codelibs.saml2.core.core.toolkit.factory.SamlOutgoingMessageFactory)
+     * @see org.codelibs.saml2.Auth#setAuthnRequestFactory(org.codelibs.saml2.factory.SamlOutgoingMessageFactory)
      */
     @Test(expected = FactoryInvokedException.class)
     public void testAuthnRequestFactory() throws Exception {
@@ -2336,7 +2336,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setSamlResponseFactory(org.codelibs.saml2.core.core.toolkit.factory.SamlReceivedMessageFactory)
+     * @see org.codelibs.saml2.Auth#setSamlResponseFactory(org.codelibs.saml2.factory.SamlReceivedMessageFactory)
      */
     @Test(expected = FactoryInvokedException.class)
     public void testSamlResponseFactory() throws Exception {
@@ -2373,7 +2373,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setOutgoingLogoutRequestFactory(org.codelibs.saml2.core.core.toolkit.factory.SamlOutgoingMessageFactory)
+     * @see org.codelibs.saml2.Auth#setOutgoingLogoutRequestFactory(org.codelibs.saml2.factory.SamlOutgoingMessageFactory)
      */
     @Test(expected = FactoryInvokedException.class)
     public void testOutgoingLogoutRequestFactory() throws Exception {
@@ -2409,7 +2409,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setReceivedLogoutRequestFactory(org.codelibs.saml2.core.core.toolkit.factory.SamlReceivedMessageFactory)
+     * @see org.codelibs.saml2.Auth#setReceivedLogoutRequestFactory(org.codelibs.saml2.factory.SamlReceivedMessageFactory)
      */
     @Test(expected = FactoryInvokedException.class)
     public void testIncomingLogoutRequestFactory() throws Exception {
@@ -2449,7 +2449,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setOutgoingLogoutResponseFactory(org.codelibs.saml2.core.core.toolkit.factory.SamlOutgoingMessageFactory)
+     * @see org.codelibs.saml2.Auth#setOutgoingLogoutResponseFactory(org.codelibs.saml2.factory.SamlOutgoingMessageFactory)
      */
     @Test(expected = FactoryInvokedException.class)
     public void testOutgoingLogoutResponseFactory() throws Exception {
@@ -2493,7 +2493,7 @@ public class AuthTest {
      *
      * @throws Exception 
      *
-     * @see org.codelibs.saml2.core.core.toolkit.Auth#setReceivedLogoutResponseFactory(org.codelibs.saml2.core.core.toolkit.factory.SamlReceivedMessageFactory)
+     * @see org.codelibs.saml2.Auth#setReceivedLogoutResponseFactory(org.codelibs.saml2.factory.SamlReceivedMessageFactory)
      */
     @Test(expected = FactoryInvokedException.class)
     public void testIncomingLogoutResponseFactory() throws Exception {

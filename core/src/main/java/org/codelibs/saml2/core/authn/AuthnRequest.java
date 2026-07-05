@@ -115,7 +115,7 @@ public class AuthnRequest {
 
         final StringSubstitutor substitutor = generateSubstitutor(params, settings);
         authnRequestString = postProcessXml(substitutor.replace(getAuthnRequestTemplate()), params, settings);
-        LOGGER.debug("AuthNRequest --> " + authnRequestString);
+        LOGGER.debug("AuthNRequest --> {}", authnRequestString);
     }
 
     /**
@@ -218,27 +218,27 @@ public class AuthnRequest {
         String subjectStr = "";
         final String nameIdValueReq = params.getNameIdValueReq();
         if (nameIdValueReq != null && !nameIdValueReq.isEmpty()) {
-            final String nameIDFormat = settings.getSpNameIDFormat();
+            final String nameIdFormat = settings.getSpNameIDFormat();
             subjectStr = "<saml:Subject>";
-            subjectStr += "<saml:NameID Format=\"" + Util.toXml(nameIDFormat) + "\">" + Util.toXml(nameIdValueReq) + "</saml:NameID>";
+            subjectStr += "<saml:NameID Format=\"" + Util.toXml(nameIdFormat) + "\">" + Util.toXml(nameIdValueReq) + "</saml:NameID>";
             subjectStr += "<saml:SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"></saml:SubjectConfirmation>";
             subjectStr += "</saml:Subject>";
         }
         valueMap.put("subjectStr", subjectStr);
 
-        String nameIDPolicyStr = "";
+        String nameIdPolicyStr = "";
         if (params.isSetNameIdPolicy()) {
-            String nameIDPolicyFormat = settings.getSpNameIDFormat();
+            String nameIdPolicyFormat = settings.getSpNameIDFormat();
             if (settings.getWantNameIdEncrypted()) {
-                nameIDPolicyFormat = Constants.NAMEID_ENCRYPTED;
+                nameIdPolicyFormat = Constants.NAMEID_ENCRYPTED;
             }
             String allowCreateStr = "";
             if (params.isAllowCreate()) {
                 allowCreateStr = " AllowCreate=\"true\"";
             }
-            nameIDPolicyStr = "<samlp:NameIDPolicy Format=\"" + Util.toXml(nameIDPolicyFormat) + "\"" + allowCreateStr + " />";
+            nameIdPolicyStr = "<samlp:NameIDPolicy Format=\"" + Util.toXml(nameIdPolicyFormat) + "\"" + allowCreateStr + " />";
         }
-        valueMap.put("nameIDPolicyStr", nameIDPolicyStr);
+        valueMap.put("nameIDPolicyStr", nameIdPolicyStr);
 
         String providerStr = "";
         final Organization organization = settings.getOrganization();
@@ -252,7 +252,7 @@ public class AuthnRequest {
 
         final String issueInstantString = Util.formatDateTime(issueInstant.getTimeInMillis());
         valueMap.put("issueInstant", issueInstantString);
-        valueMap.put("id", Util.toXml(String.valueOf(id)));
+        valueMap.put("id", Util.toXml(id));
         valueMap.put("assertionConsumerServiceURL", Util.toXml(String.valueOf(settings.getSpAssertionConsumerServiceUrl())));
         valueMap.put("protocolBinding", Util.toXml(settings.getSpAssertionConsumerServiceBinding()));
         valueMap.put("spEntityid", Util.toXml(settings.getSpEntityId()));
@@ -261,12 +261,14 @@ public class AuthnRequest {
         final List<String> requestedAuthnContexts = settings.getRequestedAuthnContext();
         if (requestedAuthnContexts != null && !requestedAuthnContexts.isEmpty()) {
             final String requestedAuthnContextCmp = settings.getRequestedAuthnContextComparison();
-            requestedAuthnContextStr = "<samlp:RequestedAuthnContext Comparison=\"" + Util.toXml(requestedAuthnContextCmp) + "\">";
+            final StringBuilder requestedAuthnContextBuilder =
+                    new StringBuilder("<samlp:RequestedAuthnContext Comparison=\"" + Util.toXml(requestedAuthnContextCmp) + "\">");
             for (final String requestedAuthnContext : requestedAuthnContexts) {
-                requestedAuthnContextStr +=
-                        "<saml:AuthnContextClassRef>" + Util.toXml(requestedAuthnContext) + "</saml:AuthnContextClassRef>";
+                requestedAuthnContextBuilder.append("<saml:AuthnContextClassRef>").append(Util.toXml(requestedAuthnContext))
+                        .append("</saml:AuthnContextClassRef>");
             }
-            requestedAuthnContextStr += "</samlp:RequestedAuthnContext>";
+            requestedAuthnContextBuilder.append("</samlp:RequestedAuthnContext>");
+            requestedAuthnContextStr = requestedAuthnContextBuilder.toString();
         }
 
         valueMap.put("requestedAuthnContextStr", requestedAuthnContextStr);
@@ -277,13 +279,13 @@ public class AuthnRequest {
     /**
      * @return the AuthnRequest's template
      */
-    private static StringBuilder getAuthnRequestTemplate() {
+    private static String getAuthnRequestTemplate() {
         final StringBuilder template = new StringBuilder();
         template.append(
                 "<samlp:AuthnRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"${id}\" Version=\"2.0\" IssueInstant=\"${issueInstant}\"${providerStr}${forceAuthnStr}${isPassiveStr}${destinationStr} ProtocolBinding=\"${protocolBinding}\" AssertionConsumerServiceURL=\"${assertionConsumerServiceURL}\">");
         template.append("<saml:Issuer>${spEntityid}</saml:Issuer>");
         template.append("${subjectStr}${nameIDPolicyStr}${requestedAuthnContextStr}</samlp:AuthnRequest>");
-        return template;
+        return template.toString();
     }
 
     /**

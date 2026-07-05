@@ -1,6 +1,4 @@
-<%@page import="org.codelibs.saml2.core.core.toolkit.Auth"%>
-<%@page import="java.util.Collection"%>
-<%@page import="java.util.Enumeration"%>
+<%@page import="org.codelibs.saml2.Auth"%>
 <%@page import="java.util.HashMap"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
@@ -27,16 +25,7 @@
 	<div class="container">
     	<h1>A Java SAML Toolkit</h1>
 	<%
-		Boolean found = false;
-		@SuppressWarnings("unchecked")
-		Enumeration<String> elems = (Enumeration<String>) session.getAttributeNames();
-
-		while (elems.hasMoreElements() && !found) {
-			String value = (String) elems.nextElement();
-			if (value.equals("attributes") || value.equals("nameId")) {
-				found = true;
-			}
-		}
+		boolean found = session.getAttribute("attributes") != null || session.getAttribute("nameId") != null;
 
 		if (found) {
 			String nameId = (String) session.getAttribute("nameId");
@@ -64,11 +53,9 @@
       				</thead>
       				<tbody>
     		<%
-				Collection<String> keys = attributes.keySet();
-				for(String name :keys){
-					out.println("<tr><td>" + name + "</td><td>");
-					List<String> values = attributes.get(name);
-					for(String value :values) {
+				for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
+					out.println("<tr><td>" + entry.getKey() + "</td><td>");
+					for(String value : entry.getValue()) {
 						out.println("<li>" + value + "</li>");
 					}
 

@@ -12,9 +12,8 @@ import org.codelibs.saml2.core.exception.SAMLSignatureException;
 import org.codelibs.saml2.core.exception.XMLParsingException;
 import org.codelibs.saml2.core.util.Constants;
 import org.codelibs.saml2.core.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -41,11 +40,6 @@ import org.xml.sax.InputSource;
 public class IdPMetadataParser {
 
     /**
-     * Private property to construct a logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(IdPMetadataParser.class);
-
-    /**
      * Default constructor.
      */
     public IdPMetadataParser() {
@@ -67,31 +61,32 @@ public class IdPMetadataParser {
      *
      * @return Mapped values with metadata info in Saml2Settings format
      */
-    public static Map<String, Object> parseXML(final Document xmlDocument, String entityId, final String desiredNameIdFormat,
+    public static Map<String, Object> parseXML(final Document xmlDocument, final String entityId, final String desiredNameIdFormat,
             final String desiredSSOBinding, final String desiredSLOBinding) {
         final Map<String, Object> metadataInfo = new LinkedHashMap<>();
 
-        String customIdPStr = "";
+        String customIdpStr = "";
         if (entityId != null && !entityId.isEmpty()) {
-            customIdPStr = "[@entityID=\"" + entityId + "\"]";
+            customIdpStr = "[@entityID=\"" + entityId + "\"]";
         }
 
-        final String idpDescryptorXPath = "//md:EntityDescriptor" + customIdPStr + "/md:IDPSSODescriptor";
+        final String idpDescriptorXPath = "//md:EntityDescriptor" + customIdpStr + "/md:IDPSSODescriptor";
 
-        final NodeList idpDescriptorNodes = Util.query(xmlDocument, idpDescryptorXPath);
+        final NodeList idpDescriptorNodes = Util.query(xmlDocument, idpDescriptorXPath);
 
         if (idpDescriptorNodes.getLength() > 0) {
 
             final Node idpDescriptorNode = idpDescriptorNodes.item(0);
-            if (entityId == null || entityId.isEmpty()) {
-                final Node entityIDNode = idpDescriptorNode.getParentNode().getAttributes().getNamedItem("entityID");
-                if (entityIDNode != null) {
-                    entityId = entityIDNode.getNodeValue();
+            String resolvedEntityId = entityId;
+            if (resolvedEntityId == null || resolvedEntityId.isEmpty()) {
+                final Node entityIdNode = idpDescriptorNode.getParentNode().getAttributes().getNamedItem("entityID");
+                if (entityIdNode != null) {
+                    resolvedEntityId = entityIdNode.getNodeValue();
                 }
             }
 
-            if (entityId != null && !entityId.isEmpty()) {
-                metadataInfo.put(SettingsBuilder.IDP_ENTITYID_PROPERTY_KEY, entityId);
+            if (resolvedEntityId != null && !resolvedEntityId.isEmpty()) {
+                metadataInfo.put(SettingsBuilder.IDP_ENTITYID_PROPERTY_KEY, resolvedEntityId);
             }
 
             NodeList ssoNodes =
@@ -100,10 +95,11 @@ public class IdPMetadataParser {
                 ssoNodes = Util.query(xmlDocument, "./md:SingleSignOnService", idpDescriptorNode);
             }
             if (ssoNodes.getLength() > 0) {
+                final NamedNodeMap ssoAttributes = ssoNodes.item(0).getAttributes();
                 metadataInfo.put(SettingsBuilder.IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY,
-                        ssoNodes.item(0).getAttributes().getNamedItem("Location").getNodeValue());
+                        ssoAttributes.getNamedItem("Location").getNodeValue());
                 metadataInfo.put(SettingsBuilder.IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY,
-                        ssoNodes.item(0).getAttributes().getNamedItem("Binding").getNodeValue());
+                        ssoAttributes.getNamedItem("Binding").getNodeValue());
             }
 
             NodeList sloNodes =
@@ -112,11 +108,12 @@ public class IdPMetadataParser {
                 sloNodes = Util.query(xmlDocument, "./md:SingleLogoutService", idpDescriptorNode);
             }
             if (sloNodes.getLength() > 0) {
+                final NamedNodeMap sloAttributes = sloNodes.item(0).getAttributes();
                 metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY,
-                        sloNodes.item(0).getAttributes().getNamedItem("Location").getNodeValue());
+                        sloAttributes.getNamedItem("Location").getNodeValue());
                 metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY,
-                        sloNodes.item(0).getAttributes().getNamedItem("Binding").getNodeValue());
-                final Node responseLocationNode = sloNodes.item(0).getAttributes().getNamedItem("ResponseLocation");
+                        sloAttributes.getNamedItem("Binding").getNodeValue());
+                final Node responseLocationNode = sloAttributes.getNamedItem("ResponseLocation");
                 if (responseLocationNode != null) {
                     metadataInfo.put(SettingsBuilder.IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY,
                             responseLocationNode.getNodeValue());
@@ -382,7 +379,7 @@ public class IdPMetadataParser {
         try (InputStream is = xmlURL.openStream()) {
             final Document xmlDocument = Util.parseXML(new InputSource(is));
             return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new XMLParsingException("Failed to parse a remote XML: " + xmlURL, e);
         }
     }
@@ -418,7 +415,7 @@ public class IdPMetadataParser {
         try (InputStream is = xmlURL.openStream()) {
             final Document xmlDocument = Util.parseXML(new InputSource(is));
             return parseXML(xmlDocument, entityId, desiredNameIdFormat, desiredSSOBinding, desiredSLOBinding, trustedSigningCert);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new XMLParsingException("Failed to parse a remote XML: " + xmlURL, e);
         }
     }

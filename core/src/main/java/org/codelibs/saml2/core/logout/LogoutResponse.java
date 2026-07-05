@@ -134,16 +134,10 @@ public class LogoutResponse {
      *
      */
     public String getEncodedLogoutResponse(Boolean deflated) {
-        String encodedLogoutResponse;
         if (deflated == null) {
             deflated = settings.isCompressResponseEnabled();
         }
-        if (deflated) {
-            encodedLogoutResponse = Util.deflatedBase64encoded(getLogoutResponseXml());
-        } else {
-            encodedLogoutResponse = Util.base64encoder(getLogoutResponseXml());
-        }
-        return encodedLogoutResponse;
+        return deflated ? Util.deflatedBase64encoded(getLogoutResponseXml()) : Util.base64encoder(getLogoutResponseXml());
     }
 
     /**
@@ -171,13 +165,13 @@ public class LogoutResponse {
      * @return the ID of the Response
      */
     public String getId() {
-        String idvalue = null;
+        String idValue = null;
         if (id != null) {
-            idvalue = id;
+            idValue = id;
         } else if (logoutResponseDocument != null) {
-            idvalue = logoutResponseDocument.getDocumentElement().getAttributes().getNamedItem("ID").getNodeValue();
+            idValue = logoutResponseDocument.getDocumentElement().getAttributes().getNamedItem("ID").getNodeValue();
         }
-        return idvalue;
+        return idValue;
     }
 
     /**
@@ -256,7 +250,7 @@ public class LogoutResponse {
                 final List<X509Certificate> certList = new ArrayList<>();
                 final List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
 
-                if (multipleCertList != null && multipleCertList.size() != 0) {
+                if (multipleCertList != null && !multipleCertList.isEmpty()) {
                     certList.addAll(multipleCertList);
                 }
 
@@ -279,7 +273,7 @@ public class LogoutResponse {
                     return false;
                 }
 
-                StringBuilder signedQuery = new StringBuilder("SAMLResponse=").append(request.getEncodedParameter("SAMLResponse"));
+                final StringBuilder signedQuery = new StringBuilder("SAMLResponse=").append(request.getEncodedParameter("SAMLResponse"));
 
                 final String relayState = request.getEncodedParameter("RelayState");
                 if (relayState != null && !relayState.isEmpty()) {

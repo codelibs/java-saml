@@ -41,7 +41,7 @@ public class Metadata {
     /**
      * AttributeConsumingService
      */
-    private AttributeConsumingService attributeConsumingService = null;
+    private AttributeConsumingService attributeConsumingService;
 
     /**
      * Generated metadata in string format
@@ -143,7 +143,7 @@ public class Metadata {
     private StringSubstitutor generateSubstitutor(final Saml2Settings settings) {
 
         final Map<String, String> valueMap = new HashMap<>();
-        final Boolean wantsEncrypted = settings.getWantAssertionsEncrypted() || settings.getWantNameIdEncrypted();
+        final boolean wantsEncrypted = settings.getWantAssertionsEncrypted() || settings.getWantNameIdEncrypted();
 
         valueMap.put("id", Util.toXml(Util.generateUniqueID(settings.getUniqueIDPrefix())));
         String validUntilTimeStr = "";
@@ -170,7 +170,7 @@ public class Metadata {
 
         valueMap.put("strAttributeConsumingService", getAttributeConsumingServiceXml());
 
-        valueMap.put("strKeyDescriptor", toX509KeyDescriptorsXML(settings.getSPcert(), settings.getSPcertNew(), wantsEncrypted));
+        valueMap.put("strKeyDescriptor", toX509KeyDescriptorsXml(settings.getSPcert(), settings.getSPcertNew(), wantsEncrypted));
 
         valueMap.put("strContacts", toContactsXml(settings.getContacts()));
         valueMap.put("strOrganization", toOrganizationXml(settings.getOrganization()));
@@ -210,18 +210,18 @@ public class Metadata {
      * @return the AttributeConsumingService section of the metadata's template
      */
     private String getAttributeConsumingServiceXml() {
-        final StringBuilder attributeConsumingServiceXML = new StringBuilder();
+        final StringBuilder attributeConsumingServiceXml = new StringBuilder();
         if (attributeConsumingService != null) {
             final String serviceName = attributeConsumingService.getServiceName();
             final String serviceDescription = attributeConsumingService.getServiceDescription();
             final List<RequestedAttribute> requestedAttributes = attributeConsumingService.getRequestedAttributes();
 
-            attributeConsumingServiceXML.append("<md:AttributeConsumingService index=\"1\">");
+            attributeConsumingServiceXml.append("<md:AttributeConsumingService index=\"1\">");
             if (serviceName != null && !serviceName.isEmpty()) {
-                attributeConsumingServiceXML.append("<md:ServiceName xml:lang=\"en\">" + Util.toXml(serviceName) + "</md:ServiceName>");
+                attributeConsumingServiceXml.append("<md:ServiceName xml:lang=\"en\">" + Util.toXml(serviceName) + "</md:ServiceName>");
             }
             if (serviceDescription != null && !serviceDescription.isEmpty()) {
-                attributeConsumingServiceXML
+                attributeConsumingServiceXml
                         .append("<md:ServiceDescription xml:lang=\"en\">" + Util.toXml(serviceDescription) + "</md:ServiceDescription>");
             }
             if (requestedAttributes != null && !requestedAttributes.isEmpty()) {
@@ -232,40 +232,41 @@ public class Metadata {
                     final Boolean isRequired = requestedAttribute.isRequired();
                     final List<String> attrValues = requestedAttribute.getAttributeValues();
 
-                    String contentStr = "<md:RequestedAttribute";
+                    final StringBuilder contentStr = new StringBuilder("<md:RequestedAttribute");
 
                     if (name != null && !name.isEmpty()) {
-                        contentStr += " Name=\"" + Util.toXml(name) + "\"";
+                        contentStr.append(" Name=\"" + Util.toXml(name) + "\"");
                     }
 
                     if (nameFormat != null && !nameFormat.isEmpty()) {
-                        contentStr += " NameFormat=\"" + Util.toXml(nameFormat) + "\"";
+                        contentStr.append(" NameFormat=\"" + Util.toXml(nameFormat) + "\"");
                     }
 
                     if (friendlyName != null && !friendlyName.isEmpty()) {
-                        contentStr += " FriendlyName=\"" + Util.toXml(friendlyName) + "\"";
+                        contentStr.append(" FriendlyName=\"" + Util.toXml(friendlyName) + "\"");
                     }
 
                     if (isRequired != null) {
-                        contentStr += " isRequired=\"" + isRequired.toString() + "\"";
+                        contentStr.append(" isRequired=\"" + isRequired + "\"");
                     }
 
                     if (attrValues != null && !attrValues.isEmpty()) {
-                        contentStr += ">";
+                        contentStr.append(">");
                         for (final String attrValue : attrValues) {
-                            contentStr += "<saml:AttributeValue xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">"
-                                    + Util.toXml(attrValue) + "</saml:AttributeValue>";
+                            contentStr.append("<saml:AttributeValue xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">"
+                                    + Util.toXml(attrValue) + "</saml:AttributeValue>");
                         }
-                        attributeConsumingServiceXML.append(contentStr + "</md:RequestedAttribute>");
+                        contentStr.append("</md:RequestedAttribute>");
                     } else {
-                        attributeConsumingServiceXML.append(contentStr + " />");
+                        contentStr.append(" />");
                     }
+                    attributeConsumingServiceXml.append(contentStr);
                 }
             }
-            attributeConsumingServiceXML.append("</md:AttributeConsumingService>");
+            attributeConsumingServiceXml.append("</md:AttributeConsumingService>");
         }
 
-        return attributeConsumingServiceXML.toString();
+        return attributeConsumingServiceXml.toString();
     }
 
     /**
@@ -329,13 +330,13 @@ public class Metadata {
      *
      * @return the KeyDescriptor section of the metadata's template
      */
-    private String toX509KeyDescriptorsXML(final X509Certificate certCurrent, final X509Certificate certNew, final Boolean wantsEncrypted) {
+    private String toX509KeyDescriptorsXml(final X509Certificate certCurrent, final X509Certificate certNew, final boolean wantsEncrypted) {
         final StringBuilder keyDescriptorXml = new StringBuilder();
 
+        final Base64 encoder = new Base64(64);
         final List<X509Certificate> certs = Arrays.asList(certCurrent, certNew);
         for (final X509Certificate cert : certs) {
             if (cert != null) {
-                final Base64 encoder = new Base64(64);
                 try {
                     final byte[] encodedCert = cert.getEncoded();
                     final String certString = new String(encoder.encode(encodedCert));

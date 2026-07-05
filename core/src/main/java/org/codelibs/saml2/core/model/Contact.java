@@ -28,7 +28,7 @@ public class Contact {
     /**
      * Contact surname
      */
-    private final String surName;
+    private final String surname;
 
     /**
        * Contact email
@@ -80,7 +80,7 @@ public class Contact {
         this.contactType = contactType != null ? contactType : "";
         this.company = company;
         this.givenName = givenName;
-        this.surName = surName;
+        this.surname = surName;
         this.emailAddresses = emailAddresses != null ? emailAddresses : Collections.emptyList();
         this.telephoneNumbers = telephoneNumbers != null ? telephoneNumbers : Collections.emptyList();
     }
@@ -102,7 +102,7 @@ public class Contact {
      */
     @Deprecated
     public final String getEmailAddress() {
-        return emailAddresses.size() > 0 ? emailAddresses.get(0) : null;
+        return !emailAddresses.isEmpty() ? emailAddresses.get(0) : null;
     }
 
     /**
@@ -129,7 +129,7 @@ public class Contact {
      * @return the contact surname
      */
     public final String getSurName() {
-        return surName;
+        return surname;
     }
 
     /**

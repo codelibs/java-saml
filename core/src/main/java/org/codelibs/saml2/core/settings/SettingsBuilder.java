@@ -65,136 +65,136 @@ public class SettingsBuilder {
     /**
      * Saml2Settings object
      */
-    private Saml2Settings saml2Setting;
+    private Saml2Settings saml2Settings;
 
     /** Property key for the strict mode flag ({@code onelogin.saml2.strict}). */
-    public final static String STRICT_PROPERTY_KEY = "onelogin.saml2.strict";
+    public static final String STRICT_PROPERTY_KEY = "onelogin.saml2.strict";
     /** Property key for the debug mode flag ({@code onelogin.saml2.debug}). */
-    public final static String DEBUG_PROPERTY_KEY = "onelogin.saml2.debug";
+    public static final String DEBUG_PROPERTY_KEY = "onelogin.saml2.debug";
 
     // SP
     /** Property key for the SP entity ID ({@code onelogin.saml2.sp.entityid}). */
-    public final static String SP_ENTITYID_PROPERTY_KEY = "onelogin.saml2.sp.entityid";
+    public static final String SP_ENTITYID_PROPERTY_KEY = "onelogin.saml2.sp.entityid";
     /** Property key for the SP Assertion Consumer Service URL ({@code onelogin.saml2.sp.assertion_consumer_service.url}). */
-    public final static String SP_ASSERTION_CONSUMER_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.sp.assertion_consumer_service.url";
+    public static final String SP_ASSERTION_CONSUMER_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.sp.assertion_consumer_service.url";
     /** Property key for the SP Assertion Consumer Service binding ({@code onelogin.saml2.sp.assertion_consumer_service.binding}). */
-    public final static String SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.sp.assertion_consumer_service.binding";
+    public static final String SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.sp.assertion_consumer_service.binding";
     /** Property key for the SP Single Logout Service URL ({@code onelogin.saml2.sp.single_logout_service.url}). */
-    public final static String SP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.sp.single_logout_service.url";
+    public static final String SP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.sp.single_logout_service.url";
     /** Property key for the SP Single Logout Service binding ({@code onelogin.saml2.sp.single_logout_service.binding}). */
-    public final static String SP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.sp.single_logout_service.binding";
+    public static final String SP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.sp.single_logout_service.binding";
     /** Property key for the SP NameID format ({@code onelogin.saml2.sp.nameidformat}). */
-    public final static String SP_NAMEIDFORMAT_PROPERTY_KEY = "onelogin.saml2.sp.nameidformat";
+    public static final String SP_NAMEIDFORMAT_PROPERTY_KEY = "onelogin.saml2.sp.nameidformat";
 
     /** Property key for the SP X.509 certificate ({@code onelogin.saml2.sp.x509cert}). */
-    public final static String SP_X509CERT_PROPERTY_KEY = "onelogin.saml2.sp.x509cert";
+    public static final String SP_X509CERT_PROPERTY_KEY = "onelogin.saml2.sp.x509cert";
     /** Property key for the SP private key ({@code onelogin.saml2.sp.privatekey}). */
-    public final static String SP_PRIVATEKEY_PROPERTY_KEY = "onelogin.saml2.sp.privatekey";
+    public static final String SP_PRIVATEKEY_PROPERTY_KEY = "onelogin.saml2.sp.privatekey";
     /** Property key for the SP new X.509 certificate used during certificate rotation ({@code onelogin.saml2.sp.x509certNew}). */
-    public final static String SP_X509CERTNEW_PROPERTY_KEY = "onelogin.saml2.sp.x509certNew";
+    public static final String SP_X509CERTNEW_PROPERTY_KEY = "onelogin.saml2.sp.x509certNew";
 
     /** Property key prefix for SP contact entries ({@code onelogin.saml2.sp.contact}). */
-    public final static String SP_CONTACT_PROPERTY_KEY_PREFIX = "onelogin.saml2.sp.contact";
+    public static final String SP_CONTACT_PROPERTY_KEY_PREFIX = "onelogin.saml2.sp.contact";
     /** Property key suffix for the SP contact type ({@code contactType}). */
-    public final static String SP_CONTACT_CONTACT_TYPE_PROPERTY_KEY_SUFFIX = "contactType";
+    public static final String SP_CONTACT_CONTACT_TYPE_PROPERTY_KEY_SUFFIX = "contactType";
     /** Property key suffix for the SP contact company name ({@code company}). */
-    public final static String SP_CONTACT_COMPANY_PROPERTY_KEY_SUFFIX = "company";
+    public static final String SP_CONTACT_COMPANY_PROPERTY_KEY_SUFFIX = "company";
     /** Property key suffix for the SP contact given name ({@code given_name}). */
-    public final static String SP_CONTACT_GIVEN_NAME_PROPERTY_KEY_SUFFIX = "given_name";
+    public static final String SP_CONTACT_GIVEN_NAME_PROPERTY_KEY_SUFFIX = "given_name";
     /** Property key suffix for the SP contact surname ({@code sur_name}). */
-    public final static String SP_CONTACT_SUR_NAME_PROPERTY_KEY_SUFFIX = "sur_name";
+    public static final String SP_CONTACT_SUR_NAME_PROPERTY_KEY_SUFFIX = "sur_name";
     /** Property key prefix for the SP contact e-mail addresses ({@code email_address}). */
-    public final static String SP_CONTACT_EMAIL_ADDRESS_PROPERTY_KEY_PREFIX = "email_address";
+    public static final String SP_CONTACT_EMAIL_ADDRESS_PROPERTY_KEY_PREFIX = "email_address";
     /** Property key prefix for the SP contact telephone numbers ({@code telephone_number}). */
-    public final static String SP_CONTACT_TELEPHONE_NUMBER_PROPERTY_KEY_PREFIX = "telephone_number";
+    public static final String SP_CONTACT_TELEPHONE_NUMBER_PROPERTY_KEY_PREFIX = "telephone_number";
 
     // KeyStore
     /** Property key for the KeyStore instance holding the SP keys ({@code onelogin.saml2.keystore.store}). */
-    public final static String KEYSTORE_KEY = "onelogin.saml2.keystore.store";
+    public static final String KEYSTORE_KEY = "onelogin.saml2.keystore.store";
     /** Property key for the KeyStore alias of the SP entry ({@code onelogin.saml2.keystore.alias}). */
-    public final static String KEYSTORE_ALIAS = "onelogin.saml2.keystore.alias";
+    public static final String KEYSTORE_ALIAS = "onelogin.saml2.keystore.alias";
     /** Property key for the KeyStore key password ({@code onelogin.saml2.keystore.key.password}). */
-    public final static String KEYSTORE_KEY_PASSWORD = "onelogin.saml2.keystore.key.password";
+    public static final String KEYSTORE_KEY_PASSWORD = "onelogin.saml2.keystore.key.password";
 
     // IDP
     /** Property key for the IdP entity ID ({@code onelogin.saml2.idp.entityid}). */
-    public final static String IDP_ENTITYID_PROPERTY_KEY = "onelogin.saml2.idp.entityid";
+    public static final String IDP_ENTITYID_PROPERTY_KEY = "onelogin.saml2.idp.entityid";
     /** Property key for the IdP Single Sign-On Service URL ({@code onelogin.saml2.idp.single_sign_on_service.url}). */
-    public final static String IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.url";
+    public static final String IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.url";
     /** Property key for the IdP Single Sign-On Service binding ({@code onelogin.saml2.idp.single_sign_on_service.binding}). */
-    public final static String IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.binding";
+    public static final String IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.idp.single_sign_on_service.binding";
     /** Property key for the IdP Single Logout Service URL ({@code onelogin.saml2.idp.single_logout_service.url}). */
-    public final static String IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_logout_service.url";
+    public static final String IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY = "onelogin.saml2.idp.single_logout_service.url";
     /** Property key for the IdP Single Logout Service response URL ({@code onelogin.saml2.idp.single_logout_service.response.url}). */
-    public final static String IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY =
+    public static final String IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY =
             "onelogin.saml2.idp.single_logout_service.response.url";
     /** Property key for the IdP Single Logout Service binding ({@code onelogin.saml2.idp.single_logout_service.binding}). */
-    public final static String IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.idp.single_logout_service.binding";
+    public static final String IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY = "onelogin.saml2.idp.single_logout_service.binding";
 
     /** Property key for the IdP X.509 certificate ({@code onelogin.saml2.idp.x509cert}). */
-    public final static String IDP_X509CERT_PROPERTY_KEY = "onelogin.saml2.idp.x509cert";
+    public static final String IDP_X509CERT_PROPERTY_KEY = "onelogin.saml2.idp.x509cert";
     /** Property key prefix for multiple IdP X.509 certificates ({@code onelogin.saml2.idp.x509certMulti}). */
-    public final static String IDP_X509CERTMULTI_PROPERTY_KEY = "onelogin.saml2.idp.x509certMulti";
+    public static final String IDP_X509CERTMULTI_PROPERTY_KEY = "onelogin.saml2.idp.x509certMulti";
     /** Property key for the IdP certificate fingerprint ({@code onelogin.saml2.idp.certfingerprint}). */
-    public final static String CERTFINGERPRINT_PROPERTY_KEY = "onelogin.saml2.idp.certfingerprint";
+    public static final String CERTFINGERPRINT_PROPERTY_KEY = "onelogin.saml2.idp.certfingerprint";
     /** Property key for the IdP certificate fingerprint algorithm ({@code onelogin.saml2.idp.certfingerprint_algorithm}). */
-    public final static String CERTFINGERPRINT_ALGORITHM_PROPERTY_KEY = "onelogin.saml2.idp.certfingerprint_algorithm";
+    public static final String CERTFINGERPRINT_ALGORITHM_PROPERTY_KEY = "onelogin.saml2.idp.certfingerprint_algorithm";
 
     // Security
     /** Property key controlling whether the NameID is encrypted ({@code onelogin.saml2.security.nameid_encrypted}). */
-    public final static String SECURITY_NAMEID_ENCRYPTED = "onelogin.saml2.security.nameid_encrypted";
+    public static final String SECURITY_NAMEID_ENCRYPTED = "onelogin.saml2.security.nameid_encrypted";
     /** Property key controlling whether AuthnRequests are signed ({@code onelogin.saml2.security.authnrequest_signed}). */
-    public final static String SECURITY_AUTHREQUEST_SIGNED = "onelogin.saml2.security.authnrequest_signed";
+    public static final String SECURITY_AUTHREQUEST_SIGNED = "onelogin.saml2.security.authnrequest_signed";
     /** Property key controlling whether LogoutRequests are signed ({@code onelogin.saml2.security.logoutrequest_signed}). */
-    public final static String SECURITY_LOGOUTREQUEST_SIGNED = "onelogin.saml2.security.logoutrequest_signed";
+    public static final String SECURITY_LOGOUTREQUEST_SIGNED = "onelogin.saml2.security.logoutrequest_signed";
     /** Property key controlling whether LogoutResponses are signed ({@code onelogin.saml2.security.logoutresponse_signed}). */
-    public final static String SECURITY_LOGOUTRESPONSE_SIGNED = "onelogin.saml2.security.logoutresponse_signed";
+    public static final String SECURITY_LOGOUTRESPONSE_SIGNED = "onelogin.saml2.security.logoutresponse_signed";
     /** Property key controlling whether received messages must be signed ({@code onelogin.saml2.security.want_messages_signed}). */
-    public final static String SECURITY_WANT_MESSAGES_SIGNED = "onelogin.saml2.security.want_messages_signed";
+    public static final String SECURITY_WANT_MESSAGES_SIGNED = "onelogin.saml2.security.want_messages_signed";
     /** Property key controlling whether received assertions must be signed ({@code onelogin.saml2.security.want_assertions_signed}). */
-    public final static String SECURITY_WANT_ASSERTIONS_SIGNED = "onelogin.saml2.security.want_assertions_signed";
+    public static final String SECURITY_WANT_ASSERTIONS_SIGNED = "onelogin.saml2.security.want_assertions_signed";
     /** Property key controlling whether received assertions must be encrypted ({@code onelogin.saml2.security.want_assertions_encrypted}). */
-    public final static String SECURITY_WANT_ASSERTIONS_ENCRYPTED = "onelogin.saml2.security.want_assertions_encrypted";
+    public static final String SECURITY_WANT_ASSERTIONS_ENCRYPTED = "onelogin.saml2.security.want_assertions_encrypted";
     /** Property key controlling whether a NameID is required in responses ({@code onelogin.saml2.security.want_nameid}). */
-    public final static String SECURITY_WANT_NAMEID = "onelogin.saml2.security.want_nameid";
+    public static final String SECURITY_WANT_NAMEID = "onelogin.saml2.security.want_nameid";
     /** Property key controlling whether the received NameID must be encrypted ({@code onelogin.saml2.security.want_nameid_encrypted}). */
-    public final static String SECURITY_WANT_NAMEID_ENCRYPTED = "onelogin.saml2.security.want_nameid_encrypted";
+    public static final String SECURITY_WANT_NAMEID_ENCRYPTED = "onelogin.saml2.security.want_nameid_encrypted";
     /** Property key controlling whether the SP metadata is signed ({@code onelogin.saml2.security.sign_metadata}). */
-    public final static String SECURITY_SIGN_METADATA = "onelogin.saml2.security.sign_metadata";
+    public static final String SECURITY_SIGN_METADATA = "onelogin.saml2.security.sign_metadata";
     /** Property key for the requested authentication context(s) ({@code onelogin.saml2.security.requested_authncontext}). */
-    public final static String SECURITY_REQUESTED_AUTHNCONTEXT = "onelogin.saml2.security.requested_authncontext";
+    public static final String SECURITY_REQUESTED_AUTHNCONTEXT = "onelogin.saml2.security.requested_authncontext";
     /** Property key for the requested authentication context comparison ({@code onelogin.saml2.security.requested_authncontextcomparison}). */
-    public final static String SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON = "onelogin.saml2.security.requested_authncontextcomparison";
+    public static final String SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON = "onelogin.saml2.security.requested_authncontextcomparison";
     /** Property key controlling whether XML schema validation is performed ({@code onelogin.saml2.security.want_xml_validation}). */
-    public final static String SECURITY_WANT_XML_VALIDATION = "onelogin.saml2.security.want_xml_validation";
+    public static final String SECURITY_WANT_XML_VALIDATION = "onelogin.saml2.security.want_xml_validation";
     /** Property key for the signature algorithm used when signing ({@code onelogin.saml2.security.signature_algorithm}). */
-    public final static String SECURITY_SIGNATURE_ALGORITHM = "onelogin.saml2.security.signature_algorithm";
+    public static final String SECURITY_SIGNATURE_ALGORITHM = "onelogin.saml2.security.signature_algorithm";
     /** Property key for the digest algorithm used when signing ({@code onelogin.saml2.security.digest_algorithm}). */
-    public final static String SECURITY_DIGEST_ALGORITHM = "onelogin.saml2.security.digest_algorithm";
+    public static final String SECURITY_DIGEST_ALGORITHM = "onelogin.saml2.security.digest_algorithm";
     /** Property key for the key transport algorithm used to encrypt the NameID ({@code onelogin.saml2.security.nameid_encryption_algorithm}). */
-    public final static String SECURITY_NAMEID_ENCRYPTION_ALGORITHM = "onelogin.saml2.security.nameid_encryption_algorithm";
+    public static final String SECURITY_NAMEID_ENCRYPTION_ALGORITHM = "onelogin.saml2.security.nameid_encryption_algorithm";
     /** Property key for the comma-separated allow-list of key transport algorithms accepted on decrypt ({@code onelogin.saml2.security.allowed_key_transport_algorithms}). */
-    public final static String SECURITY_ALLOWED_KEY_TRANSPORT_ALGORITHMS = "onelogin.saml2.security.allowed_key_transport_algorithms";
+    public static final String SECURITY_ALLOWED_KEY_TRANSPORT_ALGORITHMS = "onelogin.saml2.security.allowed_key_transport_algorithms";
     /** Property key controlling whether unsolicited responses with an InResponseTo attribute are rejected ({@code onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto}). */
-    public final static String SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO =
+    public static final String SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO =
             "onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto";
     /** Property key controlling whether duplicated attribute names are allowed ({@code onelogin.saml2.security.allow_duplicated_attribute_name}). */
-    public final static String SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY =
+    public static final String SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY =
             "onelogin.saml2.security.allow_duplicated_attribute_name";
     /** Property key controlling whether deprecated cryptographic algorithms are rejected ({@code onelogin.saml2.security.reject_deprecated_alg}). */
-    public final static String SECURITY_REJECT_DEPRECATED_ALGORITHM = "onelogin.saml2.security.reject_deprecated_alg";
+    public static final String SECURITY_REJECT_DEPRECATED_ALGORITHM = "onelogin.saml2.security.reject_deprecated_alg";
 
     // Compress
     /** Property key controlling whether outgoing requests are compressed ({@code onelogin.saml2.compress.request}). */
-    public final static String COMPRESS_REQUEST = "onelogin.saml2.compress.request";
+    public static final String COMPRESS_REQUEST = "onelogin.saml2.compress.request";
     /** Property key controlling whether outgoing responses are compressed ({@code onelogin.saml2.compress.response}). */
-    public final static String COMPRESS_RESPONSE = "onelogin.saml2.compress.response";
+    public static final String COMPRESS_RESPONSE = "onelogin.saml2.compress.response";
 
     // Parsing
     /** Property key controlling whether NameID values are trimmed during parsing ({@code onelogin.saml2.parsing.trim_name_ids}). */
-    public final static String PARSING_TRIM_NAME_IDS = "onelogin.saml2.parsing.trim_name_ids";
+    public static final String PARSING_TRIM_NAME_IDS = "onelogin.saml2.parsing.trim_name_ids";
     /** Property key controlling whether attribute values are trimmed during parsing ({@code onelogin.saml2.parsing.trim_attribute_values}). */
-    public final static String PARSING_TRIM_ATTRIBUTE_VALUES = "onelogin.saml2.parsing.trim_attribute_values";
+    public static final String PARSING_TRIM_ATTRIBUTE_VALUES = "onelogin.saml2.parsing.trim_attribute_values";
 
     // Misc
     /**
@@ -203,39 +203,39 @@ public class SettingsBuilder {
      * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
      */
     @Deprecated
-    public final static String CONTACT_TECHNICAL_GIVEN_NAME = "onelogin.saml2.contacts.technical.given_name";
+    public static final String CONTACT_TECHNICAL_GIVEN_NAME = "onelogin.saml2.contacts.technical.given_name";
     /**
      * Property key for the legacy technical contact e-mail address ({@code onelogin.saml2.contacts.technical.email_address}).
      *
      * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
      */
     @Deprecated
-    public final static String CONTACT_TECHNICAL_EMAIL_ADDRESS = "onelogin.saml2.contacts.technical.email_address";
+    public static final String CONTACT_TECHNICAL_EMAIL_ADDRESS = "onelogin.saml2.contacts.technical.email_address";
     /**
      * Property key for the legacy support contact given name ({@code onelogin.saml2.contacts.support.given_name}).
      *
      * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
      */
     @Deprecated
-    public final static String CONTACT_SUPPORT_GIVEN_NAME = "onelogin.saml2.contacts.support.given_name";
+    public static final String CONTACT_SUPPORT_GIVEN_NAME = "onelogin.saml2.contacts.support.given_name";
     /**
      * Property key for the legacy support contact e-mail address ({@code onelogin.saml2.contacts.support.email_address}).
      *
      * @deprecated use the indexed {@code onelogin.saml2.sp.contact} properties instead
      */
     @Deprecated
-    public final static String CONTACT_SUPPORT_EMAIL_ADDRESS = "onelogin.saml2.contacts.support.email_address";
+    public static final String CONTACT_SUPPORT_EMAIL_ADDRESS = "onelogin.saml2.contacts.support.email_address";
 
     /** Property key for the organization name ({@code onelogin.saml2.organization.name}). */
-    public final static String ORGANIZATION_NAME = "onelogin.saml2.organization.name";
+    public static final String ORGANIZATION_NAME = "onelogin.saml2.organization.name";
     /** Property key for the organization display name ({@code onelogin.saml2.organization.displayname}). */
-    public final static String ORGANIZATION_DISPLAYNAME = "onelogin.saml2.organization.displayname";
+    public static final String ORGANIZATION_DISPLAYNAME = "onelogin.saml2.organization.displayname";
     /** Property key for the organization URL ({@code onelogin.saml2.organization.url}). */
-    public final static String ORGANIZATION_URL = "onelogin.saml2.organization.url";
+    public static final String ORGANIZATION_URL = "onelogin.saml2.organization.url";
     /** Property key for the organization language ({@code onelogin.saml2.organization.lang}). */
-    public final static String ORGANIZATION_LANG = "onelogin.saml2.organization.lang";
+    public static final String ORGANIZATION_LANG = "onelogin.saml2.organization.lang";
     /** Property key for the prefix used to generate unique IDs ({@code onelogin.saml2.unique_id_prefix}). */
-    public final static String UNIQUE_ID_PREFIX_PROPERTY_KEY = "onelogin.saml2.unique_id_prefix";
+    public static final String UNIQUE_ID_PREFIX_PROPERTY_KEY = "onelogin.saml2.unique_id_prefix";
 
     /**
      * Load settings from the file
@@ -350,7 +350,7 @@ public class SettingsBuilder {
      */
     public Saml2Settings build(final Saml2Settings saml2Setting) {
 
-        this.saml2Setting = saml2Setting;
+        this.saml2Settings = saml2Setting;
 
         final Boolean strict = loadBooleanProperty(STRICT_PROPERTY_KEY);
         if (strict != null) {
@@ -378,7 +378,7 @@ public class SettingsBuilder {
             saml2Setting.setOrganization(org);
         }
 
-        final String uniqueIdPrefix = loadUniqueIDPrefix();
+        final String uniqueIdPrefix = loadUniqueIdPrefix();
         if (StringUtils.isNotEmpty(uniqueIdPrefix)) {
             saml2Setting.setUniqueIDPrefix(uniqueIdPrefix);
         } else if (saml2Setting.getUniqueIDPrefix() == null) {
@@ -398,54 +398,54 @@ public class SettingsBuilder {
      * Loads the IdP settings from the properties file
      */
     private void loadIdpSetting() {
-        final String idpEntityID = loadStringProperty(IDP_ENTITYID_PROPERTY_KEY);
-        if (idpEntityID != null) {
-            saml2Setting.setIdpEntityId(idpEntityID);
+        final String idpEntityId = loadStringProperty(IDP_ENTITYID_PROPERTY_KEY);
+        if (idpEntityId != null) {
+            saml2Settings.setIdpEntityId(idpEntityId);
         }
 
         final URL idpSingleSignOnServiceUrl = loadURLProperty(IDP_SINGLE_SIGN_ON_SERVICE_URL_PROPERTY_KEY);
         if (idpSingleSignOnServiceUrl != null) {
-            saml2Setting.setIdpSingleSignOnServiceUrl(idpSingleSignOnServiceUrl);
+            saml2Settings.setIdpSingleSignOnServiceUrl(idpSingleSignOnServiceUrl);
         }
 
         final String idpSingleSignOnServiceBinding = loadStringProperty(IDP_SINGLE_SIGN_ON_SERVICE_BINDING_PROPERTY_KEY);
         if (idpSingleSignOnServiceBinding != null) {
-            saml2Setting.setIdpSingleSignOnServiceBinding(idpSingleSignOnServiceBinding);
+            saml2Settings.setIdpSingleSignOnServiceBinding(idpSingleSignOnServiceBinding);
         }
 
         final URL idpSingleLogoutServiceUrl = loadURLProperty(IDP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY);
         if (idpSingleLogoutServiceUrl != null) {
-            saml2Setting.setIdpSingleLogoutServiceUrl(idpSingleLogoutServiceUrl);
+            saml2Settings.setIdpSingleLogoutServiceUrl(idpSingleLogoutServiceUrl);
         }
 
         final URL idpSingleLogoutServiceResponseUrl = loadURLProperty(IDP_SINGLE_LOGOUT_SERVICE_RESPONSE_URL_PROPERTY_KEY);
         if (idpSingleLogoutServiceResponseUrl != null) {
-            saml2Setting.setIdpSingleLogoutServiceResponseUrl(idpSingleLogoutServiceResponseUrl);
+            saml2Settings.setIdpSingleLogoutServiceResponseUrl(idpSingleLogoutServiceResponseUrl);
         }
 
         final String idpSingleLogoutServiceBinding = loadStringProperty(IDP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY);
         if (idpSingleLogoutServiceBinding != null) {
-            saml2Setting.setIdpSingleLogoutServiceBinding(idpSingleLogoutServiceBinding);
+            saml2Settings.setIdpSingleLogoutServiceBinding(idpSingleLogoutServiceBinding);
         }
 
-        final List<X509Certificate> idpX509certMulti = loadCertificateListFromProp(IDP_X509CERTMULTI_PROPERTY_KEY);
-        if (idpX509certMulti != null) {
-            saml2Setting.setIdpx509certMulti(idpX509certMulti);
+        final List<X509Certificate> idpX509CertMulti = loadCertificateListFromProp(IDP_X509CERTMULTI_PROPERTY_KEY);
+        if (idpX509CertMulti != null) {
+            saml2Settings.setIdpx509certMulti(idpX509CertMulti);
         }
 
-        final X509Certificate idpX509cert = loadCertificateFromProp(IDP_X509CERT_PROPERTY_KEY);
-        if (idpX509cert != null) {
-            saml2Setting.setIdpx509cert(idpX509cert);
+        final X509Certificate idpX509Cert = loadCertificateFromProp(IDP_X509CERT_PROPERTY_KEY);
+        if (idpX509Cert != null) {
+            saml2Settings.setIdpx509cert(idpX509Cert);
         }
 
         final String idpCertFingerprint = loadStringProperty(CERTFINGERPRINT_PROPERTY_KEY);
         if (idpCertFingerprint != null) {
-            saml2Setting.setIdpCertFingerprint(idpCertFingerprint);
+            saml2Settings.setIdpCertFingerprint(idpCertFingerprint);
         }
 
         final String idpCertFingerprintAlgorithm = loadStringProperty(CERTFINGERPRINT_ALGORITHM_PROPERTY_KEY);
-        if (idpCertFingerprintAlgorithm != null && !idpCertFingerprintAlgorithm.isEmpty()) {
-            saml2Setting.setIdpCertFingerprintAlgorithm(idpCertFingerprintAlgorithm);
+        if (StringUtils.isNotEmpty(idpCertFingerprintAlgorithm)) {
+            saml2Settings.setIdpCertFingerprintAlgorithm(idpCertFingerprintAlgorithm);
         }
     }
 
@@ -455,82 +455,82 @@ public class SettingsBuilder {
     private void loadSecuritySetting() {
         final Boolean nameIdEncrypted = loadBooleanProperty(SECURITY_NAMEID_ENCRYPTED);
         if (nameIdEncrypted != null) {
-            saml2Setting.setNameIdEncrypted(nameIdEncrypted);
+            saml2Settings.setNameIdEncrypted(nameIdEncrypted);
         }
 
         final Boolean authnRequestsSigned = loadBooleanProperty(SECURITY_AUTHREQUEST_SIGNED);
         if (authnRequestsSigned != null) {
-            saml2Setting.setAuthnRequestsSigned(authnRequestsSigned);
+            saml2Settings.setAuthnRequestsSigned(authnRequestsSigned);
         }
 
         final Boolean logoutRequestSigned = loadBooleanProperty(SECURITY_LOGOUTREQUEST_SIGNED);
         if (logoutRequestSigned != null) {
-            saml2Setting.setLogoutRequestSigned(logoutRequestSigned);
+            saml2Settings.setLogoutRequestSigned(logoutRequestSigned);
         }
 
         final Boolean logoutResponseSigned = loadBooleanProperty(SECURITY_LOGOUTRESPONSE_SIGNED);
         if (logoutResponseSigned != null) {
-            saml2Setting.setLogoutResponseSigned(logoutResponseSigned);
+            saml2Settings.setLogoutResponseSigned(logoutResponseSigned);
         }
 
         final Boolean wantMessagesSigned = loadBooleanProperty(SECURITY_WANT_MESSAGES_SIGNED);
         if (wantMessagesSigned != null) {
-            saml2Setting.setWantMessagesSigned(wantMessagesSigned);
+            saml2Settings.setWantMessagesSigned(wantMessagesSigned);
         }
 
         final Boolean wantAssertionsSigned = loadBooleanProperty(SECURITY_WANT_ASSERTIONS_SIGNED);
         if (wantAssertionsSigned != null) {
-            saml2Setting.setWantAssertionsSigned(wantAssertionsSigned);
+            saml2Settings.setWantAssertionsSigned(wantAssertionsSigned);
         }
 
         final Boolean wantAssertionsEncrypted = loadBooleanProperty(SECURITY_WANT_ASSERTIONS_ENCRYPTED);
         if (wantAssertionsEncrypted != null) {
-            saml2Setting.setWantAssertionsEncrypted(wantAssertionsEncrypted);
+            saml2Settings.setWantAssertionsEncrypted(wantAssertionsEncrypted);
         }
 
         final Boolean wantNameId = loadBooleanProperty(SECURITY_WANT_NAMEID);
         if (wantNameId != null) {
-            saml2Setting.setWantNameId(wantNameId);
+            saml2Settings.setWantNameId(wantNameId);
         }
 
         final Boolean wantNameIdEncrypted = loadBooleanProperty(SECURITY_WANT_NAMEID_ENCRYPTED);
         if (wantNameIdEncrypted != null) {
-            saml2Setting.setWantNameIdEncrypted(wantNameIdEncrypted);
+            saml2Settings.setWantNameIdEncrypted(wantNameIdEncrypted);
         }
 
-        final Boolean wantXMLValidation = loadBooleanProperty(SECURITY_WANT_XML_VALIDATION);
-        if (wantXMLValidation != null) {
-            saml2Setting.setWantXMLValidation(wantXMLValidation);
+        final Boolean wantXmlValidation = loadBooleanProperty(SECURITY_WANT_XML_VALIDATION);
+        if (wantXmlValidation != null) {
+            saml2Settings.setWantXMLValidation(wantXmlValidation);
         }
 
         final Boolean signMetadata = loadBooleanProperty(SECURITY_SIGN_METADATA);
         if (signMetadata != null) {
-            saml2Setting.setSignMetadata(signMetadata);
+            saml2Settings.setSignMetadata(signMetadata);
         }
 
         final List<String> requestedAuthnContext = loadListProperty(SECURITY_REQUESTED_AUTHNCONTEXT);
         if (requestedAuthnContext != null) {
-            saml2Setting.setRequestedAuthnContext(requestedAuthnContext);
+            saml2Settings.setRequestedAuthnContext(requestedAuthnContext);
         }
 
         final String requestedAuthnContextComparison = loadStringProperty(SECURITY_REQUESTED_AUTHNCONTEXTCOMPARISON);
-        if (requestedAuthnContextComparison != null && !requestedAuthnContextComparison.isEmpty()) {
-            saml2Setting.setRequestedAuthnContextComparison(requestedAuthnContextComparison);
+        if (StringUtils.isNotEmpty(requestedAuthnContextComparison)) {
+            saml2Settings.setRequestedAuthnContextComparison(requestedAuthnContextComparison);
         }
 
         final String signatureAlgorithm = loadStringProperty(SECURITY_SIGNATURE_ALGORITHM);
-        if (signatureAlgorithm != null && !signatureAlgorithm.isEmpty()) {
-            saml2Setting.setSignatureAlgorithm(signatureAlgorithm);
+        if (StringUtils.isNotEmpty(signatureAlgorithm)) {
+            saml2Settings.setSignatureAlgorithm(signatureAlgorithm);
         }
 
         final String digestAlgorithm = loadStringProperty(SECURITY_DIGEST_ALGORITHM);
-        if (digestAlgorithm != null && !digestAlgorithm.isEmpty()) {
-            saml2Setting.setDigestAlgorithm(digestAlgorithm);
+        if (StringUtils.isNotEmpty(digestAlgorithm)) {
+            saml2Settings.setDigestAlgorithm(digestAlgorithm);
         }
 
         final String nameIdEncryptionAlgorithm = loadStringProperty(SECURITY_NAMEID_ENCRYPTION_ALGORITHM);
-        if (nameIdEncryptionAlgorithm != null && !nameIdEncryptionAlgorithm.isEmpty()) {
-            saml2Setting.setNameIdEncryptionAlgorithm(nameIdEncryptionAlgorithm);
+        if (StringUtils.isNotEmpty(nameIdEncryptionAlgorithm)) {
+            saml2Settings.setNameIdEncryptionAlgorithm(nameIdEncryptionAlgorithm);
         }
 
         final List<String> allowedKeyTransportAlgorithms = loadListProperty(SECURITY_ALLOWED_KEY_TRANSPORT_ALGORITHMS);
@@ -541,23 +541,23 @@ public class SettingsBuilder {
                     allowedKeyTransportAlgorithmsSet.add(allowedKeyTransportAlgorithm.trim());
                 }
             }
-            saml2Setting.setAllowedKeyTransportAlgorithms(allowedKeyTransportAlgorithmsSet);
+            saml2Settings.setAllowedKeyTransportAlgorithms(allowedKeyTransportAlgorithmsSet);
         }
 
         final Boolean rejectUnsolicitedResponsesWithInResponseTo =
                 loadBooleanProperty(SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO);
         if (rejectUnsolicitedResponsesWithInResponseTo != null) {
-            saml2Setting.setRejectUnsolicitedResponsesWithInResponseTo(rejectUnsolicitedResponsesWithInResponseTo);
+            saml2Settings.setRejectUnsolicitedResponsesWithInResponseTo(rejectUnsolicitedResponsesWithInResponseTo);
         }
 
         final Boolean allowRepeatAttributeName = loadBooleanProperty(SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY);
         if (allowRepeatAttributeName != null) {
-            saml2Setting.setAllowRepeatAttributeName(allowRepeatAttributeName);
+            saml2Settings.setAllowRepeatAttributeName(allowRepeatAttributeName);
         }
 
         final Boolean rejectDeprecatedAlg = loadBooleanProperty(SECURITY_REJECT_DEPRECATED_ALGORITHM);
         if (rejectDeprecatedAlg != null) {
-            saml2Setting.setRejectDeprecatedAlg(rejectDeprecatedAlg);
+            saml2Settings.setRejectDeprecatedAlg(rejectDeprecatedAlg);
         }
     }
 
@@ -567,12 +567,12 @@ public class SettingsBuilder {
     private void loadCompressSetting() {
         final Boolean compressRequest = loadBooleanProperty(COMPRESS_REQUEST);
         if (compressRequest != null) {
-            saml2Setting.setCompressRequest(compressRequest);
+            saml2Settings.setCompressRequest(compressRequest);
         }
 
         final Boolean compressResponse = loadBooleanProperty(COMPRESS_RESPONSE);
         if (compressResponse != null) {
-            saml2Setting.setCompressResponse(compressResponse);
+            saml2Settings.setCompressResponse(compressResponse);
         }
     }
 
@@ -582,12 +582,12 @@ public class SettingsBuilder {
     private void loadParsingSetting() {
         final Boolean trimNameIds = loadBooleanProperty(PARSING_TRIM_NAME_IDS);
         if (trimNameIds != null) {
-            saml2Setting.setTrimNameIds(trimNameIds);
+            saml2Settings.setTrimNameIds(trimNameIds);
         }
 
         final Boolean trimAttributeValues = loadBooleanProperty(PARSING_TRIM_ATTRIBUTE_VALUES);
         if (trimAttributeValues != null) {
-            saml2Setting.setTrimAttributeValues(trimAttributeValues);
+            saml2Settings.setTrimAttributeValues(trimAttributeValues);
         }
     }
 
@@ -622,12 +622,12 @@ public class SettingsBuilder {
         // then build each contact
         // multiple indexed services specified
         final List<Contact> contacts =
-                contactProps.entrySet().stream().map(entry -> loadContact(entry.getValue(), entry.getKey())).collect(Collectors.toList());
+                contactProps.entrySet().stream().map(entry -> loadContact(entry.getValue())).collect(Collectors.toList());
         // append legacy contacts if present
         final String technicalGn = loadStringProperty(CONTACT_TECHNICAL_GIVEN_NAME);
         final String technicalEmailAddress = loadStringProperty(CONTACT_TECHNICAL_EMAIL_ADDRESS);
 
-        if ((technicalGn != null && !technicalGn.isEmpty()) || (technicalEmailAddress != null && !technicalEmailAddress.isEmpty())) {
+        if (StringUtils.isNotEmpty(technicalGn) || StringUtils.isNotEmpty(technicalEmailAddress)) {
             final Contact technical = new Contact(Constants.CONTACT_TYPE_TECHNICAL, technicalGn, technicalEmailAddress);
             contacts.add(technical);
         }
@@ -635,7 +635,7 @@ public class SettingsBuilder {
         final String supportGn = loadStringProperty(CONTACT_SUPPORT_GIVEN_NAME);
         final String supportEmailAddress = loadStringProperty(CONTACT_SUPPORT_EMAIL_ADDRESS);
 
-        if ((supportGn != null && !supportGn.isEmpty()) || (supportEmailAddress != null && !supportEmailAddress.isEmpty())) {
+        if (StringUtils.isNotEmpty(supportGn) || StringUtils.isNotEmpty(supportEmailAddress)) {
             final Contact support = new Contact(Constants.CONTACT_TYPE_SUPPORT, supportGn, supportEmailAddress);
             contacts.add(support);
         }
@@ -648,11 +648,9 @@ public class SettingsBuilder {
      *
      * @param contactProps
      *              a map containing the contact settings
-     * @param index
-     *              the contact index
      * @return the loaded contact
      */
-    private Contact loadContact(final Map<String, Object> contactProps, final int index) {
+    private Contact loadContact(final Map<String, Object> contactProps) {
         final String contactType = loadStringProperty(SP_CONTACT_CONTACT_TYPE_PROPERTY_KEY_SUFFIX, contactProps);
         final String company = loadStringProperty(SP_CONTACT_COMPANY_PROPERTY_KEY_SUFFIX, contactProps);
         final String givenName = loadStringProperty(SP_CONTACT_GIVEN_NAME_PROPERTY_KEY_SUFFIX, contactProps);
@@ -815,7 +813,7 @@ public class SettingsBuilder {
     /**
      * Loads the unique ID prefix. Uses default if property not set.
      */
-    private String loadUniqueIDPrefix() {
+    private String loadUniqueIdPrefix() {
         return loadStringProperty(UNIQUE_ID_PREFIX_PROPERTY_KEY);
     }
 
@@ -823,34 +821,34 @@ public class SettingsBuilder {
      * Loads the SP settings from the properties file
      */
     private void loadSpSetting() {
-        final String spEntityID = loadStringProperty(SP_ENTITYID_PROPERTY_KEY);
-        if (spEntityID != null) {
-            saml2Setting.setSpEntityId(spEntityID);
+        final String spEntityId = loadStringProperty(SP_ENTITYID_PROPERTY_KEY);
+        if (spEntityId != null) {
+            saml2Settings.setSpEntityId(spEntityId);
         }
 
         final URL assertionConsumerServiceUrl = loadURLProperty(SP_ASSERTION_CONSUMER_SERVICE_URL_PROPERTY_KEY);
         if (assertionConsumerServiceUrl != null) {
-            saml2Setting.setSpAssertionConsumerServiceUrl(assertionConsumerServiceUrl);
+            saml2Settings.setSpAssertionConsumerServiceUrl(assertionConsumerServiceUrl);
         }
 
         final String spAssertionConsumerServiceBinding = loadStringProperty(SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY);
         if (spAssertionConsumerServiceBinding != null) {
-            saml2Setting.setSpAssertionConsumerServiceBinding(spAssertionConsumerServiceBinding);
+            saml2Settings.setSpAssertionConsumerServiceBinding(spAssertionConsumerServiceBinding);
         }
 
         final URL spSingleLogoutServiceUrl = loadURLProperty(SP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY);
         if (spSingleLogoutServiceUrl != null) {
-            saml2Setting.setSpSingleLogoutServiceUrl(spSingleLogoutServiceUrl);
+            saml2Settings.setSpSingleLogoutServiceUrl(spSingleLogoutServiceUrl);
         }
 
         final String spSingleLogoutServiceBinding = loadStringProperty(SP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY);
         if (spSingleLogoutServiceBinding != null) {
-            saml2Setting.setSpSingleLogoutServiceBinding(spSingleLogoutServiceBinding);
+            saml2Settings.setSpSingleLogoutServiceBinding(spSingleLogoutServiceBinding);
         }
 
-        final String spNameIDFormat = loadStringProperty(SP_NAMEIDFORMAT_PROPERTY_KEY);
-        if (spNameIDFormat != null && !spNameIDFormat.isEmpty()) {
-            saml2Setting.setSpNameIDFormat(spNameIDFormat);
+        final String spNameIdFormat = loadStringProperty(SP_NAMEIDFORMAT_PROPERTY_KEY);
+        if (StringUtils.isNotEmpty(spNameIdFormat)) {
+            saml2Settings.setSpNameIDFormat(spNameIdFormat);
         }
 
         final boolean keyStoreEnabled = this.samlData.get(KEYSTORE_KEY) != null && this.samlData.get(KEYSTORE_ALIAS) != null
@@ -872,15 +870,15 @@ public class SettingsBuilder {
         }
 
         if (spX509cert != null) {
-            saml2Setting.setSpX509cert(spX509cert);
+            saml2Settings.setSpX509cert(spX509cert);
         }
         if (spPrivateKey != null) {
-            saml2Setting.setSpPrivateKey(spPrivateKey);
+            saml2Settings.setSpPrivateKey(spPrivateKey);
         }
 
         final X509Certificate spX509certNew = loadCertificateFromProp(SP_X509CERTNEW_PROPERTY_KEY);
         if (spX509certNew != null) {
-            saml2Setting.setSpX509certNew(spX509certNew);
+            saml2Settings.setSpX509certNew(spX509certNew);
         }
     }
 
@@ -937,6 +935,7 @@ public class SettingsBuilder {
      *
      * @return the value
      */
+    @SuppressWarnings("unchecked")
     private List<String> loadListProperty(final String propertyKey) {
         final Object propValue = samlData.get(propertyKey);
         if (isString(propValue)) {
@@ -1081,10 +1080,8 @@ public class SettingsBuilder {
     private List<X509Certificate> loadCertificateListFromProp(final String propertyKey) {
         final List<X509Certificate> list = new ArrayList<>();
 
-        int i = 0;
-        while (true) {
+        for (int i = 0;; i++) {
             final Object propValue = samlData.get(propertyKey + "." + i);
-            i++;
 
             if (propValue == null) {
                 break;
@@ -1095,39 +1092,6 @@ public class SettingsBuilder {
 
         return list;
     }
-
-    /**
-     * Loads a property of the type X509Certificate from file
-     *
-     * @param filename the file name of the file that contains the X509Certificate
-     *
-     * @return the X509Certificate object
-     */
-    /*
-    protected X509Certificate loadCertificateFromFile(String filename) {
-    	String certString = null;
-    	try {
-    		certString = Util.getFileAsString(filename.trim());
-    	} catch (URISyntaxException e) {
-    		LOGGER.error("SAMLSevereException loading certificate from file.", e);
-    		return null;
-    	}
-    	catch (IOException e) {
-    		LOGGER.error("SAMLSevereException loading certificate from file.", e);
-    		return null;
-    	}
-    
-    	try {
-    		return Util.loadCert(certString);
-    	} catch (CertificateException e) {
-    		LOGGER.error("SAMLSevereException loading certificate from file.", e);
-    		return null;
-    	} catch (UnsupportedEncodingException e) {
-    		LOGGER.error("the certificate is not in correct format.", e);
-    		return null;
-    	}
-    }
-    */
 
     /**
      * Loads a property of the type PrivateKey from the Properties object

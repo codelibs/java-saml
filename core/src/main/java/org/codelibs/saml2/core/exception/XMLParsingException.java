@@ -14,7 +14,7 @@ public class XMLParsingException extends SAMLException {
      * @param message the detail message
      * @param cause the underlying cause of the parsing failure
      */
-    public XMLParsingException(String message, Throwable cause) {
+    public XMLParsingException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

@@ -277,8 +277,7 @@ public class Auth {
         // Check settings
         final List<String> settingsErrors = settings.checkSettings();
         if (!settingsErrors.isEmpty()) {
-            String errorMsg = "Invalid settings: ";
-            errorMsg += StringUtils.join(settingsErrors, ", ");
+            final String errorMsg = "Invalid settings: " + StringUtils.join(settingsErrors, ", ");
             LOGGER.warn(errorMsg);
             throw new SettingsException(errorMsg, SettingsException.SETTINGS_INVALID);
         }
@@ -570,32 +569,28 @@ public class Auth {
      * @return the SSO URL with the AuthNRequest if stay = True
      *
      */
-    public String login(String relayState, final AuthnRequestParams authnRequestParams, final Boolean stay,
-            Map<String, String> parameters) {
+    public String login(final String relayState, final AuthnRequestParams authnRequestParams, final Boolean stay,
+            final Map<String, String> parameters) {
         final AuthnRequest authnRequest = samlMessageFactory.createAuthnRequest(settings, authnRequestParams);
 
-        if (parameters == null) {
-            parameters = new HashMap<>();
-        }
+        final Map<String, String> requestParameters = parameters == null ? new HashMap<>() : parameters;
 
         final String samlRequest = authnRequest.getEncodedAuthnRequest();
 
-        parameters.put("SAMLRequest", samlRequest);
+        requestParameters.put("SAMLRequest", samlRequest);
 
-        if (relayState == null) {
-            relayState = ServletUtils.getSelfRoutedURLNoQuery(request);
-        }
+        final String effectiveRelayState = relayState == null ? ServletUtils.getSelfRoutedURLNoQuery(request) : relayState;
 
-        if (!relayState.isEmpty()) {
-            parameters.put("RelayState", relayState);
+        if (!effectiveRelayState.isEmpty()) {
+            requestParameters.put("RelayState", effectiveRelayState);
         }
 
         if (settings.getAuthnRequestsSigned()) {
             final String sigAlg = settings.getSignatureAlgorithm();
-            final String signature = this.buildRequestSignature(samlRequest, relayState, sigAlg);
+            final String signature = this.buildRequestSignature(samlRequest, effectiveRelayState, sigAlg);
 
-            parameters.put("SigAlg", sigAlg);
-            parameters.put("Signature", signature);
+            requestParameters.put("SigAlg", sigAlg);
+            requestParameters.put("Signature", signature);
         }
 
         final String ssoUrl = getSSOurl();
@@ -606,7 +601,7 @@ public class Auth {
         if (!stay) {
             LOGGER.debug("AuthNRequest sent to {} --> {}", ssoUrl, samlRequest);
         }
-        return ServletUtils.sendRedirect(response, ssoUrl, parameters, stay);
+        return ServletUtils.sendRedirect(response, ssoUrl, requestParameters, stay);
     }
 
     /**
@@ -732,31 +727,27 @@ public class Auth {
      * @return the SLO URL with the LogoutRequest if stay = True
      *
      */
-    public String logout(String relayState, final LogoutRequestParams logoutRequestParams, final Boolean stay,
-            Map<String, String> parameters) {
+    public String logout(final String relayState, final LogoutRequestParams logoutRequestParams, final Boolean stay,
+            final Map<String, String> parameters) {
 
-        if (parameters == null) {
-            parameters = new HashMap<>();
-        }
+        final Map<String, String> requestParameters = parameters == null ? new HashMap<>() : parameters;
 
         final LogoutRequest logoutRequest = samlMessageFactory.createOutgoingLogoutRequest(settings, logoutRequestParams);
         final String samlLogoutRequest = logoutRequest.getEncodedLogoutRequest();
-        parameters.put("SAMLRequest", samlLogoutRequest);
+        requestParameters.put("SAMLRequest", samlLogoutRequest);
 
-        if (relayState == null) {
-            relayState = ServletUtils.getSelfRoutedURLNoQuery(request);
-        }
+        final String effectiveRelayState = relayState == null ? ServletUtils.getSelfRoutedURLNoQuery(request) : relayState;
 
-        if (!relayState.isEmpty()) {
-            parameters.put("RelayState", relayState);
+        if (!effectiveRelayState.isEmpty()) {
+            requestParameters.put("RelayState", effectiveRelayState);
         }
 
         if (settings.getLogoutRequestSigned()) {
             final String sigAlg = settings.getSignatureAlgorithm();
-            final String signature = this.buildRequestSignature(samlLogoutRequest, relayState, sigAlg);
+            final String signature = this.buildRequestSignature(samlLogoutRequest, effectiveRelayState, sigAlg);
 
-            parameters.put("SigAlg", sigAlg);
-            parameters.put("Signature", signature);
+            requestParameters.put("SigAlg", sigAlg);
+            requestParameters.put("Signature", signature);
         }
 
         final String sloUrl = getSLOurl();
@@ -767,7 +758,7 @@ public class Auth {
         if (!stay) {
             LOGGER.debug("Logout request sent to {} --> {}", sloUrl, samlLogoutRequest);
         }
-        return ServletUtils.sendRedirect(response, sloUrl, parameters, stay);
+        return ServletUtils.sendRedirect(response, sloUrl, requestParameters, stay);
     }
 
     /**
@@ -1153,7 +1144,7 @@ public class Auth {
             lastMessageIssueInstant = samlResponse.getResponseIssueInstant();
             lastAssertionId = samlResponse.getAssertionId();
             lastAssertionNotOnOrAfter = samlResponse.getAssertionNotOnOrAfter();
-            LOGGER.debug("processResponse success --> " + samlResponseParameter);
+            LOGGER.debug("processResponse success --> {}", samlResponseParameter);
         } else {
             errorReason = samlResponse.getError();
             validationException = samlResponse.getValidationException();
@@ -1226,7 +1217,7 @@ public class Auth {
                 } else {
                     lastMessageId = logoutResponse.getId();
                     lastMessageIssueInstant = logoutResponse.getIssueInstant();
-                    LOGGER.debug("processSLO success --> " + samlResponseParameter);
+                    LOGGER.debug("processSLO success --> {}", samlResponseParameter);
                     if (!keepLocalSession) {
                         request.getSession().invalidate();
                     }
@@ -1244,50 +1235,48 @@ public class Auth {
                 errorReason = logoutRequest.getError();
                 validationException = logoutRequest.getValidationException();
                 return null;
-            } else {
-                lastMessageId = logoutRequest.getId();
-                lastMessageIssueInstant = logoutRequest.getIssueInstant();
-                LOGGER.debug("processSLO success --> " + samlRequestParameter);
-                if (!keepLocalSession) {
-                    request.getSession().invalidate();
-                }
-
-                final String inResponseTo = logoutRequest.id;
-                final LogoutResponse logoutResponseBuilder = samlMessageFactory.createOutgoingLogoutResponse(settings,
-                        new LogoutResponseParams(inResponseTo, Constants.STATUS_SUCCESS));
-                lastResponse = logoutResponseBuilder.getLogoutResponseXml();
-
-                final String samlLogoutResponse = logoutResponseBuilder.getEncodedLogoutResponse();
-
-                final Map<String, String> parameters = new LinkedHashMap<>();
-
-                parameters.put("SAMLResponse", samlLogoutResponse);
-
-                final String relayState = request.getParameter("RelayState");
-                if (relayState != null) {
-                    parameters.put("RelayState", relayState);
-                }
-
-                if (settings.getLogoutResponseSigned()) {
-                    final String sigAlg = settings.getSignatureAlgorithm();
-                    final String signature = this.buildResponseSignature(samlLogoutResponse, relayState, sigAlg);
-
-                    parameters.put("SigAlg", sigAlg);
-                    parameters.put("Signature", signature);
-                }
-
-                final String sloUrl = getSLOResponseUrl();
-
-                if (!stay) {
-                    LOGGER.debug("Logout response sent to {} --> {}", sloUrl, samlLogoutResponse);
-                }
-                return ServletUtils.sendRedirect(response, sloUrl, parameters, stay);
             }
-        } else {
-            errors.add("invalid_binding");
-            final String errorMsg = "SAML LogoutRequest/LogoutResponse not found. Only supported HTTP_REDIRECT Binding";
-            throw new SAMLSevereException(errorMsg, SAMLSevereException.SAML_LOGOUTMESSAGE_NOT_FOUND);
+            lastMessageId = logoutRequest.getId();
+            lastMessageIssueInstant = logoutRequest.getIssueInstant();
+            LOGGER.debug("processSLO success --> {}", samlRequestParameter);
+            if (!keepLocalSession) {
+                request.getSession().invalidate();
+            }
+
+            final String inResponseTo = logoutRequest.getId();
+            final LogoutResponse logoutResponseBuilder = samlMessageFactory.createOutgoingLogoutResponse(settings,
+                    new LogoutResponseParams(inResponseTo, Constants.STATUS_SUCCESS));
+            lastResponse = logoutResponseBuilder.getLogoutResponseXml();
+
+            final String samlLogoutResponse = logoutResponseBuilder.getEncodedLogoutResponse();
+
+            final Map<String, String> parameters = new LinkedHashMap<>();
+
+            parameters.put("SAMLResponse", samlLogoutResponse);
+
+            final String relayState = request.getParameter("RelayState");
+            if (relayState != null) {
+                parameters.put("RelayState", relayState);
+            }
+
+            if (settings.getLogoutResponseSigned()) {
+                final String sigAlg = settings.getSignatureAlgorithm();
+                final String signature = this.buildResponseSignature(samlLogoutResponse, relayState, sigAlg);
+
+                parameters.put("SigAlg", sigAlg);
+                parameters.put("Signature", signature);
+            }
+
+            final String sloUrl = getSLOResponseUrl();
+
+            if (!stay) {
+                LOGGER.debug("Logout response sent to {} --> {}", sloUrl, samlLogoutResponse);
+            }
+            return ServletUtils.sendRedirect(response, sloUrl, parameters, stay);
         }
+        errors.add("invalid_binding");
+        final String errorMsg = "SAML LogoutRequest/LogoutResponse not found. Only supported HTTP_REDIRECT Binding";
+        throw new SAMLSevereException(errorMsg, SAMLSevereException.SAML_LOGOUTMESSAGE_NOT_FOUND);
     }
 
     /**
@@ -1551,7 +1540,7 @@ public class Auth {
      * @return the base64 encoded signature
      *
      */
-    private String buildSignature(final String samlMessage, final String relayState, String signAlgorithm, final String type) {
+    private String buildSignature(final String samlMessage, final String relayState, final String signAlgorithm, final String type) {
         String signature = "";
 
         if (!settings.checkSPCerts()) {
@@ -1562,19 +1551,17 @@ public class Auth {
 
         final PrivateKey key = settings.getSPkey();
 
-        StringBuilder msg = new StringBuilder().append(type).append("=").append(Util.urlEncoder(samlMessage));
+        final StringBuilder msg = new StringBuilder().append(type).append("=").append(Util.urlEncoder(samlMessage));
         if (StringUtils.isNotEmpty(relayState)) {
             msg.append("&RelayState=").append(Util.urlEncoder(relayState));
         }
 
-        if (StringUtils.isEmpty(signAlgorithm)) {
-            signAlgorithm = Constants.RSA_SHA1;
-        }
+        final String algorithm = StringUtils.isEmpty(signAlgorithm) ? Constants.RSA_SHA1 : signAlgorithm;
 
-        msg.append("&SigAlg=").append(Util.urlEncoder(signAlgorithm));
+        msg.append("&SigAlg=").append(Util.urlEncoder(algorithm));
 
         try {
-            signature = Util.base64encoder(Util.sign(msg.toString(), key, signAlgorithm));
+            signature = Util.base64encoder(Util.sign(msg.toString(), key, algorithm));
         } catch (InvalidKeyRuntimeException | NoSuchAlgorithmRuntimeException | SAMLSignatureException e) {
             final String errorMsg = "buildSignature error." + e.getMessage();
             LOGGER.warn(errorMsg, e);

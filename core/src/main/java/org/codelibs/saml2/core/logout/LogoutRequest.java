@@ -294,16 +294,10 @@ public class LogoutRequest {
      *
      */
     public String getEncodedLogoutRequest(Boolean deflated) {
-        String encodedLogoutRequest;
         if (deflated == null) {
             deflated = settings.isCompressRequestEnabled();
         }
-        if (deflated) {
-            encodedLogoutRequest = Util.deflatedBase64encoded(getLogoutRequestXml());
-        } else {
-            encodedLogoutRequest = Util.base64encoder(getLogoutRequestXml());
-        }
-        return encodedLogoutRequest;
+        return deflated ? Util.deflatedBase64encoded(getLogoutRequestXml()) : Util.base64encoder(getLogoutRequestXml());
     }
 
     /**
@@ -467,7 +461,7 @@ public class LogoutRequest {
                 // Check destination
                 if (rootElement.hasAttribute("Destination")) {
                     final String destinationUrl = rootElement.getAttribute("Destination");
-                    if ((destinationUrl != null) && (!destinationUrl.isEmpty() && !destinationUrl.equals(currentUrl))) {
+                    if (!destinationUrl.isEmpty() && !destinationUrl.equals(currentUrl)) {
                         throw new ValidationException("The LogoutRequest was received at " + currentUrl + " instead of " + destinationUrl,
                                 ValidationException.WRONG_DESTINATION);
                     }
@@ -494,7 +488,7 @@ public class LogoutRequest {
                 final List<X509Certificate> certList = new ArrayList<>();
                 final List<X509Certificate> multipleCertList = settings.getIdpx509certMulti();
 
-                if (multipleCertList != null && multipleCertList.size() != 0) {
+                if (multipleCertList != null && !multipleCertList.isEmpty()) {
                     certList.addAll(multipleCertList);
                 }
 
@@ -519,7 +513,7 @@ public class LogoutRequest {
 
                 final String relayState = request.getEncodedParameter("RelayState");
 
-                StringBuilder signedQuery = new StringBuilder("SAMLRequest=").append(request.getEncodedParameter("SAMLRequest"));
+                final StringBuilder signedQuery = new StringBuilder("SAMLRequest=").append(request.getEncodedParameter("SAMLRequest"));
 
                 if (relayState != null && !relayState.isEmpty()) {
                     signedQuery.append("&RelayState=").append(relayState);
@@ -679,8 +673,7 @@ public class LogoutRequest {
             final boolean trimValue, final Collection<String> allowedKeyTransportAlgorithms) {
         try {
             final NodeList encryptedIDNodes = Util.query(samlLogoutRequestDocument, "/samlp:LogoutRequest/saml:EncryptedID");
-            NodeList nameIdNodes;
-            Element nameIdElem;
+            final NodeList nameIdNodes;
 
             if (encryptedIDNodes.getLength() == 1) {
                 if (key == null) {
@@ -701,31 +694,29 @@ public class LogoutRequest {
             if ((nameIdNodes == null) || (nameIdNodes.getLength() != 1)) {
                 throw new ValidationException("No name id found in Logout Request.", ValidationException.NO_NAMEID);
             }
-            nameIdElem = (Element) nameIdNodes.item(0);
+            final Element nameIdElem = (Element) nameIdNodes.item(0);
 
             final Map<String, String> nameIdData = new HashMap<>();
 
-            if (nameIdElem != null) {
-                String value = nameIdElem.getTextContent();
-                if (value != null && trimValue) {
-                    value = value.trim();
-                }
-                nameIdData.put("Value", value);
+            String value = nameIdElem.getTextContent();
+            if (value != null && trimValue) {
+                value = value.trim();
+            }
+            nameIdData.put("Value", value);
 
-                if (nameIdElem.hasAttribute("Format")) {
-                    nameIdData.put("Format", nameIdElem.getAttribute("Format"));
-                }
-                if (nameIdElem.hasAttribute("SPNameQualifier")) {
-                    nameIdData.put("SPNameQualifier", nameIdElem.getAttribute("SPNameQualifier"));
-                }
-                if (nameIdElem.hasAttribute("NameQualifier")) {
-                    nameIdData.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
-                }
+            if (nameIdElem.hasAttribute("Format")) {
+                nameIdData.put("Format", nameIdElem.getAttribute("Format"));
+            }
+            if (nameIdElem.hasAttribute("SPNameQualifier")) {
+                nameIdData.put("SPNameQualifier", nameIdElem.getAttribute("SPNameQualifier"));
+            }
+            if (nameIdElem.hasAttribute("NameQualifier")) {
+                nameIdData.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
             }
             return nameIdData;
-        } catch (SAMLException e) {
+        } catch (final SAMLException e) {
             throw e;
-        } catch (DOMException e) {
+        } catch (final DOMException e) {
             throw new XMLParsingException("Failed to get NameID Data.", e);
         }
     }

@@ -13,7 +13,7 @@ public class SAMLSignatureException extends SAMLException {
      *
      * @param e the underlying exception
      */
-    public SAMLSignatureException(Exception e) {
+    public SAMLSignatureException(final Exception e) {
         super(e);
     }
 

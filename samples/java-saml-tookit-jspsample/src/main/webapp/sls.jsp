@@ -1,8 +1,5 @@
-<%@page import="org.codelibs.saml2.core.core.toolkit.Auth"%>
-<%@page import="java.util.Collection"%>
-<%@page import="java.util.HashMap"%>
+<%@page import="org.codelibs.saml2.Auth"%>
 <%@page import="java.util.List"%>
-<%@page import="java.util.Map"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -32,7 +29,7 @@
 		List<String> errors = auth.getErrors();
 
 		if (errors.isEmpty()) {
-			out.println("<p>Sucessfully logged out</p>");
+			out.println("<p>Successfully logged out</p>");
 			out.println("<a href=\"dologin.jsp\" class=\"btn btn-primary\">Login</a>");
 		} else {
 			out.println("<p>");
