@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -350,7 +351,7 @@ public class SamlResponse {
                 if (expiresAt == null) {
                     final List<Instant> notOnOrAfters = getAssertionNotOnOrAfter();
                     expiresAt = notOnOrAfters.isEmpty() ? Instant.now().plusSeconds(settings.getClockDrift() + 300)
-                            : java.util.Collections.min(notOnOrAfters);
+                            : Collections.min(notOnOrAfters);
                 }
                 if (replayCache.registerAndCheck(assertionId, expiresAt)) {
                     throw new ValidationException("The Assertion was already processed (replay detected): " + assertionId,
@@ -389,24 +390,24 @@ public class SamlResponse {
 
             final NodeList subjectConfirmationDataNodes = scn.getChildNodes();
             for (int c = 0; c < subjectConfirmationDataNodes.getLength(); c++) {
-                if (subjectConfirmationDataNodes.item(c).getLocalName() != null
-                        && "SubjectConfirmationData".equals(subjectConfirmationDataNodes.item(c).getLocalName())) {
+                final Node subjectConfirmationDataNode = subjectConfirmationDataNodes.item(c);
+                if ("SubjectConfirmationData".equals(subjectConfirmationDataNode.getLocalName())) {
 
-                    final Node recipient = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("Recipient");
+                    final Node recipient = subjectConfirmationDataNode.getAttributes().getNamedItem("Recipient");
                     final SubjectConfirmationIssue issue = validateRecipient(recipient, i);
                     if (issue != null) {
                         validationIssues.add(issue);
                         continue;
                     }
 
-                    final Node inResponseTo = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("InResponseTo");
+                    final Node inResponseTo = subjectConfirmationDataNode.getAttributes().getNamedItem("InResponseTo");
                     if (inResponseTo == null && responseInResponseTo != null
                             || inResponseTo != null && !inResponseTo.getNodeValue().equals(responseInResponseTo)) {
                         validationIssues.add(new SubjectConfirmationIssue(i, "SubjectConfirmationData has an invalid InResponseTo value"));
                         continue;
                     }
 
-                    final Node notOnOrAfter = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotOnOrAfter");
+                    final Node notOnOrAfter = subjectConfirmationDataNode.getAttributes().getNamedItem("NotOnOrAfter");
                     if (notOnOrAfter == null) {
                         validationIssues
                                 .add(new SubjectConfirmationIssue(i, "SubjectConfirmationData doesn't contain a NotOnOrAfter attribute"));
@@ -420,7 +421,7 @@ public class SamlResponse {
                         continue;
                     }
 
-                    final Node notBefore = subjectConfirmationDataNodes.item(c).getAttributes().getNamedItem("NotBefore");
+                    final Node notBefore = subjectConfirmationDataNode.getAttributes().getNamedItem("NotBefore");
                     if (notBefore != null) {
                         Instant nb = Util.parseDateTime(notBefore.getNodeValue());
                         nb = ChronoUnit.SECONDS.addTo(nb, settings.getClockDrift() * -1);
@@ -460,7 +461,7 @@ public class SamlResponse {
             return this.nameIdData;
         }
         try {
-            final Map<String, String> nameIdData = new HashMap<>();
+            final Map<String, String> data = new HashMap<>();
 
             final NodeList encryptedIDNodes = this.queryAssertion("/saml:Subject/saml:EncryptedID");
             NodeList nameIdNodes;
@@ -498,25 +499,25 @@ public class SamlResponse {
                         throw new ValidationException("An empty NameID value found", ValidationException.EMPTY_NAMEID);
                     }
 
-                    nameIdData.put("Value", value);
+                    data.put("Value", value);
 
                     if (nameIdElem.hasAttribute("Format")) {
-                        nameIdData.put("Format", nameIdElem.getAttribute("Format"));
+                        data.put("Format", nameIdElem.getAttribute("Format"));
                     }
                     if (nameIdElem.hasAttribute("SPNameQualifier")) {
                         final String spNameQualifier = nameIdElem.getAttribute("SPNameQualifier");
                         validateSpNameQualifier(spNameQualifier);
-                        nameIdData.put("SPNameQualifier", spNameQualifier);
+                        data.put("SPNameQualifier", spNameQualifier);
                     }
                     if (nameIdElem.hasAttribute("NameQualifier")) {
-                        nameIdData.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
+                        data.put("NameQualifier", nameIdElem.getAttribute("NameQualifier"));
                     }
                 }
             } else if (settings.getWantNameId()) {
                 throw new ValidationException("No name id found in Document.", ValidationException.NO_NAMEID);
             }
-            this.nameIdData = nameIdData;
-            return nameIdData;
+            this.nameIdData = data;
+            return data;
         } catch (SAMLException e) {
             throw e;
         } catch (DOMException e) {
@@ -531,13 +532,13 @@ public class SamlResponse {
      *
      */
     public String getNameId() {
-        final Map<String, String> nameIdData = getNameIdData();
-        String nameID = null;
-        if (!nameIdData.isEmpty()) {
-            LOGGER.debug("SAMLResponse has NameID --> {}", nameIdData.get("Value"));
-            nameID = nameIdData.get("Value");
+        final Map<String, String> data = getNameIdData();
+        String nameId = null;
+        if (!data.isEmpty()) {
+            LOGGER.debug("SAMLResponse has NameID --> {}", data.get("Value"));
+            nameId = data.get("Value");
         }
-        return nameID;
+        return nameId;
     }
 
     /**
@@ -547,13 +548,13 @@ public class SamlResponse {
      *
      */
     public String getNameIdFormat() {
-        final Map<String, String> nameIdData = getNameIdData();
-        String nameidFormat = null;
-        if (!nameIdData.isEmpty() && nameIdData.containsKey("Format")) {
-            LOGGER.debug("SAMLResponse has NameID Format --> {}", nameIdData.get("Format"));
-            nameidFormat = nameIdData.get("Format");
+        final Map<String, String> data = getNameIdData();
+        String nameIdFormat = null;
+        if (!data.isEmpty() && data.containsKey("Format")) {
+            LOGGER.debug("SAMLResponse has NameID Format --> {}", data.get("Format"));
+            nameIdFormat = data.get("Format");
         }
-        return nameidFormat;
+        return nameIdFormat;
     }
 
     /**
@@ -563,11 +564,11 @@ public class SamlResponse {
      *
      */
     public String getNameIdNameQualifier() {
-        final Map<String, String> nameIdData = getNameIdData();
+        final Map<String, String> data = getNameIdData();
         String nameQualifier = null;
-        if (!nameIdData.isEmpty() && nameIdData.containsKey("NameQualifier")) {
-            LOGGER.debug("SAMLResponse has NameID NameQualifier --> " + nameIdData.get("NameQualifier"));
-            nameQualifier = nameIdData.get("NameQualifier");
+        if (!data.isEmpty() && data.containsKey("NameQualifier")) {
+            LOGGER.debug("SAMLResponse has NameID NameQualifier --> {}", data.get("NameQualifier"));
+            nameQualifier = data.get("NameQualifier");
         }
         return nameQualifier;
     }
@@ -579,11 +580,11 @@ public class SamlResponse {
      *
      */
     public String getNameIdSPNameQualifier() {
-        final Map<String, String> nameIdData = getNameIdData();
+        final Map<String, String> data = getNameIdData();
         String spNameQualifier = null;
-        if (!nameIdData.isEmpty() && nameIdData.containsKey("SPNameQualifier")) {
-            LOGGER.debug("SAMLResponse has NameID NameQualifier --> " + nameIdData.get("SPNameQualifier"));
-            spNameQualifier = nameIdData.get("SPNameQualifier");
+        if (!data.isEmpty() && data.containsKey("SPNameQualifier")) {
+            LOGGER.debug("SAMLResponse has NameID NameQualifier --> {}", data.get("SPNameQualifier"));
+            spNameQualifier = data.get("SPNameQualifier");
         }
         return spNameQualifier;
     }
@@ -609,7 +610,7 @@ public class SamlResponse {
                             ValidationException.DUPLICATED_ATTRIBUTE_NAME_FOUND);
                 }
 
-                final NodeList childrens = nodes.item(i).getChildNodes();
+                final NodeList children = nodes.item(i).getChildNodes();
 
                 List<String> attrValues = null;
                 if (attributes.containsKey(attName) && settings.isAllowRepeatAttributeName()) {
@@ -617,9 +618,9 @@ public class SamlResponse {
                 } else {
                     attrValues = new ArrayList<>();
                 }
-                for (int j = 0; j < childrens.getLength(); j++) {
-                    if ("AttributeValue".equals(childrens.item(j).getLocalName())) {
-                        String attrValue = childrens.item(j).getTextContent();
+                for (int j = 0; j < children.getLength(); j++) {
+                    if ("AttributeValue".equals(children.item(j).getLocalName())) {
+                        String attrValue = children.item(j).getTextContent();
                         if (attrValue != null && settings.isTrimAttributeValues()) {
                             attrValue = attrValue.trim();
                         }
@@ -629,7 +630,7 @@ public class SamlResponse {
 
                 attributes.put(attName, attrValues);
             }
-            LOGGER.debug("SAMLResponse has attributes: {}", attributes.toString());
+            LOGGER.debug("SAMLResponse has attributes: {}", attributes);
         } else {
             LOGGER.debug("SAMLResponse has no attributes");
         }
@@ -685,10 +686,7 @@ public class SamlResponse {
      */
     public Boolean checkOneCondition() {
         final NodeList entries = this.queryAssertion("/saml:Conditions");
-        if (entries.getLength() == 1) {
-            return true;
-        }
-        return false;
+        return entries.getLength() == 1;
     }
 
     /**
@@ -700,10 +698,7 @@ public class SamlResponse {
      */
     public Boolean checkOneAuthnStatement() {
         final NodeList entries = this.queryAssertion("/saml:AuthnStatement");
-        if (entries.getLength() == 1) {
-            return true;
-        }
-        return false;
+        return entries.getLength() == 1;
     }
 
     /**
@@ -933,8 +928,8 @@ public class SamlResponse {
      */
     public ArrayList<String> processSignedElements() {
         final ArrayList<String> signedElements = new ArrayList<>();
-        final ArrayList<String> verifiedSeis = new ArrayList<>();
-        final ArrayList<String> verifiedIds = new ArrayList<>();
+        final List<String> verifiedSeis = new ArrayList<>();
+        final List<String> verifiedIds = new ArrayList<>();
 
         final NodeList signNodes = query("//ds:Signature", null);
         for (int i = 0; i < signNodes.getLength(); i++) {
@@ -1011,7 +1006,7 @@ public class SamlResponse {
         final Map<String, Integer> occurrences = new HashMap<>();
         for (final String e : signedElements) {
             if (occurrences.containsKey(e)) {
-                occurrences.put(e, occurrences.get(e).intValue() + 1);
+                occurrences.put(e, occurrences.get(e) + 1);
             } else {
                 occurrences.put(e, 1);
             }
@@ -1027,7 +1022,7 @@ public class SamlResponse {
         }
 
         // check that the signed elements found here, are the ones that will be verified
-        // by org.codelibs.saml2.core.core.util.Util.validateSign()
+        // by org.codelibs.saml2.core.util.Util.validateSign()
         if (occurrences.containsKey(responseTag)) {
             final NodeList expectedSignatureNode = query(Util.RESPONSE_SIGNATURE_XPATH, null);
             if (expectedSignatureNode.getLength() != 1) {
@@ -1189,7 +1184,6 @@ public class SamlResponse {
      * @return DOMNodeList The queried nodes
      */
     protected NodeList query(final String nameQuery, final Node context) {
-        // LOGGER.debug("Executing query " + nameQuery);
         return Util.query(getSAMLResponseDocument(), nameQuery, context);
     }
 
@@ -1225,19 +1219,18 @@ public class SamlResponse {
         }
 
         // We need to Remove the saml:EncryptedAssertion Node
-        final NodeList AssertionDataNodes = Util.query(dom, "/samlp:Response/saml:EncryptedAssertion/saml:Assertion");
-        if (AssertionDataNodes.getLength() == 0) {
+        final NodeList assertionDataNodes = Util.query(dom, "/samlp:Response/saml:EncryptedAssertion/saml:Assertion");
+        if (assertionDataNodes.getLength() == 0) {
             throw new ValidationException("No /samlp:Response/saml:EncryptedAssertion/saml:Assertion element found",
                     ValidationException.MISSING_ENCRYPTED_ELEMENT);
         }
-        final Node assertionNode = AssertionDataNodes.item(0);
+        final Node assertionNode = assertionDataNodes.item(0);
         assertionNode.getParentNode().getParentNode().replaceChild(assertionNode, assertionNode.getParentNode());
 
         // In order to avoid Signature Validation errors we need to rebuild the dom.
         // https://groups.google.com/forum/#!topic/opensaml-users/gpXvwaZ53NA
         final String xmlStr = Util.convertDocumentToString(dom);
 
-        // LOGGER.debug("Decrypted SAMLResponse --> " + xmlStr);
         return Util.convertStringToDocument(xmlStr);
     }
 

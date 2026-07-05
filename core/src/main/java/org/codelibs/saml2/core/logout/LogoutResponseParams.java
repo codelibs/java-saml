@@ -65,11 +65,11 @@ public class LogoutResponseParams {
      *              the response status; should not be <code>null</code>
      */
     public LogoutResponseParams(final String inResponseTo, final SamlResponseStatus responseStatus) {
-        this.inResponseTo = inResponseTo;
-        this.responseStatus = responseStatus;
         if (responseStatus == null) {
             throw new IllegalArgumentException("response status must not be null");
         }
+        this.inResponseTo = inResponseTo;
+        this.responseStatus = responseStatus;
     }
 
     /**

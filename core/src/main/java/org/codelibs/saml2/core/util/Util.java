@@ -8,11 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -130,6 +128,9 @@ public final class Util {
 
     private static final Set<String> DEPRECATED_ALGOS = new HashSet<>(Arrays.asList(Constants.RSA_SHA1, Constants.DSA_SHA1));
 
+    private static final Set<String> WHITELISTED_ALGORITHMS =
+            Set.of(Constants.DSA_SHA1, Constants.RSA_SHA1, Constants.RSA_SHA256, Constants.RSA_SHA384, Constants.RSA_SHA512);
+
     static {
         System.setProperty("org.apache.xml.security.ignoreLineBreaks", "true");
         org.apache.xml.security.Init.init();
@@ -184,7 +185,7 @@ public final class Util {
             }
             LOGGER.warn("Detected use of ENTITY in XML, disabled to prevent XXE/XEE attacks");
         } catch (final Exception e) {
-            LOGGER.warn("Load XML error: " + e.getMessage(), e);
+            LOGGER.warn("Load XML error: {}", e.getMessage(), e);
         }
 
         return null;
@@ -241,13 +242,8 @@ public final class Util {
         });
 
         try {
-            NodeList nodeList;
-            if (context == null) {
-                nodeList = (NodeList) xpath.evaluate(query, dom, XPathConstants.NODESET);
-            } else {
-                nodeList = (NodeList) xpath.evaluate(query, context, XPathConstants.NODESET);
-            }
-            return nodeList;
+            final Node contextNode = context == null ? dom : context;
+            return (NodeList) xpath.evaluate(query, contextNode, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
             throw new XMLParsingException("Failed to evaluate " + query, e);
         }
@@ -295,15 +291,15 @@ public final class Util {
                 validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             }
 
-            final XMLErrorAccumulatorHandler errorAcumulator = new XMLErrorAccumulatorHandler();
-            validator.setErrorHandler(errorAcumulator);
+            final XMLErrorAccumulatorHandler errorAccumulator = new XMLErrorAccumulatorHandler();
+            validator.setErrorHandler(errorAccumulator);
 
             final Source xmlSource = new DOMSource(xmlDocument);
             validator.validate(xmlSource);
 
-            final boolean isValid = !errorAcumulator.hasError();
+            final boolean isValid = !errorAccumulator.hasError();
             if (!isValid) {
-                LOGGER.warn("Errors found when validating SAML response with schema: {}", errorAcumulator.getErrorXML());
+                LOGGER.warn("Errors found when validating SAML response with schema: {}", errorAccumulator.getErrorXML());
             }
             return isValid;
         } catch (final Exception e) {
@@ -336,36 +332,36 @@ public final class Util {
      * @return the Document object
      */
     public static Document parseXML(final InputSource inputSource) {
-        final DocumentBuilderFactory docfactory = DocumentBuilderFactory.newInstance();
-        docfactory.setNamespaceAware(true);
+        final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        docFactory.setNamespaceAware(true);
 
         // do not expand entity reference nodes
-        docfactory.setExpandEntityReferences(false);
+        docFactory.setExpandEntityReferences(false);
 
-        docfactory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        docFactory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
         // Add various options explicitly to prevent XXE attacks.
         // (adding try/catch around every setAttribute just in case a specific parser does not support it.
         // do not include external general entities
-        setDocumentBuilderFactoryAttribute(docfactory, "http://xml.org/sax/features/external-general-entities", Boolean.FALSE);
+        setDocumentBuilderFactoryAttribute(docFactory, "http://xml.org/sax/features/external-general-entities", Boolean.FALSE);
         // do not include external parameter entities or the external DTD subset
-        setDocumentBuilderFactoryAttribute(docfactory, "http://xml.org/sax/features/external-parameter-entities", Boolean.FALSE);
-        setDocumentBuilderFactoryAttribute(docfactory, "http://apache.org/xml/features/disallow-doctype-decl", Boolean.TRUE);
-        setDocumentBuilderFactoryAttribute(docfactory, "http://javax.xml.XMLConstants/feature/secure-processing", Boolean.TRUE);
+        setDocumentBuilderFactoryAttribute(docFactory, "http://xml.org/sax/features/external-parameter-entities", Boolean.FALSE);
+        setDocumentBuilderFactoryAttribute(docFactory, "http://apache.org/xml/features/disallow-doctype-decl", Boolean.TRUE);
+        setDocumentBuilderFactoryAttribute(docFactory, "http://javax.xml.XMLConstants/feature/secure-processing", Boolean.TRUE);
         // ignore the external DTD completely
-        setDocumentBuilderFactoryAttribute(docfactory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", Boolean.FALSE);
+        setDocumentBuilderFactoryAttribute(docFactory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", Boolean.FALSE);
         // build the grammar but do not use the default attributes and attribute types information it contains
-        setDocumentBuilderFactoryAttribute(docfactory, "http://apache.org/xml/features/nonvalidating/load-dtd-grammar", Boolean.FALSE);
+        setDocumentBuilderFactoryAttribute(docFactory, "http://apache.org/xml/features/nonvalidating/load-dtd-grammar", Boolean.FALSE);
         try {
-            docfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         } catch (final Exception e) {
             LOGGER.debug("Cannot set {} to {}", true, XMLConstants.FEATURE_SECURE_PROCESSING, e);
         }
 
         try {
-            final DocumentBuilder builder = docfactory.newDocumentBuilder();
-            final XMLErrorAccumulatorHandler errorAcumulator = new XMLErrorAccumulatorHandler();
-            builder.setErrorHandler(errorAcumulator);
+            final DocumentBuilder builder = docFactory.newDocumentBuilder();
+            final XMLErrorAccumulatorHandler errorAccumulator = new XMLErrorAccumulatorHandler();
+            builder.setErrorHandler(errorAccumulator);
             final Document doc = builder.parse(inputSource);
 
             // Loop through the doc and tag every element with an ID attribute
@@ -392,9 +388,9 @@ public final class Util {
         }
     }
 
-    private static void setDocumentBuilderFactoryAttribute(DocumentBuilderFactory docfactory, String name, Object value) {
+    private static void setDocumentBuilderFactoryAttribute(DocumentBuilderFactory docFactory, String name, Object value) {
         try {
-            docfactory.setAttribute(name, value);
+            docFactory.setAttribute(name, value);
         } catch (final Exception e) {
             LOGGER.debug("Cannot set {} to {}", value, name, e);
         }
@@ -650,15 +646,15 @@ public final class Util {
      * @return the formated PEM string
      */
     public static String convertToPem(final X509Certificate certificate) {
-        String pemCert = "";
+        String pemCert = StringUtils.EMPTY;
         try {
             final Base64 encoder = new Base64(64);
-            final String cert_begin = "-----BEGIN CERTIFICATE-----\n";
-            final String end_cert = "-----END CERTIFICATE-----";
+            final String certBegin = "-----BEGIN CERTIFICATE-----\n";
+            final String certEnd = "-----END CERTIFICATE-----";
 
             final byte[] derCert = certificate.getEncoded();
             final String pemCertPre = new String(encoder.encode(derCert));
-            pemCert = cert_begin + pemCertPre + end_cert;
+            pemCert = certBegin + pemCertPre + certEnd;
 
         } catch (final Exception e) {
             LOGGER.debug("Certificate encoding exception.", e);
@@ -684,7 +680,7 @@ public final class Util {
             final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             copyBytes(new BufferedInputStream(is), bytes);
 
-            return bytes.toString("utf-8");
+            return bytes.toString(StandardCharsets.UTF_8);
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
@@ -715,17 +711,17 @@ public final class Util {
 
         // Inflater
         try {
-            final Inflater decompresser = new Inflater(true);
-            decompresser.setInput(decoded);
+            final Inflater decompressor = new Inflater(true);
+            decompressor.setInput(decoded);
             final byte[] result = new byte[1024];
             StringBuilder inflated = new StringBuilder();
             long limit = 0;
-            while (!decompresser.finished() && limit < 150) {
-                final int resultLength = decompresser.inflate(result);
+            while (!decompressor.finished() && limit < 150) {
+                final int resultLength = decompressor.inflate(result);
                 limit += 1;
-                inflated.append(new String(result, 0, resultLength, "UTF-8"));
+                inflated.append(new String(result, 0, resultLength, StandardCharsets.UTF_8));
             }
-            decompresser.end();
+            decompressor.end();
             return inflated.toString();
         } catch (final Exception e) {
             LOGGER.debug("Failed to decode {}", input, e);
@@ -746,7 +742,7 @@ public final class Util {
         final ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         final Deflater deflater = new Deflater(Deflater.DEFLATED, true);
         try (final DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater)) {
-            deflaterStream.write(input.getBytes(Charset.forName("UTF-8")));
+            deflaterStream.write(input.getBytes(StandardCharsets.UTF_8));
             deflaterStream.finish();
         } catch (final IOException e) {
             throw new IORuntimeException(e);
@@ -970,8 +966,6 @@ public final class Util {
                             if (validateSignNode(signature, cert, null, null, null)) {
                                 return true;
                             }
-                        } else {
-                            continue;
                         }
                     } else if (validateSignNode(signature, cert, fingerprint, extractedCert, extractedFingerprint)) {
                         return true;
@@ -1219,19 +1213,9 @@ public final class Util {
      * @return True if the sign is valid, false otherwise.
      */
     public static boolean isAlgorithmWhitelisted(final String alg) {
-        final Set<String> whiteListedAlgorithm = new HashSet<>();
-        whiteListedAlgorithm.add(Constants.DSA_SHA1);
-        whiteListedAlgorithm.add(Constants.RSA_SHA1);
-        whiteListedAlgorithm.add(Constants.RSA_SHA256);
-        whiteListedAlgorithm.add(Constants.RSA_SHA384);
-        whiteListedAlgorithm.add(Constants.RSA_SHA512);
-
-        boolean whitelisted = false;
-        if (whiteListedAlgorithm.contains(alg)) {
-            whitelisted = true;
-        }
-
-        return whitelisted;
+        // Preserve the original null contract: an immutable Set.of(...) throws on contains(null),
+        // whereas the previous HashSet returned false for a null algorithm.
+        return alg != null && WHITELISTED_ALGORITHMS.contains(alg);
     }
 
     /**
@@ -1409,10 +1393,11 @@ public final class Util {
                     ValidationException.KEYINFO_NOT_FOUND_IN_ENCRYPTED_DATA);
         }
 
-        final NodeList childs = keyInfoInEncData.item(0).getChildNodes();
-        for (int i = 0; i < childs.getLength(); i++) {
-            if (childs.item(i).getLocalName() != null && "RetrievalMethod".equals(childs.item(i).getLocalName())) {
-                final Element retrievalMethodElem = (Element) childs.item(i);
+        final NodeList children = keyInfoInEncData.item(0).getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            final Node child = children.item(i);
+            if (child.getLocalName() != null && "RetrievalMethod".equals(child.getLocalName())) {
+                final Element retrievalMethodElem = (Element) child;
                 if (!"http://www.w3.org/2001/04/xmlenc#EncryptedKey".equals(retrievalMethodElem.getAttribute("Type"))) {
                     throw new ValidationException("Unsupported Retrieval Method found", ValidationException.UNSUPPORTED_RETRIEVAL_METHOD);
                 }
@@ -1423,7 +1408,7 @@ public final class Util {
                         ((Element) encryptedDataElement.getParentNode()).getElementsByTagNameNS(Constants.NS_XENC, "EncryptedKey");
                 for (int j = 0; j < encryptedKeyNodes.getLength(); j++) {
                     if (((Element) encryptedKeyNodes.item(j)).getAttribute("Id").equals(uri)) {
-                        keyInfoInEncData.item(0).replaceChild(encryptedKeyNodes.item(j), childs.item(i));
+                        keyInfoInEncData.item(0).replaceChild(encryptedKeyNodes.item(j), child);
                     }
                 }
             }
@@ -1704,7 +1689,7 @@ public final class Util {
                         break;
                     }
                 } catch (final Exception e) {
-                    LOGGER.warn("SAMLSevereException executing validateSign: " + e.getMessage(), e);
+                    LOGGER.warn("SAMLSevereException executing validateSign: {}", e.getMessage(), e);
                 }
             }
             return valid;
@@ -1735,8 +1720,8 @@ public final class Util {
         if (codeEntry.getLength() == 0) {
             throw new ValidationException("Missing Status Code on response", ValidationException.MISSING_STATUS_CODE);
         }
-        final String stausCode = codeEntry.item(0).getAttributes().getNamedItem("Value").getNodeValue();
-        final SamlResponseStatus status = new SamlResponseStatus(stausCode);
+        final String statusCode = codeEntry.item(0).getAttributes().getNamedItem("Value").getNodeValue();
+        final SamlResponseStatus status = new SamlResponseStatus(statusCode);
 
         final NodeList subStatusCodeEntry = Util.query(dom, statusXpath + "/samlp:StatusCode/samlp:StatusCode", statusEntry.item(0));
         if (subStatusCodeEntry.getLength() > 0) {
@@ -1923,7 +1908,7 @@ public final class Util {
      * @return A unique string
      */
     public static String generateUniqueID(String prefix) {
-        if (prefix == null || StringUtils.isEmpty(prefix)) {
+        if (StringUtils.isEmpty(prefix)) {
             prefix = Util.UNIQUE_ID_PREFIX;
         }
         return prefix + UUID.randomUUID();
@@ -2013,11 +1998,11 @@ public final class Util {
     public static long getExpireTime(final String cacheDuration, final String validUntil) {
         long expireTime = 0;
         try {
-            if (cacheDuration != null && !StringUtils.isEmpty(cacheDuration)) {
+            if (StringUtils.isNotEmpty(cacheDuration)) {
                 expireTime = parseDuration(cacheDuration);
             }
 
-            if (validUntil != null && !StringUtils.isEmpty(validUntil)) {
+            if (StringUtils.isNotEmpty(validUntil)) {
                 final Instant dt = Util.parseDateTime(validUntil);
                 final long validUntilTimeInt = dt.toEpochMilli() / 1000;
                 if (expireTime == 0 || expireTime > validUntilTimeInt) {
@@ -2025,7 +2010,7 @@ public final class Util {
                 }
             }
         } catch (final Exception e) {
-            LOGGER.error("SAMLSevereException executing getExpireTime: " + e.getMessage(), e);
+            LOGGER.error("SAMLSevereException executing getExpireTime: {}", e.getMessage(), e);
         }
         return expireTime;
     }
@@ -2043,7 +2028,7 @@ public final class Util {
     public static long getExpireTime(final String cacheDuration, final long validUntil) {
         long expireTime = 0;
         try {
-            if (cacheDuration != null && !StringUtils.isEmpty(cacheDuration)) {
+            if (StringUtils.isNotEmpty(cacheDuration)) {
                 expireTime = parseDuration(cacheDuration);
             }
 
@@ -2051,7 +2036,7 @@ public final class Util {
                 expireTime = validUntil;
             }
         } catch (final Exception e) {
-            LOGGER.error("SAMLSevereException executing getExpireTime: " + e.getMessage(), e);
+            LOGGER.error("SAMLSevereException executing getExpireTime: {}", e.getMessage(), e);
         }
         return expireTime;
     }
@@ -2093,19 +2078,11 @@ public final class Util {
     }
 
     private static String toStringUtf8(final byte[] bytes) {
-        try {
-            return new String(bytes, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
-        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private static byte[] toBytesUtf8(final String str) {
-        try {
-            return str.getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
-        }
+        return str.getBytes(StandardCharsets.UTF_8);
     }
 
     private static Clock clock = Clock.systemUTC();

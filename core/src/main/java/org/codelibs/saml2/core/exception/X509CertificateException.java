@@ -15,7 +15,7 @@ public class X509CertificateException extends SAMLException {
      *
      * @param e the underlying certificate exception
      */
-    public X509CertificateException(CertificateException e) {
+    public X509CertificateException(final CertificateException e) {
         super(e);
     }
 

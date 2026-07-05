@@ -1,6 +1,5 @@
-<%@page import="org.codelibs.saml2.core.core.toolkit.Auth"%>
-<%@page import="org.codelibs.saml2.core.core.toolkit.servlet.ServletUtils"%>
-<%@page import="java.util.Collection"%>
+<%@page import="org.codelibs.saml2.Auth"%>
+<%@page import="org.codelibs.saml2.servlet.ServletUtils"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Map"%>
 <%@page import="org.apache.commons.lang3.StringUtils" %>
@@ -91,11 +90,9 @@
 	      				</thead>
 	      				<tbody>
 	    <%
-					Collection<String> keys = attributes.keySet();
-					for(String name :keys){
-						out.println("<tr><td>" + name + "</td><td>");
-						List<String> values = attributes.get(name);
-						for(String value :values) {
+					for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
+						out.println("<tr><td>" + entry.getKey() + "</td><td>");
+						for(String value : entry.getValue()) {
 							out.println("<li>" + value + "</li>");
 						}
 

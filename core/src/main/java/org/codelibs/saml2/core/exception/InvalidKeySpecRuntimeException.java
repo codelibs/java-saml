@@ -15,7 +15,7 @@ public class InvalidKeySpecRuntimeException extends RuntimeException {
      *
      * @param e the underlying invalid key spec exception
      */
-    public InvalidKeySpecRuntimeException(InvalidKeySpecException e) {
+    public InvalidKeySpecRuntimeException(final InvalidKeySpecException e) {
         super(e);
     }
 }

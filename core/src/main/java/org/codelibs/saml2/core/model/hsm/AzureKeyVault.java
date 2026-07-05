@@ -1,6 +1,7 @@
 package org.codelibs.saml2.core.model.hsm;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.codelibs.saml2.core.util.Constants;
 
@@ -23,7 +24,7 @@ public class AzureKeyVault extends HSM {
     private final String tenantId;
     private final String keyVaultId;
     private CryptographyClient akvClient;
-    private final HashMap<String, KeyWrapAlgorithm> algorithmMapping;
+    private final Map<String, KeyWrapAlgorithm> algorithmMapping;
 
     /**
      * Constructor to initialise an HSM object.
@@ -49,8 +50,8 @@ public class AzureKeyVault extends HSM {
      *
      * @return The algorithm mapping.
      */
-    private HashMap<String, KeyWrapAlgorithm> createAlgorithmMapping() {
-        final HashMap<String, KeyWrapAlgorithm> mapping = new HashMap<>();
+    private Map<String, KeyWrapAlgorithm> createAlgorithmMapping() {
+        final Map<String, KeyWrapAlgorithm> mapping = new HashMap<>();
 
         mapping.put(Constants.RSA_1_5, KeyWrapAlgorithm.RSA1_5);
         mapping.put(Constants.RSA_OAEP_MGF1P, KeyWrapAlgorithm.RSA_OAEP);

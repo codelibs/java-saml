@@ -29,7 +29,7 @@ public class SubjectConfirmationIssue {
     public static String prettyPrintIssues(final List<SubjectConfirmationIssue> subjectConfirmationDataIssues) {
         final StringBuilder subjectConfirmationDataIssuesMsg =
                 new StringBuilder("A valid SubjectConfirmation was not found on this Response");
-        if (subjectConfirmationDataIssues.size() > 0) {
+        if (!subjectConfirmationDataIssues.isEmpty()) {
             subjectConfirmationDataIssuesMsg.append(": ");
         }
         for (int i = 0; i < subjectConfirmationDataIssues.size(); i++) {

@@ -154,32 +154,33 @@ public class ServletUtils {
      * @see jakarta.servlet.http.HttpServletResponse#sendRedirect(String)
      */
     public static String sendRedirect(HttpServletResponse response, String location, Map<String, String> parameters, Boolean stay) {
-        String target = location;
+        final StringBuilder target = new StringBuilder(location);
 
         if (!parameters.isEmpty()) {
             boolean first = !location.contains("?");
             for (Map.Entry<String, String> parameter : parameters.entrySet()) {
                 if (first) {
-                    target += "?";
+                    target.append("?");
                     first = false;
                 } else {
-                    target += "&";
+                    target.append("&");
                 }
-                target += parameter.getKey();
+                target.append(parameter.getKey());
                 if (!parameter.getValue().isEmpty()) {
-                    target += "=" + Util.urlEncoder(parameter.getValue());
+                    target.append("=").append(Util.urlEncoder(parameter.getValue()));
                 }
             }
         }
+        final String targetUrl = target.toString();
         if (!stay) {
             try {
-                response.sendRedirect(target);
+                response.sendRedirect(targetUrl);
             } catch (IOException e) {
                 throw new IORuntimeException(e);
             }
         }
 
-        return target;
+        return targetUrl;
     }
 
     /**
@@ -211,7 +212,7 @@ public class ServletUtils {
      * @see HttpServletResponse#sendRedirect(String)
      */
     public static void sendRedirect(HttpServletResponse response, String location) {
-        Map<String, String> parameters = new HashMap<String, String>();
+        Map<String, String> parameters = new HashMap<>();
         sendRedirect(response, location, parameters);
     }
 }

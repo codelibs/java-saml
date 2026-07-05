@@ -68,7 +68,7 @@ public class RequestedAttribute {
     /**
      * Returns the RequestedAttribute friendly name.
      *
-     * @return string the RequestedAttribute fiendlyname
+     * @return string the RequestedAttribute friendlyName
      */
     public final String getFriendlyName() {
         return friendlyName;

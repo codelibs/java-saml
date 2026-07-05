@@ -24,7 +24,7 @@ import org.codelibs.saml2.core.util.Util;
 public final class HttpRequest {
 
     /** An immutable empty map used as the default set of request parameters. */
-    public static final Map<String, List<String>> EMPTY_PARAMETERS = Collections.<String, List<String>> emptyMap();
+    public static final Map<String, List<String>> EMPTY_PARAMETERS = Collections.emptyMap();
 
     private final String requestURL;
     private final Map<String, List<String>> parameters;
@@ -87,7 +87,7 @@ public final class HttpRequest {
         checkNotNull(name, "name");
         checkNotNull(value, "value");
 
-        final List<String> oldValues = parameters.containsKey(name) ? parameters.get(name) : new ArrayList<>();
+        final List<String> oldValues = parameters.getOrDefault(name, new ArrayList<>());
         final List<String> newValues = new ArrayList<>(oldValues);
         newValues.add(value);
         final Map<String, List<String>> params = new HashMap<>(parameters);
@@ -140,7 +140,7 @@ public final class HttpRequest {
      */
     public List<String> getParameters(final String name) {
         final List<String> values = parameters.get(name);
-        return values != null ? values : Collections.<String> emptyList();
+        return values != null ? values : Collections.emptyList();
     }
 
     /**

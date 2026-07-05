@@ -4,8 +4,6 @@ import java.net.URL;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -42,55 +40,55 @@ public class Saml2Settings {
 
     // Toolkit settings
     private boolean strict = true;
-    private boolean debug = false;
+    private boolean debug;
 
     // SP
     private String spEntityId = "";
-    private URL spAssertionConsumerServiceUrl = null;
+    private URL spAssertionConsumerServiceUrl;
     private String spAssertionConsumerServiceBinding = Constants.BINDING_HTTP_POST;
-    private URL spSingleLogoutServiceUrl = null;
+    private URL spSingleLogoutServiceUrl;
     private String spSingleLogoutServiceBinding = Constants.BINDING_HTTP_REDIRECT;
-    private String spNameIDFormat = Constants.NAMEID_UNSPECIFIED;
-    private X509Certificate spX509cert = null;
-    private X509Certificate spX509certNew = null;
-    private PrivateKey spPrivateKey = null;
-    private HSM hsm = null;
-    private ReplayCache replayCache = null;
+    private String spNameIdFormat = Constants.NAMEID_UNSPECIFIED;
+    private X509Certificate spX509Cert;
+    private X509Certificate spX509CertNew;
+    private PrivateKey spPrivateKey;
+    private HSM hsm;
+    private ReplayCache replayCache;
 
     // IdP
     private String idpEntityId = "";
-    private URL idpSingleSignOnServiceUrl = null;
+    private URL idpSingleSignOnServiceUrl;
     private String idpSingleSignOnServiceBinding = Constants.BINDING_HTTP_REDIRECT;
-    private URL idpSingleLogoutServiceUrl = null;
-    private URL idpSingleLogoutServiceResponseUrl = null;
+    private URL idpSingleLogoutServiceUrl;
+    private URL idpSingleLogoutServiceResponseUrl;
     private String idpSingleLogoutServiceBinding = Constants.BINDING_HTTP_REDIRECT;
-    private X509Certificate idpx509cert = null;
-    private List<X509Certificate> idpx509certMulti = null;
-    private String idpCertFingerprint = null;
+    private X509Certificate idpX509Cert;
+    private List<X509Certificate> idpX509CertMulti;
+    private String idpCertFingerprint;
     private String idpCertFingerprintAlgorithm = "sha1";
 
     // Security
-    private boolean nameIdEncrypted = false;
-    private boolean authnRequestsSigned = false;
-    private boolean logoutRequestSigned = false;
-    private boolean logoutResponseSigned = false;
-    private boolean wantMessagesSigned = false;
-    private boolean wantAssertionsSigned = false;
-    private boolean wantAssertionsEncrypted = false;
+    private boolean nameIdEncrypted;
+    private boolean authnRequestsSigned;
+    private boolean logoutRequestSigned;
+    private boolean logoutResponseSigned;
+    private boolean wantMessagesSigned;
+    private boolean wantAssertionsSigned;
+    private boolean wantAssertionsEncrypted;
     private boolean wantNameId = true;
-    private boolean wantNameIdEncrypted = false;
-    private boolean signMetadata = false;
+    private boolean wantNameIdEncrypted;
+    private boolean signMetadata;
     private List<String> requestedAuthnContext = new ArrayList<>();
     private String requestedAuthnContextComparison = "exact";
-    private boolean wantXMLValidation = true;
+    private boolean wantXmlValidation = true;
     private String signatureAlgorithm = Constants.RSA_SHA256;
     private String digestAlgorithm = Constants.SHA256;
     private String nameIdEncryptionAlgorithm = Constants.RSA_1_5;
-    private Set<String> allowedKeyTransportAlgorithms = null;
-    private boolean rejectUnsolicitedResponsesWithInResponseTo = false;
-    private boolean allowRepeatAttributeName = false;
-    private boolean rejectDeprecatedAlg = false;
-    private String uniqueIDPrefix = null;
+    private Set<String> allowedKeyTransportAlgorithms;
+    private boolean rejectUnsolicitedResponsesWithInResponseTo;
+    private boolean allowRepeatAttributeName;
+    private boolean rejectDeprecatedAlg;
+    private String uniqueIdPrefix;
     private long clockDrift = Constants.ALLOWED_CLOCK_DRIFT;
 
     // Compress
@@ -98,14 +96,14 @@ public class Saml2Settings {
     private boolean compressResponse = true;
 
     // Parsing
-    private boolean trimNameIds = false;
-    private boolean trimAttributeValues = false;
+    private boolean trimNameIds;
+    private boolean trimAttributeValues;
 
     // Misc
-    private List<Contact> contacts = new LinkedList<>();
-    private Organization organization = null;
+    private List<Contact> contacts = new ArrayList<>();
+    private Organization organization;
 
-    private boolean spValidationOnly = false;
+    private boolean spValidationOnly;
 
     /**
      * Returns whether strict mode is enabled.
@@ -164,10 +162,10 @@ public class Saml2Settings {
     /**
      * Returns the Service Provider NameID format.
      *
-     * @return the spNameIDFormat setting value
+     * @return the spNameIdFormat setting value
      */
     public final String getSpNameIDFormat() {
-        return spNameIDFormat;
+        return spNameIdFormat;
     }
 
     /**
@@ -191,19 +189,19 @@ public class Saml2Settings {
     /**
      * Returns the Service Provider X.509 certificate.
      *
-     * @return the spX509cert setting value
+     * @return the spX509Cert setting value
      */
     public final X509Certificate getSPcert() {
-        return spX509cert;
+        return spX509Cert;
     }
 
     /**
      * Returns the new Service Provider X.509 certificate used for certificate rollover.
      *
-     * @return the spX509certNew setting value
+     * @return the spX509CertNew setting value
      */
     public final X509Certificate getSPcertNew() {
-        return spX509certNew;
+        return spX509CertNew;
     }
 
     /**
@@ -276,10 +274,10 @@ public class Saml2Settings {
     /**
      * Returns the Identity Provider X.509 certificate.
      *
-     * @return the idpx509cert setting value
+     * @return the idpX509Cert setting value
      */
     public final X509Certificate getIdpx509cert() {
-        return idpx509cert;
+        return idpX509Cert;
     }
 
     /**
@@ -309,10 +307,10 @@ public class Saml2Settings {
     /**
      * Returns the list of additional Identity Provider X.509 certificates.
      *
-     * @return the idpx509certMulti setting value
+     * @return the idpX509CertMulti setting value
      */
     public List<X509Certificate> getIdpx509certMulti() {
-        return idpx509certMulti;
+        return idpX509CertMulti;
     }
 
     /**
@@ -435,10 +433,10 @@ public class Saml2Settings {
     /**
      * Returns whether XML schema validation is performed on SAML messages.
      *
-     * @return the wantXMLValidation setting value
+     * @return the wantXmlValidation setting value
      */
     public boolean getWantXMLValidation() {
-        return wantXMLValidation;
+        return wantXmlValidation;
     }
 
     /**
@@ -494,7 +492,7 @@ public class Saml2Settings {
      * @return Unique ID prefix
      */
     public String getUniqueIDPrefix() {
-        return this.uniqueIDPrefix;
+        return this.uniqueIdPrefix;
     }
 
     /**
@@ -641,7 +639,7 @@ public class Saml2Settings {
      *            the spNameIDFormat value to be set
      */
     protected final void setSpNameIDFormat(final String spNameIDFormat) {
-        this.spNameIDFormat = spNameIDFormat;
+        this.spNameIdFormat = spNameIDFormat;
     }
 
     /**
@@ -671,7 +669,7 @@ public class Saml2Settings {
      *            the spX509cert value to be set in X509Certificate format
      */
     protected final void setSpX509cert(final X509Certificate spX509cert) {
-        this.spX509cert = spX509cert;
+        this.spX509Cert = spX509cert;
     }
 
     /**
@@ -681,7 +679,7 @@ public class Saml2Settings {
      *            the spX509certNew value to be set in X509Certificate format
      */
     protected final void setSpX509certNew(final X509Certificate spX509certNew) {
-        this.spX509certNew = spX509certNew;
+        this.spX509CertNew = spX509certNew;
     }
 
     /**
@@ -701,7 +699,7 @@ public class Saml2Settings {
      *            the Unique ID prefix used when generating Unique ID
      */
     protected final void setUniqueIDPrefix(final String uniqueIDPrefix) {
-        this.uniqueIDPrefix = uniqueIDPrefix;
+        this.uniqueIdPrefix = uniqueIDPrefix;
     }
 
     /**
@@ -771,7 +769,7 @@ public class Saml2Settings {
      *            the idpX509cert value to be set in X509Certificate format
      */
     protected final void setIdpx509cert(final X509Certificate idpX509cert) {
-        this.idpx509cert = idpX509cert;
+        this.idpX509Cert = idpX509cert;
     }
 
     /**
@@ -811,7 +809,7 @@ public class Saml2Settings {
      * @param idpx509certMulti the idpx509certMulti to set
      */
     public void setIdpx509certMulti(final List<X509Certificate> idpx509certMulti) {
-        this.idpx509certMulti = idpx509certMulti;
+        this.idpX509CertMulti = idpx509certMulti;
     }
 
     /**
@@ -943,7 +941,7 @@ public class Saml2Settings {
      *            the wantXMLValidation value to be set. Based on it the SP will validate SAML messages against the XML scheme
      */
     public void setWantXMLValidation(final boolean wantXMLValidation) {
-        this.wantXMLValidation = wantXMLValidation;
+        this.wantXmlValidation = wantXMLValidation;
     }
 
     /**
@@ -1188,13 +1186,15 @@ public class Saml2Settings {
             LOGGER.warn(errorMsg);
         }
 
-        if (!checkIdpx509certRequired() && !checkRequired(this.getIdpCertFingerprint())) {
+        final boolean idpx509certRequired = checkIdpx509certRequired();
+
+        if (!idpx509certRequired && !checkRequired(this.getIdpCertFingerprint())) {
             errorMsg = "idp_cert_or_fingerprint_not_found_and_required";
             errors.add(errorMsg);
             LOGGER.warn(errorMsg);
         }
 
-        if (!checkIdpx509certRequired() && this.getNameIdEncrypted()) {
+        if (!idpx509certRequired && this.getNameIdEncrypted()) {
             errorMsg = "idp_cert_not_found_and_required";
             errors.add(errorMsg);
             LOGGER.warn(errorMsg);
@@ -1246,12 +1246,8 @@ public class Saml2Settings {
 
         final List<Contact> contacts = this.getContacts();
         if (!contacts.isEmpty()) {
-            final Set<String> validTypes = new HashSet<>();
-            validTypes.add(Constants.CONTACT_TYPE_TECHNICAL);
-            validTypes.add(Constants.CONTACT_TYPE_SUPPORT);
-            validTypes.add(Constants.CONTACT_TYPE_ADMINISTRATIVE);
-            validTypes.add(Constants.CONTACT_TYPE_BILLING);
-            validTypes.add(Constants.CONTACT_TYPE_OTHER);
+            final Set<String> validTypes = Set.of(Constants.CONTACT_TYPE_TECHNICAL, Constants.CONTACT_TYPE_SUPPORT,
+                    Constants.CONTACT_TYPE_ADMINISTRATIVE, Constants.CONTACT_TYPE_BILLING, Constants.CONTACT_TYPE_OTHER);
             for (final Contact contact : contacts) {
                 if (!validTypes.contains(contact.getContactType())) {
                     errorMsg = "contact_type_invalid";
@@ -1295,7 +1291,7 @@ public class Saml2Settings {
         final X509Certificate cert = getSPcert();
         final PrivateKey key = getSPkey();
 
-        return (cert != null && key != null);
+        return cert != null && key != null;
     }
 
     /**
@@ -1308,7 +1304,7 @@ public class Saml2Settings {
      * @return true if the SP settings are valid
      */
     private boolean checkRequired(final Object value) {
-        if ((value == null) || (value instanceof String s && s.isEmpty())) {
+        if (value == null || (value instanceof String s && s.isEmpty())) {
             return false;
         }
 
@@ -1344,12 +1340,11 @@ public class Saml2Settings {
      *
      */
     public String getSPMetadata() {
-        final Metadata metadataObj = new Metadata(this);
-        String metadataString = metadataObj.getMetadataString();
+        final Metadata metadata = new Metadata(this);
+        String metadataString = metadata.getMetadataString();
 
         // Check if must be signed
-        final boolean signMetadata = this.getSignMetadata();
-        if (signMetadata) {
+        if (getSignMetadata()) {
             // Note: Currently only SP privateKey/certificate are supported for metadata signing.
             // Future enhancement: Support signing with custom key/certificate pairs for more flexible
             // key management scenarios (e.g., separate metadata signing keys, key rotation).
