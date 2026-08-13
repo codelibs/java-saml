@@ -1151,16 +1151,21 @@ public class Auth {
             final SamlResponseStatus samlResponseStatus = samlResponse.getResponseStatus();
             if (samlResponseStatus.getStatusCode() == null || !Constants.STATUS_SUCCESS.equals(samlResponseStatus.getStatusCode())) {
                 errors.add("response_not_success");
-                LOGGER.warn("processResponse error. sso_not_success");
-                LOGGER.debug(" --> {}", samlResponseParameter);
+                // Debug rather than warn: "response_not_success" is already in getErrors(), and
+                // the detail is in getLastErrorReason() and getLastValidationException(). Logging
+                // it here as well reports the same rejection twice, once at a level the caller
+                // does not control.
+                LOGGER.debug("processResponse error. sso_not_success --> {}", samlResponseParameter);
                 errors.add(samlResponseStatus.getStatusCode());
                 if (samlResponseStatus.getSubStatusCode() != null) {
                     errors.add(samlResponseStatus.getSubStatusCode());
                 }
             } else {
                 errors.add("invalid_response");
-                LOGGER.warn("processResponse error. invalid_response");
-                LOGGER.debug(" --> {}", samlResponseParameter);
+                // Debug for the same reason as above. This is also the line a caller that tries
+                // several request ids hits for every candidate it rules out, so at warn it
+                // reports an error on logins that go on to succeed.
+                LOGGER.debug("processResponse error. invalid_response --> {}", samlResponseParameter);
             }
         }
     }

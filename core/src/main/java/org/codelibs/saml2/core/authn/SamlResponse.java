@@ -364,7 +364,13 @@ public class SamlResponse {
         } catch (final Exception e) {
             validationException = e;
             LOGGER.debug("SAMLResponse invalid --> {}", samlResponseString);
-            LOGGER.warn(validationException.getMessage());
+            // Debug rather than warn: the failure is handed to the caller through
+            // getValidationException(), and a false return value is the answer this method was
+            // asked for. A caller that tries several request ids -- the InResponseTo comparison
+            // is the one failure worth retrying with the next candidate -- would otherwise log a
+            // warning for every candidate it rules out, including on the login that then
+            // succeeds. What reaches an operator is for the caller to decide.
+            LOGGER.debug("SAMLResponse validation failed: {}", validationException.getMessage());
             return false;
         }
     }

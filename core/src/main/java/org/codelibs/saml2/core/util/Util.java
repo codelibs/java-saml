@@ -185,7 +185,13 @@ public final class Util {
             }
             LOGGER.warn("Detected use of ENTITY in XML, disabled to prevent XXE/XEE attacks");
         } catch (final Exception e) {
-            LOGGER.warn("Load XML error: {}", e.getMessage(), e);
+            // The message stays at warn because this method answers with null and drops the
+            // exception, so nothing else would record it. The stack trace moves to debug: the
+            // input is whatever was posted to a service provider's assertion consumer service,
+            // which is anonymous, so an unauthenticated client could otherwise fill the log with
+            // a full trace per request.
+            LOGGER.warn("Load XML error: {}", e.getMessage());
+            LOGGER.debug("Load XML error.", e);
         }
 
         return null;
