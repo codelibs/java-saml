@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.Locale;
 
 import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 
 import org.slf4j.Logger;
@@ -37,6 +39,17 @@ public abstract class SchemaFactory {
     public static final URL SAML_SCHEMA_PROTOCOL_2_0 = SchemaFactory.class.getResource("/schemas/saml-schema-protocol-2.0.xsd");
 
     /**
+     * URL of the XML Encryption 1.1 schema, which is added to every schema set built here.
+     *
+     * <p>Nothing in the SAML schemas imports this namespace, but {@code xenc:EncryptionMethod}
+     * ends in a wildcard whose {@code processContents} is {@code strict}, so any element carried
+     * there has to be declared somewhere in the schema set or the document is invalid. An IdP
+     * encrypting with XML Encryption 1.1 puts {@code <xenc11:MGF>} in exactly that position, and
+     * without this schema the whole response is refused before it is decrypted.</p>
+     */
+    private static final URL XML_ENCRYPTION_SCHEMA_1_1 = SchemaFactory.class.getResource("/schemas/xenc-schema-11.xsd");
+
+    /**
      * Loads a {@link Schema} from the given URL, resolving referenced schemas and DTDs locally.
      *
      * @param schemaUrl the URL of the schema to load
@@ -66,6 +79,7 @@ public abstract class SchemaFactory {
                             case "urn:oasis:names:tc:SAML:metadata:algsupport" -> getLocalResource("sstc-saml-metadata-algsupport-v1.0.xsd");
                             case "urn:oasis:names:tc:SAML:metadata:ui" -> getLocalResource("sstc-saml-metadata-ui-v1.0.xsd");
                             case "http://www.w3.org/2001/04/xmlenc#" -> getLocalResource("xenc-schema.xsd");
+                            case "http://www.w3.org/2009/xmlenc11#" -> getLocalResource("xenc-schema-11.xsd");
                             case "http://www.w3.org/XML/1998/namespace" -> getLocalResource("xml.xsd");
                             case "http://www.w3.org/2000/09/xmldsig#" -> getLocalResource("xmldsig-core-schema.xsd");
                             default -> null;
@@ -108,6 +122,12 @@ public abstract class SchemaFactory {
                 return lsInput;
             }
         });
-        return factory.newSchema(schemaUrl);
+        if (XML_ENCRYPTION_SCHEMA_1_1 == null) {
+            // the schema is packaged next to the others; carry on without it rather than fail
+            LOGGER.warn("xenc-schema-11.xsd is missing, so XML Encryption 1.1 elements will not validate");
+            return factory.newSchema(schemaUrl);
+        }
+        return factory.newSchema(new Source[] { new StreamSource(schemaUrl.toExternalForm()),
+                new StreamSource(XML_ENCRYPTION_SCHEMA_1_1.toExternalForm()) });
     }
 }
