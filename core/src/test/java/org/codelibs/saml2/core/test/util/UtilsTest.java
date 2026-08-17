@@ -156,6 +156,31 @@ public class UtilsTest {
      *
      * @see org.codelibs.saml2.core.core.util.Util#validateXML
      */
+    /**
+     * Tests the ValidateXML method
+     * Case: Validates a response encrypted with XML Encryption 1.1
+     *
+     * @throws Exception
+     *
+     * @see org.codelibs.saml2.core.core.util.Util#validateXML
+     */
+    @Test
+    public void testValidateXMLEncryptionMethodFromXmlEnc11() throws Exception {
+        // An IdP encrypting with XML Encryption 1.1 puts <xenc11:MGF> inside
+        // <xenc:EncryptionMethod>, whose wildcard is strict: unless the 1.1 schema is part of the
+        // schema set, the whole response is invalid and is refused before it is ever decrypted.
+        String response =
+                new String(Base64.decodeBase64(Util.getFileAsString("data/responses/valid_encrypted_assertion_xmlenc11.xml.base64")));
+        assertThat(response, containsString("xenc11:MGF"));
+
+        assertTrue(Util.validateXML(Util.loadXML(response), SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0));
+
+        // and the namespace is known rather than waved through: an element that does not exist in
+        // it is still refused, which is what tells this apart from switching validation off
+        String bogus = response.replace("xenc11:MGF", "xenc11:NoSuchElement");
+        assertFalse(Util.validateXML(Util.loadXML(bogus), SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0));
+    }
+
     @Test
     public void testValidateXMLBadFormat() throws Exception {
         String metadataUnloaded = "<xml><EntityDescriptor>";
