@@ -714,6 +714,22 @@ public class SettingBuilderTest {
     }
 
     /**
+     * Tests that the reject-missing-audience security option is off by default and can be enabled by property.
+     */
+    @Test
+    public void testRejectMissingAudienceProperty() throws Exception {
+        assertEquals("onelogin.saml2.security.reject_missing_audience", SettingsBuilder.SECURITY_REJECT_MISSING_AUDIENCE);
+        assertFalse(new SettingsBuilder().fromFile("config/config.min.properties").build().isRejectMissingAudience());
+
+        final Properties prop = new Properties();
+        prop.setProperty(SettingsBuilder.SECURITY_REJECT_MISSING_AUDIENCE, "true");
+        assertTrue(new SettingsBuilder().fromProperties(prop).build().isRejectMissingAudience());
+
+        prop.setProperty(SettingsBuilder.SECURITY_REJECT_MISSING_AUDIENCE, "false");
+        assertFalse(new SettingsBuilder().fromProperties(prop).build().isRejectMissingAudience());
+    }
+
+    /**
      * Tests SettingsBuilder fromProperties method
      *
      * @throws SAMLSevereException

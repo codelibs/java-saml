@@ -1275,12 +1275,13 @@ public class SamlResponse {
     /**
      * Validates the audiences.
      *
-     *
-     *
+     * An Assertion with no Audience is accepted unless {@link Saml2Settings#isRejectMissingAudience()} is set.
      */
     protected void validateAudiences() {
         final List<String> validAudiences = getAudiences();
-        if (!validAudiences.isEmpty() && !validAudiences.contains(settings.getSpEntityId())) {
+        final boolean wrongAudience = validAudiences.isEmpty() ? settings.isRejectMissingAudience()
+                : !validAudiences.contains(settings.getSpEntityId());
+        if (wrongAudience) {
             throw new ValidationException(settings.getSpEntityId() + " is not a valid audience for this Response",
                     ValidationException.WRONG_AUDIENCE);
         }

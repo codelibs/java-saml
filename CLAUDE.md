@@ -48,7 +48,7 @@ Settings loaded from `onelogin.saml.properties` on classpath or programmatically
 
 ### Security Defaults
 
-SHA-256 digest, RSA-SHA256 signatures, 120s clock drift tolerance. `strict` mode must be TRUE in production. By default, deprecated algorithms are NOT rejected (`rejectDeprecatedAlg` defaults to `false`) and the IdP cert fingerprint algorithm defaults to `sha1`. For production, explicitly set `rejectDeprecatedAlg=true`, `idpCertFingerprintAlgorithm=sha256`, and `wantAssertionsSigned`/`wantMessagesSigned=true`.
+SHA-256 digest, RSA-SHA256 signatures, 120s clock drift tolerance. `strict` mode must be TRUE in production. By default, deprecated algorithms are NOT rejected (`rejectDeprecatedAlg` defaults to `false`) and the IdP cert fingerprint algorithm defaults to `sha1`. For production, explicitly set `rejectDeprecatedAlg=true`, `idpCertFingerprintAlgorithm=sha256`, and `wantAssertionsSigned`/`wantMessagesSigned=true`. An Assertion with no Audience is also accepted by default; set `rejectMissingAudience=true` (`onelogin.saml2.security.reject_missing_audience`) to reject it.
 
 ## Test Resources
 
