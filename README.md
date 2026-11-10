@@ -413,6 +413,11 @@ onelogin.saml2.security.digest_algorithm = http://www.w3.org/2001/04/xmlenc#sha2
 # Reject Signatures with deprecated algorithms (sha1)
 onelogin.saml2.security.reject_deprecated_alg = true
 
+# Reject an Assertion that carries no Audience (AudienceRestriction).
+# By default an Assertion with no Audience is accepted; an Assertion that lists
+# Audiences without the SP entity ID is always rejected.
+onelogin.saml2.security.reject_missing_audience = false
+
 # Enable trimming of parsed Name IDs and attribute values
 # SAML specification states that no trimming for string elements should be performed, so no trimming will be
 # performed by default on extracted Name IDs and attribute values. However, some SAML implementations may add

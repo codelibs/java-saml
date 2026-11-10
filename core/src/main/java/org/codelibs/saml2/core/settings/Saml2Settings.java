@@ -86,6 +86,7 @@ public class Saml2Settings {
     private String nameIdEncryptionAlgorithm = Constants.RSA_1_5;
     private Set<String> allowedKeyTransportAlgorithms;
     private boolean rejectUnsolicitedResponsesWithInResponseTo;
+    private boolean rejectMissingAudience;
     private boolean allowRepeatAttributeName;
     private boolean rejectDeprecatedAlg;
     private String uniqueIdPrefix;
@@ -1012,6 +1013,32 @@ public class Saml2Settings {
      */
     public boolean isRejectUnsolicitedResponsesWithInResponseTo() {
         return rejectUnsolicitedResponsesWithInResponseTo;
+    }
+
+    /**
+     * Controls if a Response whose Assertion carries no Audience is rejected.
+     *
+     * If false (the default) an Assertion with no AudienceRestriction/Audience is accepted, and only an Assertion that
+     * lists Audiences, none of which is the SP entity ID, is rejected.
+     *
+     * If true an Assertion with no Audience is rejected as well, with the same error as an Audience that does not
+     * match the SP entity ID ({@link org.codelibs.saml2.core.exception.ValidationException#WRONG_AUDIENCE}). The Web
+     * Browser SSO profile requires a bearer Assertion to carry an AudienceRestriction naming the SP, and an Assertion
+     * without one can be replayed at any other SP that trusts the same IdP.
+     *
+     * @param rejectMissingAudience whether to require the Assertion to carry an Audience
+     */
+    public void setRejectMissingAudience(final boolean rejectMissingAudience) {
+        this.rejectMissingAudience = rejectMissingAudience;
+    }
+
+    /**
+     * Returns whether a Response whose Assertion carries no Audience is rejected.
+     *
+     * @return the rejectMissingAudience setting value
+     */
+    public boolean isRejectMissingAudience() {
+        return rejectMissingAudience;
     }
 
     /**

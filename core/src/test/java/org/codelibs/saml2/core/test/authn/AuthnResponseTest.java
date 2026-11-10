@@ -2611,6 +2611,60 @@ public class AuthnResponseTest {
     }
 
     @Test
+    public void testRejectMissingAudienceIsOffByDefault() throws Exception {
+        final Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setWantAssertionsSigned(false);
+        settings.setWantMessagesSigned(true);
+        assertFalse(settings.isRejectMissingAudience());
+
+        final String samlResponseEncoded = loadSignMessageAndEncode("data/responses/invalids/invalid_no_audience_restriction.xml");
+
+        assertResponseValid(settings, samlResponseEncoded, true, true, null);
+    }
+
+    @Test
+    public void testRejectMissingAudience() throws Exception {
+        final Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setWantAssertionsSigned(false);
+        settings.setWantMessagesSigned(true);
+        settings.setRejectMissingAudience(true);
+
+        final String samlResponseEncoded = loadSignMessageAndEncode("data/responses/invalids/invalid_no_audience_restriction.xml");
+
+        assertResponseValid(settings, samlResponseEncoded, true, false,
+                "http://localhost:8080/java-saml-jspsample/metadata.jsp is not a valid audience for this Response");
+        final SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest(samlResponseEncoded));
+        assertFalse(samlResponse.isValid());
+        assertEquals(ValidationException.WRONG_AUDIENCE, ((ValidationException) samlResponse.getValidationException()).getErrorCode());
+    }
+
+    @Test
+    public void testRejectMissingAudienceAcceptsMatchingAudience() throws Exception {
+        final Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        settings.setWantAssertionsSigned(false);
+        settings.setWantMessagesSigned(true);
+        settings.setRejectMissingAudience(true);
+
+        final String samlResponseEncoded = loadSignMessageAndEncode("data/responses/valid_idp_initiated_response.xml");
+
+        assertResponseValid(settings, samlResponseEncoded, true, true, null);
+    }
+
+    @Test
+    public void testMismatchedAudienceIsRejectedWhetherOrNotMissingAudienceIsRejected() throws Exception {
+        final String samlResponseEncoded = loadSignMessageAndEncode("data/responses/invalids/invalid_audience_idp_initiated.xml");
+        for (final boolean rejectMissingAudience : new boolean[] { false, true }) {
+            final Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+            settings.setWantAssertionsSigned(false);
+            settings.setWantMessagesSigned(true);
+            settings.setRejectMissingAudience(rejectMissingAudience);
+
+            assertResponseValid(settings, samlResponseEncoded, true, false,
+                    "http://localhost:8080/java-saml-jspsample/metadata.jsp is not a valid audience for this Response");
+        }
+    }
+
+    @Test
     public void testMissingExpectedRequestId() throws Exception {
         Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
         settings.setWantMessagesSigned(true);

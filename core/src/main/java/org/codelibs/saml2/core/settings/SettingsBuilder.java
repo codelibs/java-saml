@@ -178,6 +178,8 @@ public class SettingsBuilder {
     /** Property key controlling whether unsolicited responses with an InResponseTo attribute are rejected ({@code onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto}). */
     public static final String SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO =
             "onelogin.saml2.security.reject_unsolicited_responses_with_inresponseto";
+    /** Property key controlling whether a Response whose Assertion has no Audience is rejected ({@code onelogin.saml2.security.reject_missing_audience}). */
+    public static final String SECURITY_REJECT_MISSING_AUDIENCE = "onelogin.saml2.security.reject_missing_audience";
     /** Property key controlling whether duplicated attribute names are allowed ({@code onelogin.saml2.security.allow_duplicated_attribute_name}). */
     public static final String SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY =
             "onelogin.saml2.security.allow_duplicated_attribute_name";
@@ -548,6 +550,11 @@ public class SettingsBuilder {
                 loadBooleanProperty(SECURITY_REJECT_UNSOLICITED_RESPONSES_WITH_INRESPONSETO);
         if (rejectUnsolicitedResponsesWithInResponseTo != null) {
             saml2Settings.setRejectUnsolicitedResponsesWithInResponseTo(rejectUnsolicitedResponsesWithInResponseTo);
+        }
+
+        final Boolean rejectMissingAudience = loadBooleanProperty(SECURITY_REJECT_MISSING_AUDIENCE);
+        if (rejectMissingAudience != null) {
+            saml2Settings.setRejectMissingAudience(rejectMissingAudience);
         }
 
         final Boolean allowRepeatAttributeName = loadBooleanProperty(SECURITY_ALLOW_REPEAT_ATTRIBUTE_NAME_PROPERTY_KEY);
