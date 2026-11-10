@@ -1149,7 +1149,11 @@ public class Auth {
             errorReason = samlResponse.getError();
             validationException = samlResponse.getValidationException();
             final SamlResponseStatus samlResponseStatus = samlResponse.getResponseStatus();
-            if (samlResponseStatus.getStatusCode() == null || !Constants.STATUS_SUCCESS.equals(samlResponseStatus.getStatusCode())) {
+            // The status is read after the version and the ID are checked, so it is null when the
+            // response failed one of those (a document that is not a SAML response at all, for example).
+            // That is an invalid response like any other, not a status the IdP reported.
+            if (samlResponseStatus != null
+                    && (samlResponseStatus.getStatusCode() == null || !Constants.STATUS_SUCCESS.equals(samlResponseStatus.getStatusCode()))) {
                 errors.add("response_not_success");
                 // Debug rather than warn: "response_not_success" is already in getErrors(), and
                 // the detail is in getLastErrorReason() and getLastValidationException(). Logging

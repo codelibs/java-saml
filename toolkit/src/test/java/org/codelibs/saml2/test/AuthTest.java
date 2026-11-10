@@ -996,6 +996,27 @@ public class AuthTest {
      * @see org.codelibs.saml2.Auth#getErrors
      * @see org.codelibs.saml2.Auth#getLastErrorReason
      */
+    /**
+     * A well-formed document that is not a SAML response has no Version and no Status, so the response
+     * is refused before its status is read. processResponse must report that as an invalid response, not
+     * throw a NullPointerException on the missing status.
+     */
+    @Test
+    public void testProcessResponseWithoutStatus() throws Exception {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        String samlResponseEncoded = java.util.Base64.getEncoder().encodeToString("<foo/>".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        when(request.getParameterMap()).thenReturn(singletonMap("SAMLResponse", new String[] { samlResponseEncoded }));
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/java-saml-jspsample/acs.jsp"));
+
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+        Auth auth = new Auth(settings, request, response);
+        auth.processResponse();
+        assertFalse(auth.isAuthenticated());
+        assertEquals(java.util.Collections.singletonList("invalid_response"), auth.getErrors());
+        assertTrue(auth.getLastValidationException() instanceof ValidationException);
+    }
+
     @Test
     public void testIsAuthenticated() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
