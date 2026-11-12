@@ -190,7 +190,7 @@ public final class Util {
             // input is whatever was posted to a service provider's assertion consumer service,
             // which is anonymous, so an unauthenticated client could otherwise fill the log with
             // a full trace per request.
-            LOGGER.warn("Load XML error: {}", e.getMessage());
+            LOGGER.warn("Load XML error: {}", sanitizeForLog(e.getMessage()));
             LOGGER.debug("Load XML error.", e);
         }
 
@@ -271,6 +271,36 @@ public final class Util {
         return query(dom, query, null);
     }
 
+    /** The longest piece of a message that is copied into one log line. */
+    private static final int MAX_LOGGED_LENGTH = 1000;
+
+    /**
+     * Makes text that came from a SAML message safe to write into a log line.
+     *
+     * <p>A service provider's assertion consumer service is anonymous, and the schema check, the
+     * algorithm check and the parser all quote what the sender wrote. A line break in an attribute or
+     * an element value would otherwise end the log record and let the sender start another one.</p>
+     *
+     * @param value the text, which may be {@code null}
+     * @return the text with every control character, and the Unicode line and paragraph separators,
+     *         replaced by a space and with a length of at most 1000 characters
+     */
+    public static String sanitizeForLog(final Object value) {
+        if (value == null) {
+            return null;
+        }
+        final String text = String.valueOf(value);
+        final StringBuilder sb = new StringBuilder(Math.min(text.length(), MAX_LOGGED_LENGTH) + 3);
+        for (int i = 0; i < text.length() && sb.length() < MAX_LOGGED_LENGTH; i++) {
+            final char c = text.charAt(i);
+            sb.append(Character.isISOControl(c) || c == '\u2028' || c == '\u2029' ? ' ' : c);
+        }
+        if (text.length() > MAX_LOGGED_LENGTH) {
+            sb.append("...");
+        }
+        return sb.toString();
+    }
+
     /**
      * This function attempts to validate an XML against the specified schema.
      *
@@ -305,11 +335,11 @@ public final class Util {
 
             final boolean isValid = !errorAccumulator.hasError();
             if (!isValid) {
-                LOGGER.warn("Errors found when validating SAML response with schema: {}", errorAccumulator.getErrorXML());
+                LOGGER.warn("Errors found when validating SAML response with schema: {}", sanitizeForLog(errorAccumulator.getErrorXML()));
             }
             return isValid;
         } catch (final Exception e) {
-            LOGGER.warn("SAMLSevereException executing validateXML: {}", e.getMessage(), e);
+            LOGGER.warn("SAMLSevereException executing validateXML: {}", sanitizeForLog(e.getMessage()), e);
             return false;
         }
     }
@@ -1107,7 +1137,7 @@ public final class Util {
      */
     public static boolean mustRejectDeprecatedSignatureAlgo(final String signAlg, final boolean rejectDeprecatedAlg) {
         if (DEPRECATED_ALGOS.contains(signAlg)) {
-            final String errorMsg = "Found a deprecated algorithm " + signAlg + " related to the Signature element,";
+            final String errorMsg = "Found a deprecated algorithm " + sanitizeForLog(signAlg) + " related to the Signature element,";
             if (rejectDeprecatedAlg) {
                 LOGGER.warn("{} rejecting it", errorMsg);
                 return true;
@@ -1267,7 +1297,11 @@ public final class Util {
             xmlCipher.setKEK(inputKey);
             xmlCipher.doFinal(encryptedDataElement.getOwnerDocument(), encryptedDataElement, false);
         } catch (final Exception e) {
-            LOGGER.warn("Failed to decrypt an element.", e);
+            // One line at warn, the trace at debug: the encrypted element is whatever was posted to a
+            // service provider's assertion consumer service, which is anonymous, so a trace per
+            // request would let an unauthenticated client fill the log.
+            LOGGER.warn("Failed to decrypt an element: {}", sanitizeForLog(e));
+            LOGGER.debug("Failed to decrypt an element.", e);
         }
     }
 
@@ -1325,7 +1359,8 @@ public final class Util {
             xmlCipher.setKEK(encryptionKey);
             xmlCipher.doFinal(encryptedDataElement.getOwnerDocument(), encryptedDataElement, false);
         } catch (final Exception e) {
-            LOGGER.warn("Failed to decrypt an element using HSM.", e);
+            LOGGER.warn("Failed to decrypt an element using HSM: {}", sanitizeForLog(e));
+            LOGGER.debug("Failed to decrypt an element using HSM.", e);
         }
     }
 
@@ -1695,7 +1730,7 @@ public final class Util {
                         break;
                     }
                 } catch (final Exception e) {
-                    LOGGER.warn("SAMLSevereException executing validateSign: {}", e.getMessage(), e);
+                    LOGGER.warn("SAMLSevereException executing validateSign: {}", sanitizeForLog(e.getMessage()), e);
                 }
             }
             return valid;

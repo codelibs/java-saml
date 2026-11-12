@@ -181,6 +181,51 @@ public class UtilsTest {
         assertFalse(Util.validateXML(Util.loadXML(bogus), SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0));
     }
 
+
+    /**
+     * Tests the sanitizeForLog method
+     *
+     * @see org.codelibs.saml2.core.util.Util#sanitizeForLog
+     */
+    @Test
+    public void testSanitizeForLog() {
+        assertNull(Util.sanitizeForLog(null));
+        assertEquals("plain text", Util.sanitizeForLog("plain text"));
+        assertEquals("a b c d e f g", Util.sanitizeForLog("a\nb\rc\td\u0085e\u2028f\u2029g"));
+        assertEquals("[a b]", Util.sanitizeForLog(Arrays.asList("a\nb")).replace("]", "]"));
+        String longText = String.join("", Collections.nCopies(2000, "x"));
+        String cut = Util.sanitizeForLog(longText);
+        assertEquals(1003, cut.length());
+        assertTrue(cut.endsWith("..."));
+    }
+
+    /**
+     * Tests the sanitizeForLog method
+     * Case: what the schema check quotes from a message the sender wrote
+     *
+     * @see org.codelibs.saml2.core.util.Util#validateXML
+     */
+    @Test
+    public void testSanitizeForLogOfTheErrorsTheSchemaCheckQuotes() throws Exception {
+        String response = new String(Base64.decodeBase64(Util.getFileAsString("data/responses/valid_response.xml.base64")));
+        String forged = response.replace("http://localhost:8080/java-saml-jspsample/metadata.jsp",
+                "evil\n2026-01-01 00:00:00,000 [main] ERROR FORGED");
+
+        javax.xml.validation.Validator validator = SchemaFactory.loadFromUrl(SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0).newValidator();
+        org.codelibs.saml2.core.util.XMLErrorAccumulatorHandler errors = new org.codelibs.saml2.core.util.XMLErrorAccumulatorHandler();
+        validator.setErrorHandler(errors);
+        validator.validate(new javax.xml.transform.dom.DOMSource(Util.loadXML(forged)));
+
+        assertTrue(errors.hasError());
+        // the premise: the parser quotes the value, line break included
+        assertThat(String.valueOf(errors.getErrorXML()), containsString("\n2026-01-01 00:00:00,000 [main] ERROR FORGED"));
+        String logged = Util.sanitizeForLog(errors.getErrorXML());
+        assertThat(logged, containsString("ERROR FORGED"));
+        assertThat(logged, not(containsString("\n")));
+        assertThat(logged, not(containsString("\r")));
+        assertFalse(Util.validateXML(Util.loadXML(forged), SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0));
+    }
+
     @Test
     public void testValidateXMLBadFormat() throws Exception {
         String metadataUnloaded = "<xml><EntityDescriptor>";
