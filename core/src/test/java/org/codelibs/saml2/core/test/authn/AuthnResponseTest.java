@@ -3716,4 +3716,73 @@ public class AuthnResponseTest {
                 Constants.ALLOWED_CLOCK_DRIFT, settings.getClockDrift());
     }
 
+    /**
+     * Tests the constructor
+     * Case: an assertion encrypted for the service provider (which anyone can do) whose plaintext is
+     * nested deeper than the parser would have accepted
+     */
+    @Test
+    public void testEncryptedAssertionNestedTooDeeplyIsRefused() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.my.properties").build();
+
+        // the control: the helper makes a response that is decrypted
+        SamlResponse samlResponse = new SamlResponse(settings, newHttpRequest("/", encryptedAssertionResponse(settings, 50)));
+        assertNotNull(samlResponse);
+
+        // deeper than the limit: refused when the decrypted assertion is parsed
+        try {
+            new SamlResponse(settings, newHttpRequest("/", encryptedAssertionResponse(settings, 300)));
+            org.junit.Assert.fail("the assertion is nested more than 100 levels deep");
+        } catch (org.codelibs.saml2.core.exception.XMLParsingException e) {
+            assertThat(e.getMessage(), org.hamcrest.CoreMatchers.containsString("nested more than 100 levels"));
+        }
+
+        // far deeper: the XML security library overflows the stack while it decrypts, before the
+        // parser can look at the plaintext. That is refused like any decryption that failed, and
+        // does not leave the library as an Error.
+        try {
+            new SamlResponse(settings, newHttpRequest("/", encryptedAssertionResponse(settings, 50000)));
+            org.junit.Assert.fail("the assertion is nested 50000 levels deep");
+        } catch (SAMLException e) {
+            // refused
+        }
+    }
+
+    private static String encryptedAssertionResponse(Saml2Settings settings, int depth) throws Exception {
+        StringBuilder deep = new StringBuilder();
+        for (int i = 0; i < depth; i++) {
+            deep.append("<x>");
+        }
+        for (int i = 0; i < depth; i++) {
+            deep.append("</x>");
+        }
+        String xml = "<samlp:Response xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\""
+                + " xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"r1\" Version=\"2.0\""
+                + " IssueInstant=\"2026-01-01T00:00:00Z\"><saml:Issuer>idp</saml:Issuer>"
+                + "<saml:EncryptedAssertion><saml:Assertion ID=\"a1\" Version=\"2.0\" IssueInstant=\"2026-01-01T00:00:00Z\">"
+                + "<saml:Issuer>idp</saml:Issuer><saml:Advice>" + deep + "</saml:Advice></saml:Assertion></saml:EncryptedAssertion>"
+                + "</samlp:Response>";
+        // Util.loadXML would refuse the deep document, which is what the test is about
+        javax.xml.parsers.DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        Document doc = factory.newDocumentBuilder().parse(new org.xml.sax.InputSource(new java.io.StringReader(xml)));
+        org.w3c.dom.Element assertion = (org.w3c.dom.Element) doc.getElementsByTagNameNS(Constants.NS_SAML, "Assertion").item(0);
+
+        javax.crypto.KeyGenerator generator = javax.crypto.KeyGenerator.getInstance("AES");
+        generator.init(128);
+        javax.crypto.SecretKey key = generator.generateKey();
+        org.apache.xml.security.encryption.XMLCipher keyCipher =
+                org.apache.xml.security.encryption.XMLCipher.getInstance(org.apache.xml.security.encryption.XMLCipher.RSA_OAEP);
+        keyCipher.init(org.apache.xml.security.encryption.XMLCipher.WRAP_MODE, settings.getSPcert().getPublicKey());
+        org.apache.xml.security.encryption.EncryptedKey encryptedKey = keyCipher.encryptKey(doc, key);
+        org.apache.xml.security.encryption.XMLCipher dataCipher =
+                org.apache.xml.security.encryption.XMLCipher.getInstance(org.apache.xml.security.encryption.XMLCipher.AES_128);
+        dataCipher.init(org.apache.xml.security.encryption.XMLCipher.ENCRYPT_MODE, key);
+        org.apache.xml.security.keys.KeyInfo keyInfo = new org.apache.xml.security.keys.KeyInfo(doc);
+        keyInfo.add(encryptedKey);
+        dataCipher.getEncryptedData().setKeyInfo(keyInfo);
+        dataCipher.doFinal(doc, assertion, false);
+        return Util.base64encoder(Util.convertDocumentToString(doc));
+    }
+
 }
