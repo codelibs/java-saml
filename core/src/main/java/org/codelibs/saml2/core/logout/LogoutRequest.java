@@ -542,7 +542,8 @@ public class LogoutRequest {
         } catch (final Exception e) {
             validationException = e;
             LOGGER.debug("LogoutRequest invalid --> {}", logoutRequestString, e);
-            LOGGER.warn(validationException.getMessage());
+            // the message quotes values the sender wrote (Issuer, Destination, the ID)
+            LOGGER.warn("{}", Util.sanitizeForLog(validationException.getMessage()));
             return false;
         }
     }

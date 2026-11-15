@@ -109,4 +109,31 @@ public class InMemoryReplayCacheTest {
 
         assertEquals(1, firstUseCount.get());
     }
+    /**
+     * Tests the registerAndCheck method of InMemoryReplayCache
+     * Case: a very long id (the id of an unsigned message is whatever the sender wrote) is still
+     * detected as a replay, two long ids with the same beginning are not mixed up, and the cache
+     * does not keep the id itself
+     *
+     * @throws Exception if the entries cannot be read
+     * @see org.codelibs.saml2.core.replay.InMemoryReplayCache#registerAndCheck
+     */
+    @Test
+    public void testLongIdIsKeptAsDigest() throws Exception {
+        final InMemoryReplayCache cache = new InMemoryReplayCache();
+        final Instant expiresAt = Instant.now().plusSeconds(300);
+        final String prefix = "_" + "a".repeat(100000);
+
+        assertFalse(cache.registerAndCheck(prefix + "1", expiresAt));
+        assertTrue(cache.registerAndCheck(prefix + "1", expiresAt));
+        assertFalse(cache.registerAndCheck(prefix + "2", expiresAt));
+
+        final java.lang.reflect.Field field = InMemoryReplayCache.class.getDeclaredField("entries");
+        field.setAccessible(true);
+        final java.util.Map<?, ?> entries = (java.util.Map<?, ?>) field.get(cache);
+        assertEquals(2, entries.size());
+        for (final Object key : entries.keySet()) {
+            assertTrue(((String) key).length() < 128);
+        }
+    }
 }
