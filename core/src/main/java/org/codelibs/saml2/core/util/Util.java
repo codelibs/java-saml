@@ -360,6 +360,49 @@ public final class Util {
         }
     }
 
+    /** The deepest element nesting accepted in a parsed document. A SAML message is a few dozen levels deep at most. */
+    private static final int MAX_XML_DEPTH = 100;
+
+    /**
+     * Refuses a document whose elements are nested deeper than {@link #MAX_XML_DEPTH}.
+     *
+     * <p>The DOM is walked recursively later on ({@code Element#normalize}, {@code importNode}, the
+     * canonicalization of a signature), and the document is parsed before any signature or schema check,
+     * so a few hundred bytes of nested elements sent to an anonymous endpoint would end in a
+     * {@link StackOverflowError} that no {@code catch (Exception)} sees. The check walks the tree without
+     * recursion.</p>
+     *
+     * @param doc the parsed document
+     * @throws XMLParsingException if the document is nested too deeply
+     */
+    private static void checkNestingDepth(final Document doc) {
+        final Element root = doc.getDocumentElement();
+        if (root == null) {
+            return;
+        }
+        Node node = root;
+        int depth = 1;
+        while (true) {
+            if (depth > MAX_XML_DEPTH && node.getNodeType() == Node.ELEMENT_NODE) {
+                throw new XMLParsingException("The document is nested more than " + MAX_XML_DEPTH + " levels deep.", null);
+            }
+            final Node child = node.getFirstChild();
+            if (child != null) {
+                node = child;
+                depth++;
+                continue;
+            }
+            while (node != root && node.getNextSibling() == null) {
+                node = node.getParentNode();
+                depth--;
+            }
+            if (node == root) {
+                return;
+            }
+            node = node.getNextSibling();
+        }
+    }
+
     /**
      * Parse an XML from input source to a Document object
      *
@@ -400,6 +443,7 @@ public final class Util {
             final XMLErrorAccumulatorHandler errorAccumulator = new XMLErrorAccumulatorHandler();
             builder.setErrorHandler(errorAccumulator);
             final Document doc = builder.parse(inputSource);
+            checkNestingDepth(doc);
 
             // Loop through the doc and tag every element with an ID attribute
             // as an XML ID node.
