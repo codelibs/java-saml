@@ -791,8 +791,8 @@ public final class Util {
         final byte[] decoded = Base64.decodeBase64(input);
 
         // Inflater
+        final Inflater decompressor = new Inflater(true);
         try {
-            final Inflater decompressor = new Inflater(true);
             decompressor.setInput(decoded);
             final byte[] result = new byte[1024];
             StringBuilder inflated = new StringBuilder();
@@ -802,11 +802,13 @@ public final class Util {
                 limit += 1;
                 inflated.append(new String(result, 0, resultLength, StandardCharsets.UTF_8));
             }
-            decompressor.end();
             return inflated.toString();
         } catch (final Exception e) {
             LOGGER.debug("Failed to decode {}", input, e);
             return new String(decoded);
+        } finally {
+            // the native memory of the inflater is released here, not left to the garbage collector
+            decompressor.end();
         }
     }
 

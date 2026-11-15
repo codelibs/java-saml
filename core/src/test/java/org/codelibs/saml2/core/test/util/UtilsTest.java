@@ -303,6 +303,44 @@ public class UtilsTest {
         return sb.toString();
     }
 
+    /**
+     * Tests the XMLErrorAccumulatorHandler class
+     * Case: a document with far more invalid elements than the handler keeps
+     *
+     * @see org.codelibs.saml2.core.util.XMLErrorAccumulatorHandler
+     */
+    @Test
+    public void testSchemaErrorsAreKeptUpToALimit() throws Exception {
+        StringBuilder xml = new StringBuilder("<samlp:Response xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\""
+                + " xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"r1\" Version=\"2.0\""
+                + " IssueInstant=\"2026-01-01T00:00:00Z\"><samlp:Extensions>");
+        for (int i = 0; i < 3000; i++) {
+            xml.append("<saml:Attribute/>"); // the Name attribute is required
+        }
+        xml.append("</samlp:Extensions><samlp:Status><samlp:StatusCode Value=\"urn:oasis:names:tc:SAML:2.0:status:Success\"/>"
+                + "</samlp:Status></samlp:Response>");
+
+        javax.xml.validation.Validator validator = SchemaFactory.loadFromUrl(SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0).newValidator();
+        org.codelibs.saml2.core.util.XMLErrorAccumulatorHandler errors = new org.codelibs.saml2.core.util.XMLErrorAccumulatorHandler();
+        validator.setErrorHandler(errors);
+        validator.validate(new javax.xml.transform.dom.DOMSource(Util.loadXML(xml.toString())));
+
+        assertTrue(errors.hasError());
+        assertEquals(100, errors.getErrorXML().size());
+        assertFalse(Util.validateXML(Util.loadXML(xml.toString()), SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0));
+    }
+
+    /**
+     * Tests the base64decodedInflated method
+     * Case: a payload that is not deflated data is answered with its decoded text, as before
+     *
+     * @see org.codelibs.saml2.core.util.Util#base64decodedInflated
+     */
+    @Test
+    public void testBase64decodedInflatedOfBytesThatAreNotDeflated() {
+        assertEquals("not deflated", Util.base64decodedInflated(Util.base64encoder("not deflated")));
+    }
+
     @Test
     public void testValidateXMLBadFormat() throws Exception {
         String metadataUnloaded = "<xml><EntityDescriptor>";
