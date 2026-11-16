@@ -1348,7 +1348,12 @@ public final class Util {
 
             xmlCipher.setKEK(inputKey);
             xmlCipher.doFinal(encryptedDataElement.getOwnerDocument(), encryptedDataElement, false);
-        } catch (final Exception e) {
+        } catch (final Exception | StackOverflowError e) {
+            // A StackOverflowError is caught as well: anyone can encrypt for the certificate of a
+            // service provider, and the XML security library handles the plaintext before parseXML
+            // can limit how deeply it is nested. The element stays encrypted, and the response is
+            // refused later like any other whose decryption failed.
+            //
             // One line at warn, the trace at debug: the encrypted element is whatever was posted to a
             // service provider's assertion consumer service, which is anonymous, so a trace per
             // request would let an unauthenticated client fill the log.
@@ -1410,7 +1415,7 @@ public final class Util {
             xmlCipher.init(XMLCipher.DECRYPT_MODE, encryptionKey);
             xmlCipher.setKEK(encryptionKey);
             xmlCipher.doFinal(encryptedDataElement.getOwnerDocument(), encryptedDataElement, false);
-        } catch (final Exception e) {
+        } catch (final Exception | StackOverflowError e) {
             LOGGER.warn("Failed to decrypt an element using HSM: {}", sanitizeForLog(e));
             LOGGER.debug("Failed to decrypt an element using HSM.", e);
         }
