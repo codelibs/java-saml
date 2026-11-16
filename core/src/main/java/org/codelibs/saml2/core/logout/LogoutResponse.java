@@ -303,7 +303,8 @@ public class LogoutResponse {
         } catch (final Exception e) {
             validationException = e;
             LOGGER.debug("LogoutResponse invalid --> {}", logoutResponseString, e);
-            LOGGER.warn(validationException.getMessage());
+            // the message quotes values the sender wrote (Issuer, Destination, the ID)
+            LOGGER.warn("{}", Util.sanitizeForLog(validationException.getMessage()));
             return false;
         }
     }

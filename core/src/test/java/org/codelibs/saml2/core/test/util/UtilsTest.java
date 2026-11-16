@@ -226,6 +226,39 @@ public class UtilsTest {
         assertFalse(Util.validateXML(Util.loadXML(forged), SchemaFactory.SAML_SCHEMA_PROTOCOL_2_0));
     }
 
+    /**
+     * Tests the sanitizeForLog method
+     * Case: the signature algorithm URI the sender wrote is quoted by the XML security library
+     *
+     * @see org.codelibs.saml2.core.util.Util#validateSignNode
+     */
+    @Test
+    public void testSanitizeForLogOfTheSignatureAlgorithmTheSecurityLibraryQuotes() throws Exception {
+        String forgedAlgorithm = "http://example.com/x\n2026-01-01 00:00:00,000 main ERROR FORGED";
+        String xml = "<ds:Signature xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:SignedInfo>"
+                + "<ds:CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"/>"
+                + "<ds:SignatureMethod Algorithm=\"" + forgedAlgorithm.replace("\n", "&#10;") + "\"/>"
+                + "<ds:Reference URI=\"#a1\"><ds:DigestMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256\"/>"
+                + "<ds:DigestValue>AAAA</ds:DigestValue></ds:Reference></ds:SignedInfo>"
+                + "<ds:SignatureValue>AAAA</ds:SignatureValue></ds:Signature>";
+        org.w3c.dom.Element signature = Util.loadXML(xml).getDocumentElement();
+
+        // the premise: the library quotes the algorithm, line break included
+        try {
+            new org.apache.xml.security.signature.XMLSignature(signature, "", true).getSignedInfo().getSignatureMethodURI();
+            org.junit.Assert.fail("the library should refuse an unknown signature algorithm");
+        } catch (XMLSecurityException e) {
+            assertThat(String.valueOf(e), containsString("\n2026-01-01 00:00:00,000 main ERROR FORGED"));
+            String logged = Util.sanitizeForLog(e);
+            assertThat(logged, containsString("ERROR FORGED"));
+            assertThat(logged, not(containsString("\n")));
+            assertThat(logged, not(containsString("\r")));
+        }
+
+        // the refusal itself is unchanged: no data, no exception
+        assertFalse(Util.validateSignNode(signature, null, "00", "sha256"));
+    }
+
     @Test
     public void testValidateXMLBadFormat() throws Exception {
         String metadataUnloaded = "<xml><EntityDescriptor>";

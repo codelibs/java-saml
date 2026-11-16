@@ -1,6 +1,10 @@
 package org.codelibs.saml2.core.replay;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -11,6 +15,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * background threads are started by this class).
  */
 public class InMemoryReplayCache implements ReplayCache {
+
+    /** IDs longer than this are kept as their SHA-256 digest, so an entry never costs more than a digest. */
+    private static final int MAX_KEY_LENGTH = 128;
 
     /** Number of registrations between opportunistic sweeps of expired entries. */
     private static final long SWEEP_INTERVAL = 1000L;
@@ -33,8 +40,9 @@ public class InMemoryReplayCache implements ReplayCache {
     public boolean registerAndCheck(final String id, final Instant expiresAt) {
         final Instant now = Instant.now();
         final AtomicBoolean replay = new AtomicBoolean(false);
+        final String entryKey = toKey(id);
 
-        entries.compute(id, (key, previousExpiresAt) -> {
+        entries.compute(entryKey, (key, previousExpiresAt) -> {
             if (previousExpiresAt != null && previousExpiresAt.isAfter(now)) {
                 // Still-valid previous entry: this is a replay, keep the existing expiry.
                 replay.set(true);
@@ -50,6 +58,25 @@ public class InMemoryReplayCache implements ReplayCache {
         }
 
         return replay.get();
+    }
+
+    /**
+     * Returns the key an ID is stored under. The ID of an unsigned message is whatever the sender wrote,
+     * and the cache keeps it for the whole validity window, so a long ID is replaced by its digest.
+     *
+     * @param id the ID of the message
+     * @return the ID itself when it is short, otherwise the hex SHA-256 digest of it
+     */
+    private static String toKey(final String id) {
+        if (id.length() <= MAX_KEY_LENGTH) {
+            return id;
+        }
+        try {
+            final byte[] digest = MessageDigest.getInstance("SHA-256").digest(id.getBytes(StandardCharsets.UTF_8));
+            return "sha256:" + HexFormat.of().formatHex(digest);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available.", e);
+        }
     }
 
     /**

@@ -339,7 +339,8 @@ public final class Util {
             }
             return isValid;
         } catch (final Exception e) {
-            LOGGER.warn("SAMLSevereException executing validateXML: {}", sanitizeForLog(e.getMessage()), e);
+            LOGGER.warn("SAMLSevereException executing validateXML: {}", sanitizeForLog(e.getMessage()));
+            LOGGER.debug("SAMLSevereException executing validateXML", e);
             return false;
         }
     }
@@ -941,7 +942,8 @@ public final class Util {
             final NodeList signatures = query(doc, xpath);
             return signatures.getLength() == 1 && validateSignNode(signatures.item(0), cert, fingerprint, alg);
         } catch (final Exception e) {
-            LOGGER.warn("Failed to find signature nodes", e);
+            LOGGER.warn("Failed to find signature nodes: {}", sanitizeForLog(e));
+            LOGGER.debug("Failed to find signature nodes", e);
         }
         return false;
     }
@@ -1012,7 +1014,8 @@ public final class Util {
                 }
             }
         } catch (final Exception e) {
-            LOGGER.warn("Failed to find signature nodes", e);
+            LOGGER.warn("Failed to find signature nodes: {}", sanitizeForLog(e));
+            LOGGER.debug("Failed to find signature nodes", e);
         }
         return false;
     }
@@ -1076,7 +1079,8 @@ public final class Util {
                 return true;
             }
         } catch (final Exception e) {
-            LOGGER.warn("Failed to find signature nodes", e);
+            LOGGER.warn("Failed to find signature nodes: {}", sanitizeForLog(e));
+            LOGGER.debug("Failed to find signature nodes", e);
         }
         return false;
     }
@@ -1123,7 +1127,8 @@ public final class Util {
                 LOGGER.debug("No KeyInfo or not x509CertificateData");
             }
         } catch (final Exception e) {
-            LOGGER.warn("Cannot get a signature data.", e);
+            LOGGER.warn("Cannot get a signature data: {}", sanitizeForLog(e));
+            LOGGER.debug("Cannot get a signature data", e);
         }
         return signatureData;
     }
@@ -1235,7 +1240,8 @@ public final class Util {
                 }
             }
         } catch (final Exception e) {
-            LOGGER.warn("Failed to validate a sign node.", e);
+            LOGGER.warn("Failed to validate a sign node: {}", sanitizeForLog(e));
+            LOGGER.debug("Failed to validate a sign node", e);
         }
         return res;
     }
@@ -1693,7 +1699,8 @@ public final class Util {
 
             valid = sig.verify(signature);
         } catch (final Exception e) {
-            LOGGER.warn("Failed to validate a binary signature.", e);
+            LOGGER.warn("Failed to validate a binary signature: {}", sanitizeForLog(e));
+            LOGGER.debug("Failed to validate a binary signature", e);
         }
         return valid;
     }
@@ -1730,7 +1737,8 @@ public final class Util {
                         break;
                     }
                 } catch (final Exception e) {
-                    LOGGER.warn("SAMLSevereException executing validateSign: {}", sanitizeForLog(e.getMessage()), e);
+                    LOGGER.warn("SAMLSevereException executing validateSign: {}", sanitizeForLog(e.getMessage()));
+                    LOGGER.debug("SAMLSevereException executing validateSign", e);
                 }
             }
             return valid;
@@ -2051,7 +2059,8 @@ public final class Util {
                 }
             }
         } catch (final Exception e) {
-            LOGGER.error("SAMLSevereException executing getExpireTime: {}", e.getMessage(), e);
+            LOGGER.error("SAMLSevereException executing getExpireTime: {}", sanitizeForLog(e.getMessage()));
+            LOGGER.debug("SAMLSevereException executing getExpireTime", e);
         }
         return expireTime;
     }
@@ -2077,7 +2086,8 @@ public final class Util {
                 expireTime = validUntil;
             }
         } catch (final Exception e) {
-            LOGGER.error("SAMLSevereException executing getExpireTime: {}", e.getMessage(), e);
+            LOGGER.error("SAMLSevereException executing getExpireTime: {}", sanitizeForLog(e.getMessage()));
+            LOGGER.debug("SAMLSevereException executing getExpireTime", e);
         }
         return expireTime;
     }
