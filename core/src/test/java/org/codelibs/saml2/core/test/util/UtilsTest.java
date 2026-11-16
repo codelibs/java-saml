@@ -259,6 +259,50 @@ public class UtilsTest {
         assertFalse(Util.validateSignNode(signature, null, "00", "sha256"));
     }
 
+    /**
+     * Tests the loadXML method
+     * Case: element nesting at and beyond the limit
+     *
+     * @see org.codelibs.saml2.core.util.Util#loadXML
+     */
+    @Test
+    public void testLoadXMLRefusesDeeplyNestedElements() {
+        assertNotNull(Util.loadXML(nested(100)));
+        assertNull(Util.loadXML(nested(101)));
+        // far deeper than the stack of a thread can take when the tree is walked recursively
+        assertNull(Util.loadXML(nested(50000)));
+        // siblings are not nesting
+        StringBuilder wide = new StringBuilder("<root>");
+        for (int i = 0; i < 5000; i++) {
+            wide.append("<x><y/></x>");
+        }
+        assertNotNull(Util.loadXML(wide.append("</root>").toString()));
+    }
+
+    /**
+     * Tests the parseXML method
+     * Case: the refusal is reported as a parsing failure
+     *
+     * @see org.codelibs.saml2.core.util.Util#parseXML
+     */
+    @Test
+    public void testParseXMLReportsDeeplyNestedElements() {
+        expectedEx.expect(XMLParsingException.class);
+        expectedEx.expectMessage("nested more than 100 levels");
+        Util.parseXML(new org.xml.sax.InputSource(new java.io.StringReader(nested(101))));
+    }
+
+    private static String nested(int depth) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < depth; i++) {
+            sb.append("<x>");
+        }
+        for (int i = 0; i < depth; i++) {
+            sb.append("</x>");
+        }
+        return sb.toString();
+    }
+
     @Test
     public void testValidateXMLBadFormat() throws Exception {
         String metadataUnloaded = "<xml><EntityDescriptor>";

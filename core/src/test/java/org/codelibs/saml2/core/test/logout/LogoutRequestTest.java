@@ -1216,4 +1216,30 @@ public class LogoutRequestTest {
         };
         assertEquals("changed", logoutRequest.getLogoutRequestXml());
     }
+
+    /**
+     * Tests the constructor
+     * Case: a deflated request whose elements are nested thousands of levels deep, which used to
+     * overflow the stack in Element#normalize before any signature or schema check
+     */
+    @Test
+    public void testDeeplyNestedRequestIsRefusedWithoutAnError() throws Exception {
+        Saml2Settings settings = new SettingsBuilder().fromFile("config/config.min.properties").build();
+        settings.setStrict(true);
+        int depth = 20000;
+        StringBuilder xml = new StringBuilder("<samlp:LogoutRequest xmlns:samlp=\"urn:oasis:names:tc:SAML:2.0:protocol\""
+                + " ID=\"l1\" Version=\"2.0\" IssueInstant=\"2026-01-01T00:00:00Z\"><samlp:Extensions>");
+        for (int i = 0; i < depth; i++) {
+            xml.append("<x>");
+        }
+        for (int i = 0; i < depth; i++) {
+            xml.append("</x>");
+        }
+        xml.append("</samlp:Extensions></samlp:LogoutRequest>");
+        String encoded = Util.deflatedBase64encoded(xml.toString());
+        assertTrue("the request must stay small enough for a GET", encoded.length() < 1000);
+
+        LogoutRequest logoutRequest = new LogoutRequest(settings, newHttpRequest("http://stuff.com/endpoints/endpoints/sls.php", encoded));
+        assertFalse(logoutRequest.isValid());
+    }
 }
